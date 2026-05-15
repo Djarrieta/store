@@ -56,22 +56,24 @@ export default function FilterableList({
 
       {children}
 
-      <div className="flex items-center justify-between rounded-xl border-2 border-black bg-white p-3 text-sm">
-        <span>
-          Page {page} of {totalPages}
-        </span>
-        <div className="flex gap-2">
-          <Link
-            href={buildHref(previousPage)}
-            className="rounded-md border-2 border-black px-2 py-1 disabled:pointer-events-none"
-          >
-            Prev
-          </Link>
-          <Link href={buildHref(nextPage)} className="rounded-md border-2 border-black px-2 py-1">
-            Next
-          </Link>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between rounded-xl border-2 border-black bg-white p-3 text-sm">
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          <div className="flex gap-2">
+            <Link
+              href={buildHref(previousPage)}
+              className="rounded-md border-2 border-black px-2 py-1 disabled:pointer-events-none"
+            >
+              Prev
+            </Link>
+            <Link href={buildHref(nextPage)} className="rounded-md border-2 border-black px-2 py-1">
+              Next
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
