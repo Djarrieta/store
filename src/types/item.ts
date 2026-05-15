@@ -1,16 +1,8 @@
-export interface ItemImage {
-  url: string;
-  description?: string;
-}
-
 export interface Item {
   id: string;
-  title: string;
-  description: string | null;
-  tags: string[];
-  images: ItemImage[];
-  price: number;
-  category: string;
+  product_id: string;
+  sku: string | null;
+  stock: number;
   created_at: string;
   updated_at: string;
 }

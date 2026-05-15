@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Item } from "@/types";
-import ItemCard from "@/app/items/ItemCard";
+import type { ProductWithCategory } from "@/types";
+import ProductCard from "@/app/components/ProductCard";
 import PageHeader from "@/app/components/PageHeader";
 import FilterableList from "@/app/components/FilterableList";
 import { PAGE_SIZE } from "@/lib/constants";
@@ -28,8 +28,8 @@ export default async function Home({
   const supabase = await createClient();
 
   let query = supabase
-    .from("items")
-    .select("*", { count: "exact" })
+    .from("products")
+    .select("*, category:category_id(*, parent:parent_id(*))", { count: "exact" })
     .order("created_at", { ascending: false });
 
   if (q?.trim()) {
@@ -46,15 +46,15 @@ export default async function Home({
     query = query.contains("tags", activeTags);
   }
 
-  const { data: items, count } = await query.range(from, to).returns<Item[]>();
+  const { data: products, count } = await query.range(from, to).returns<ProductWithCategory[]>();
 
   const total = count ?? 0;
 
   return (
     <PageHeader
-      title="Items"
+      title="Products"
       isEmpty={total === 0 && !q && activeTags.length === 0}
-      emptyText="No items yet."
+      emptyText="No products yet."
     >
       <FilterableList
         q={q}
@@ -64,8 +64,8 @@ export default async function Home({
         pageSize={PAGE_SIZE}
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {(items ?? []).map((item, i) => (
-            <ItemCard key={item.id} item={item} priority={i === 0} />
+          {(products ?? []).map((product, i) => (
+            <ProductCard key={product.id} product={product} priority={i === 0} />
           ))}
         </div>
       </FilterableList>
