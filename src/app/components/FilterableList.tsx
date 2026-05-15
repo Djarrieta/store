@@ -3,7 +3,6 @@ import Link from "next/link";
 interface FilterableListProps {
   q?: string;
   tags?: string;
-  mine?: string;
   page: number;
   total: number;
   pageSize: number;
@@ -13,7 +12,6 @@ interface FilterableListProps {
 export default function FilterableList({
   q,
   tags,
-  mine,
   page,
   total,
   pageSize,
@@ -27,14 +25,13 @@ export default function FilterableList({
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (tags) params.set("tags", tags);
-    if (mine) params.set("mine", mine);
     params.set("page", String(targetPage));
     return `?${params.toString()}`;
   };
 
   return (
     <div className="space-y-4">
-      <form className="grid gap-2 rounded-xl border-2 border-black bg-white p-4 sm:grid-cols-4" method="get">
+      <form className="grid gap-2 rounded-xl border-2 border-black bg-white p-4 sm:grid-cols-3" method="get">
         <input
           type="text"
           name="q"
@@ -49,13 +46,9 @@ export default function FilterableList({
           placeholder="tag1,tag2"
           className="rounded-md border-2 border-black px-3 py-2 text-sm"
         />
-        <label className="flex items-center justify-between rounded-md border-2 border-black px-3 py-2 text-sm">
-          My items
-          <input type="checkbox" name="mine" value="1" defaultChecked={Boolean(mine)} />
-        </label>
         <button
           type="submit"
-          className="rounded-md border-2 border-black bg-[var(--accent)] px-3 py-2 text-sm font-semibold sm:col-span-4"
+          className="rounded-md border-2 border-black bg-[var(--accent)] px-3 py-2 text-sm font-semibold sm:col-span-3"
         >
           Apply Filters
         </button>

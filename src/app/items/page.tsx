@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/auth";
 import type { Item } from "@/types";
 import ItemCard from "./ItemCard";
 import PageHeader from "@/app/components/PageHeader";
@@ -13,11 +12,9 @@ export default async function ItemsPage({
     q?: string;
     tags?: string;
     page?: string;
-    mine?: string;
   }>;
 }) {
-  const { q, tags: tagsParam, page: pageStr, mine } = await searchParams;
-  const user = await getUser();
+  const { q, tags: tagsParam, page: pageStr } = await searchParams;
 
   const page = Math.max(1, parseInt(pageStr ?? "1", 10) || 1);
   const from = (page - 1) * PAGE_SIZE;
@@ -32,7 +29,7 @@ export default async function ItemsPage({
 
   let query = supabase
     .from("items")
-    .select("*, profile:profiles(display_name, avatar_url)", { count: "exact" })
+    .select("*", { count: "exact" })
     .order("created_at", { ascending: false });
 
   if (q?.trim()) {
@@ -49,10 +46,6 @@ export default async function ItemsPage({
     query = query.contains("tags", activeTags);
   }
 
-  if (mine && user) {
-    query = query.eq("user_id", user.id);
-  }
-
   const { data: items, count } = await query.range(from, to).returns<Item[]>();
 
   const total = count ?? 0;
@@ -62,13 +55,12 @@ export default async function ItemsPage({
       title="Items"
       createHref="/items/new"
       createLabel="New Item"
-      isEmpty={total === 0 && !q && activeTags.length === 0 && !mine}
+      isEmpty={total === 0 && !q && activeTags.length === 0}
       emptyText="No items yet."
     >
       <FilterableList
         q={q}
         tags={tagsParam}
-        mine={mine}
         page={page}
         total={total}
         pageSize={PAGE_SIZE}

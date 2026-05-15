@@ -44,10 +44,7 @@ export async function createItem(formData: FormData) {
   const supabase = await createClient();
   const input = parseInput(formData);
 
-  const { error } = await supabase.from("items").insert({
-    ...input,
-    user_id: user.id,
-  });
+  const { error } = await supabase.from("items").insert(input);
 
   if (error) throw new Error(error.message);
 
@@ -65,8 +62,7 @@ export async function updateItem(id: string, formData: FormData) {
   const { error } = await supabase
     .from("items")
     .update(input)
-    .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("id", id);
 
   if (error) throw new Error(error.message);
 
@@ -83,8 +79,7 @@ export async function deleteItem(id: string) {
   const { error } = await supabase
     .from("items")
     .delete()
-    .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("id", id);
 
   if (error) throw new Error(error.message);
 

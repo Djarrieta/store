@@ -40,7 +40,6 @@ export default function ItemCard({ item }: ItemCardProps) {
           ))}
         </div>
         <div className="flex items-center justify-between text-xs text-[var(--muted)]">
-          <span>{item.profile?.display_name ?? "Unknown seller"}</span>
           <span>{formatDate(item.created_at)}</span>
         </div>
         <Link href={`/items/${item.id}`} className="inline-flex text-sm font-semibold underline">

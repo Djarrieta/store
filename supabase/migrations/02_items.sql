@@ -2,8 +2,6 @@ DROP TABLE IF EXISTS public.items CASCADE;
 
 CREATE TABLE public.items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL DEFAULT auth.uid()
-    REFERENCES auth.users(id) ON DELETE CASCADE,
   title text NOT NULL,
   description text,
   tags text[] NOT NULL DEFAULT '{}',
@@ -11,9 +9,7 @@ CREATE TABLE public.items (
   price numeric(10,2) NOT NULL DEFAULT 0,
   category text NOT NULL DEFAULT '',
   created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT items_user_id_profiles_fk
-    FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+  updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TRIGGER items_updated_at

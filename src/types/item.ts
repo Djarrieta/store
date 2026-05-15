@@ -5,7 +5,6 @@ export interface ItemImage {
 
 export interface Item {
   id: string;
-  user_id: string;
   title: string;
   description: string | null;
   tags: string[];
@@ -14,12 +13,8 @@ export interface Item {
   category: string;
   created_at: string;
   updated_at: string;
-  profile?: { display_name: string; avatar_url: string | null };
 }
 
-export type CreateItemInput = Omit<
-  Item,
-  "id" | "user_id" | "created_at" | "updated_at" | "profile"
->;
+export type CreateItemInput = Omit<Item, "id" | "created_at" | "updated_at">;
 
 export type UpdateItemInput = Partial<CreateItemInput>;

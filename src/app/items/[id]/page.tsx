@@ -18,7 +18,7 @@ export default async function ItemDetailPage({
   const supabase = await createClient();
   const { data: item } = await supabase
     .from("items")
-    .select("*, profile:profiles(display_name, avatar_url)")
+    .select("*")
     .eq("id", id)
     .single<Item>();
 
@@ -40,9 +40,6 @@ export default async function ItemDetailPage({
           </p>
           <p>
             <strong>Category:</strong> {item.category}
-          </p>
-          <p>
-            <strong>Seller:</strong> {item.profile?.display_name ?? "Unknown"}
           </p>
           <p>
             <strong>Created:</strong> {formatDate(item.created_at)}

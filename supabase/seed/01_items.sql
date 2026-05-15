@@ -25,16 +25,15 @@ WITH seed_user AS (
   ORDER BY created_at ASC
   LIMIT 1
 )
-INSERT INTO public.items (user_id, title, description, tags, images, price, category)
+INSERT INTO public.items (title, description, tags, images, price, category)
 SELECT
-  seed_user.id,
   item_data.title,
   item_data.description,
   item_data.tags,
   item_data.images,
   item_data.price,
   item_data.category
-FROM seed_user
+FROM (SELECT 1) AS _dummy
 CROSS JOIN (
   VALUES
     ('Retro Camera', 'Film-look instant camera in mint condition', ARRAY['photo','camera']::text[], '[{"url":"https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1200"}]'::jsonb, 149.99, 'Electronics'),
