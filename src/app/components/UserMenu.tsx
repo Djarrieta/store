@@ -1,0 +1,26 @@
+import type { User } from "@supabase/supabase-js";
+import { signOut } from "@/app/components/user-actions";
+
+interface UserMenuProps {
+  user: User | null;
+}
+
+export default function UserMenu({ user }: UserMenuProps) {
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <p className="text-xs font-medium text-[var(--muted)]">{user.email}</p>
+      <form action={signOut}>
+        <button
+          type="submit"
+          className="rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-semibold"
+        >
+          Logout
+        </button>
+      </form>
+    </div>
+  );
+}

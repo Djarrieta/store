@@ -10,7 +10,6 @@ A full-stack store application built with **Next.js 16**, **Supabase**, and **Re
 | Language | TypeScript 5.x |
 | UI | React 19 · RetroUI (NeoBrutalism, shadcn-based) + Tailwind CSS |
 | Backend | Supabase (Postgres + Auth + Storage + RLS) |
-| Scripts | Bun |
 | Linter | ESLint (eslint-config-next) |
 
 ## Getting Started
@@ -19,8 +18,6 @@ A full-stack store application built with **Next.js 16**, **Supabase**, and **Re
 
 - Node.js 20+
 - [Supabase CLI](https://supabase.com/docs/guides/cli)
-- Docker or Podman (for local Supabase)
-- Bun (for scripts)
 
 ### Setup
 
@@ -28,18 +25,30 @@ A full-stack store application built with **Next.js 16**, **Supabase**, and **Re
 # Install dependencies
 npm install
 
-# Start local Supabase
-npm run db:start
-
 # Create .env.local from the example values
 cp .env.local.example .env.local
-# Edit .env.local with your local Supabase URL and anon key
-
-# Reset DB (run migrations + seed)
-npm run db:reset
+# Edit .env.local with your dev Supabase URL and anon key
 
 # Start dev server
 npm run dev
+```
+
+### Supabase Environments
+
+Use two hosted Supabase projects:
+
+- `dev` for development/testing
+- `prod` for production traffic
+
+Push migrations with Supabase CLI:
+
+```bash
+npx supabase link --project-ref <dev-project-ref>
+npx supabase db push
+
+# after validation in dev
+npx supabase link --project-ref <prod-project-ref>
+npx supabase db push
 ```
 
 ### Environment Variables
@@ -47,9 +56,9 @@ npm run dev
 Create a `.env.local` file:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:5002
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
-DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5003/postgres
+ADMIN_USER_IDS=<comma-separated-user-ids>
 ```
 
 For Google OAuth (optional for local dev):
@@ -77,7 +86,6 @@ src/
 └── types/                   # TypeScript types (Item, Profile, etc.)
 
 supabase/
-├── config.toml              # Local Supabase configuration (Postgres 17)
 ├── migrations/              # Numbered SQL migrations (NN_module.sql)
 ├── seed/                    # Seed data (~6 items across 2-3 categories)
 └── seed.sql                 # Main seed entry point
@@ -104,8 +112,6 @@ The `items` table includes: `id`, `user_id`, `title`, `description`, `tags`, `im
 - **Google OAuth** (production sign-in method)
 - **Dev login** (`seed@app.local / password123`) — available in development only
 
-> **Note:** Local Supabase uses Postgres 17. If deploying to hosted Supabase, verify the Postgres major version matches or test migrations against both.
-
 ## Scripts
 
 | Command | Description |
@@ -114,9 +120,6 @@ The `items` table includes: `id`, `user_id`, `title`, `description`, `tags`, `im
 | `npm run build` | Production build |
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Run TypeScript type checking |
-| `npm run db:reset` | Drop, migrate, and seed the database |
-| `npm run db:start` | Start local Supabase |
-| `npm run db:stop` | Stop local Supabase |
 
 ## Documentation
 

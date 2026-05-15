@@ -99,7 +99,6 @@ The project uses the following Copilot agent skills (`.agents/skills/`):
 │       ├── index.ts            # Re-exports + Profile type
 │       └── <module>.ts         # Types per module
 ├── supabase/
-│   ├── config.toml             # Local Supabase config
 │   ├── migrations/             # Numbered SQL migration files
 │   ├── seed/                   # Seed data SQL files
 │   └── seed.sql                # Main seed entry point
@@ -113,9 +112,9 @@ The project uses the following Copilot agent skills (`.agents/skills/`):
 Create a `.env.local` file:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:5002   # or your hosted Supabase URL
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
-DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5003/postgres  # for scripts
+ADMIN_USER_IDS=<comma-separated-user-ids>
 ```
 
 The `NEXT_PUBLIC_` prefix exposes them to the browser (needed for the Supabase client).
@@ -124,26 +123,34 @@ The `NEXT_PUBLIC_` prefix exposes them to the browser (needed for the Supabase c
 
 ## 4. Supabase Setup
 
-### Local Development
+### Hosted Environments
 
-Uses Supabase CLI with Podman/Docker:
+Use two hosted Supabase projects:
+
+- **Development** project for daily work and testing
+- **Production** project for live traffic
+
+Set project-specific values in environment files (for example: `.env.local` for development and deployment platform variables for production).
+
+### Migration Flow (Remote Projects)
+
+Apply migrations to hosted projects with Supabase CLI:
 
 ```bash
-# Start local Supabase (Postgres, Auth, Storage, Studio)
-DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock npx supabase start
+# Link CLI to the development project first
+npx supabase link --project-ref <dev-project-ref>
 
-# Stop
-DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock npx supabase stop
+# Push migrations to development
+npx supabase db push
+
+# Re-link to production when promoting changes
+npx supabase link --project-ref <prod-project-ref>
+
+# Push the same tested migrations to production
+npx supabase db push
 ```
 
-### Config (`supabase/config.toml`)
-
-Key settings:
-
-- `project_id` — unique name for local containers
-- `api.port` — PostgREST port (for `NEXT_PUBLIC_SUPABASE_URL`)
-- `db.port` — Postgres port (for `DATABASE_URL`)
-- `db.major_version = 17`
+> **Tip:** Keep migration files idempotent and versioned in `supabase/migrations/` so the same SQL can be promoted from dev to prod safely.
 
 ### Supabase Client Setup
 
@@ -237,7 +244,7 @@ export const config = {
 ### Migration Files
 
 - Location: `supabase/migrations/`
-- Naming: `NN_<module>.sql` with **zero-padded two-digit prefix** (e.g., `01_profiles.sql`, `02_items.sql`, … `10_storage.sql`). Zero-padding ensures alphabetical sort matches numeric order — without it, `10_…` would sort before `2_…` and break the run order used by `db-reset` (§18). Pick the next available number per migration; do not hard-code specific numbers in code or docs.
+- Naming: `NN_<module>.sql` with **zero-padded two-digit prefix** (e.g., `01_profiles.sql`, `02_items.sql`, … `10_storage.sql`). Zero-padding ensures alphabetical sort matches numeric order — without it, `10_…` would sort before `2_…` and break migration run order. Pick the next available number per migration; do not hard-code specific numbers in code or docs.
 - Numbered prefix enforces execution order (foreign key dependencies)
 - Each file is **idempotent** — uses `DROP TABLE IF EXISTS ... CASCADE` at the top
 
@@ -1312,20 +1319,16 @@ The app supports both light and dark modes using RetroUI's default theming. A th
 
 ---
 
-## 18. Scripts & DB Reset
+## 18. Scripts & Migration Workflow
 
-### DB Reset Script (`scripts/db-reset.ts`)
+This project does not require running a local Supabase stack. Schema changes are promoted through hosted **dev** and **prod** projects via migrations.
 
-Run with: `bun scripts/db-reset.ts` (or `npm run db:reset`)
+Recommended flow:
 
-What it does:
-
-1. Drops all tables in the `public` schema
-2. Runs all migration files in order (sorted alphabetically)
-3. Runs seed files
-4. Uploads seed assets to Supabase Storage
-
-Requires `DATABASE_URL` env var.
+1. Create a new migration in `supabase/migrations/`
+2. Push to hosted development project (`supabase db push`)
+3. Validate app behavior against the dev project
+4. Promote the same migration set to production
 
 ### `package.json` Scripts
 
@@ -1336,22 +1339,9 @@ Requires `DATABASE_URL` env var.
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit",
-    "db:reset": "bun scripts/db-reset.ts",
-    "db:start": "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock npx supabase start",
-    "db:stop": "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock npx supabase stop"
+    "typecheck": "tsc --noEmit"
   }
 }
-```
-
-### Script Pattern
-
-All scripts use Bun and the `postgres` npm package for direct DB access:
-
-```ts
-import postgres from "postgres";
-const sql = postgres(process.env.DATABASE_URL!);
-await sql`SELECT ...`;
 ```
 
 ---
