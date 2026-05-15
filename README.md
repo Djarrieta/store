@@ -29,7 +29,7 @@ npm install
 cp .env.local.example .env.local
 # Edit .env.local with your dev Supabase URL and anon key
 
-# Start dev server
+# Start dev server (runs on http://localhost:5000)
 npm run dev
 ```
 

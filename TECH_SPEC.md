@@ -39,9 +39,8 @@
 | Styling           | **RetroUI** (NeoBrutalism, shadcn-based) + Tailwind CSS | per RetroUI  |
 | Backend / DB      | **Supabase** (Postgres + Auth + Storage + RLS)   | —            |
 | Supabase Client   | `@supabase/supabase-js` + `@supabase/ssr`        | 2.x / 0.10.x |
-| Runtime (scripts) | **Bun**                                          | latest       |
 | Linter            | **ESLint** (eslint-config-next)                  | 9.x          |
-| Package Manager   | **npm** (app) / **bun** (scripts)                | —            |
+| Package Manager   | **npm**                                          | —            |
 
 ### Key Design Decisions
 
@@ -67,7 +66,6 @@ The project uses the following Copilot agent skills (`.agents/skills/`):
 
 ```
 ├── public/images/             # Static assets (illustrations, icons)
-├── scripts/                   # Bun scripts (db-reset, data sync, etc.)
 ├── src/
 │   ├── middleware.ts           # Supabase session refresh
 │   ├── app/
