@@ -11,28 +11,29 @@ interface ItemFormProps {
 
 export default function ItemForm({ action, defaultValues }: ItemFormProps) {
   const [imagesText, setImagesText] = useState(
-    (defaultValues?.images ?? []).map((img) => img.url).join("\n"),
+    (defaultValues?.images ?? []).map((img) => img.url).join(", "),
   );
 
   const serializedImages = useMemo(() => {
     const images: ItemImage[] = imagesText
-      .split("\n")
-      .map((line) => line.trim())
+      .split(",")
+      .map((part) => part.trim())
       .filter(Boolean)
       .map((url) => ({ url }));
     return JSON.stringify(images);
   }, [imagesText]);
 
   return (
-    <form action={action} className="space-y-4 rounded-xl border-2 border-black bg-white p-5">
+    <form action={action} className="min-w-0 space-y-4 rounded-xl border-2 border-black bg-white p-5">
       <label className="grid gap-1 text-sm font-medium">
         Title
         <input
           name="title"
           maxLength={MAX_TITLE_LENGTH}
           required
+          placeholder="e.g. Vintage Leather Jacket"
           defaultValue={defaultValues?.title ?? ""}
-          className="rounded-md border-2 border-black px-3 py-2"
+          className="w-full rounded-md border-2 border-black px-3 py-2"
         />
       </label>
 
@@ -42,8 +43,9 @@ export default function ItemForm({ action, defaultValues }: ItemFormProps) {
           name="description"
           maxLength={MAX_DESCRIPTION_LENGTH}
           rows={5}
+          placeholder="Describe the item, its condition, and any notable details…"
           defaultValue={defaultValues?.description ?? ""}
-          className="rounded-md border-2 border-black px-3 py-2"
+          className="w-full rounded-md border-2 border-black px-3 py-2"
         />
       </label>
 
@@ -57,7 +59,7 @@ export default function ItemForm({ action, defaultValues }: ItemFormProps) {
             step="0.01"
             required
             defaultValue={defaultValues?.price ?? 0}
-            className="rounded-md border-2 border-black px-3 py-2"
+            className="w-full rounded-md border-2 border-black px-3 py-2"
           />
         </label>
 
@@ -66,28 +68,31 @@ export default function ItemForm({ action, defaultValues }: ItemFormProps) {
           <input
             name="category"
             required
+            placeholder="e.g. Clothing"
             defaultValue={defaultValues?.category ?? ""}
-            className="rounded-md border-2 border-black px-3 py-2"
+            className="w-full rounded-md border-2 border-black px-3 py-2"
           />
         </label>
       </div>
 
       <label className="grid gap-1 text-sm font-medium">
-        Tags (comma-separated)
+        Tags
         <input
           name="tags"
-          defaultValue={(defaultValues?.tags ?? []).join(",")}
-          className="rounded-md border-2 border-black px-3 py-2"
+          placeholder="e.g. vintage, leather, jacket"
+          defaultValue={(defaultValues?.tags ?? []).join(", ")}
+          className="w-full rounded-md border-2 border-black px-3 py-2"
         />
       </label>
 
       <label className="grid gap-1 text-sm font-medium">
-        Image URLs (one per line)
+        Image URLs
         <textarea
           value={imagesText}
           onChange={(event) => setImagesText(event.target.value)}
           rows={4}
-          className="rounded-md border-2 border-black px-3 py-2"
+          placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+          className="w-full rounded-md border-2 border-black px-3 py-2"
         />
       </label>
 

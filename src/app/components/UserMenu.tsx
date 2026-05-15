@@ -11,8 +11,8 @@ export default function UserMenu({ user }: UserMenuProps) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <p className="text-xs font-medium text-[var(--muted)]">{user.email}</p>
+    <div className="flex min-w-0 items-center gap-2">
+      <p className="max-w-[140px] truncate text-xs font-medium text-[var(--muted)] sm:max-w-none">{user.email}</p>
       <form action={signOut}>
         <button
           type="submit"
