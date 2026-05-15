@@ -36,7 +36,7 @@
 | Framework         | **Next.js** (App Router)                         | 16.x         |
 | Language          | **TypeScript**                                   | 5.x          |
 | React             | **React**                                        | 19.x         |
-| Styling           | **Tailwind CSS** v4 (via `@tailwindcss/postcss`) | 4.x          |
+| Styling           | **RetroUI** (NeoBrutalism, shadcn-based) + Tailwind CSS | per RetroUI  |
 | Backend / DB      | **Supabase** (Postgres + Auth + Storage + RLS)   | —            |
 | Supabase Client   | `@supabase/supabase-js` + `@supabase/ssr`        | 2.x / 0.10.x |
 | Runtime (scripts) | **Bun**                                          | latest       |
@@ -88,7 +88,7 @@ The project uses the following Copilot agent skills (`.agents/skills/`):
 │   │       └── new/page.tsx        # Create page
 │   ├── lib/
 │   │   ├── auth.ts             # getUser(), requireAuth(), ensureProfile()
-│   │   ├── constants.ts        # PAGE_SIZE, MAX_TITLE_LENGTH, MAX_DESCRIPTION_LENGTH
+│   │   ├── constants.ts        # PAGE_SIZE (24), MAX_TITLE_LENGTH (120), MAX_DESCRIPTION_LENGTH (2000)
 │   │   ├── format.ts           # Utility formatters
 │   │   ├── hooks/              # Client-side hooks
 │   │   └── supabase/
@@ -318,6 +318,37 @@ CREATE POLICY "<entities>: owner delete"
 
 > **Note:** The "public read" policy makes all content visible to everyone. If you need private data, change the SELECT policy to `USING (auth.uid() = user_id)`.
 
+### Items Table (Store Module)
+
+The `items` table extends the standard template with store-specific columns:
+
+```sql
+CREATE TABLE public.items (
+    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     uuid NOT NULL DEFAULT auth.uid()
+                     REFERENCES auth.users(id) ON DELETE CASCADE,
+    title       text NOT NULL,
+    description text,
+    tags        text[] NOT NULL DEFAULT '{}',
+    images      jsonb NOT NULL DEFAULT '[]'::jsonb,
+    price       numeric(10,2) NOT NULL DEFAULT 0,
+    category    text NOT NULL DEFAULT '',
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    updated_at  timestamptz NOT NULL DEFAULT now()
+);
+```
+
+| Column     | Type             | Purpose                               |
+| ---------- | ---------------- | ------------------------------------- |
+| `price`    | `numeric(10,2)`  | Item price in USD (e.g. 19.99)        |
+| `category` | `text NOT NULL`  | Fixed category (e.g. Electronics)     |
+
+### Access Model: Admin-Only Catalog
+
+This store uses an **admin-only** catalog model — only admins can create, update, and delete items. Public users can browse and view items.
+
+RLS policies for items use admin checks instead of the generic `auth.uid() = user_id` pattern. Admin status is determined by a list of admin user IDs or an `is_admin` flag on the profiles table. The exact mechanism is defined at implementation time.
+
 ---
 
 ## 6. Profiles & User Management
@@ -407,7 +438,7 @@ export async function ensureProfile(user: {
         "") as string,
       avatar_url: (user.user_metadata?.avatar_url ?? null) as string | null,
     },
-    { onConflict: "id", ignoreDuplicates: true },
+    { onConflict: "id" },
   );
 }
 ```
@@ -522,7 +553,7 @@ TypeScript type:
 ```ts
 interface EntityImage {
   url: string;
-  description: string;
+  description?: string;
 }
 ```
 
@@ -1262,34 +1293,11 @@ export default function EntityForm({ action, defaultValues }: FormProps) {
 
 ## 17. Styling & Theming
 
-### Tailwind CSS v4
+### RetroUI (NeoBrutalism)
 
-Uses `@tailwindcss/postcss` plugin. Theme tokens defined in `globals.css`:
+Uses [RetroUI](https://retroui.dev/docs) — a NeoBrutalism-styled component library built on shadcn conventions. Follow RetroUI's recommended installation and Tailwind version.
 
-```css
-@import "tailwindcss";
-
-@theme {
-  --font-display: var(--font-outfit), system-ui, sans-serif;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-
-  /* Primary brand */
-  --color-primary-500: #f59e0b;
-  --color-primary-600: #d97706;
-  /* ... more shades ... */
-
-  /* Semantic tokens */
-  --color-bg: #050505;
-  --color-surface: #0f0f0f;
-  --color-surface-alt: #161616;
-  --color-border: #2a2a2a;
-  --color-text: #ffffff;
-  --color-text-secondary: #a3a3a3;
-  --color-text-muted: #8a8a8a;
-
-  /* Danger, Success, Accent... */
-}
-```
+Theme tokens and global styles are defined in `globals.css` per RetroUI's setup guide.
 
 ### Fonts
 
@@ -1298,9 +1306,9 @@ Two Google Fonts loaded via `next/font`:
 - **Outfit** — display/headings (`font-display`)
 - **Inter** — body text (`font-sans`)
 
-### Dark Theme
+### Light + Dark Theme
 
-The app is dark-theme by default (no light mode toggle). All colors are designed for dark backgrounds.
+The app supports both light and dark modes using RetroUI's default theming. A theme toggle is available in the UI.
 
 ---
 
@@ -1318,6 +1326,23 @@ What it does:
 4. Uploads seed assets to Supabase Storage
 
 Requires `DATABASE_URL` env var.
+
+### `package.json` Scripts
+
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:reset": "bun scripts/db-reset.ts",
+    "db:start": "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock npx supabase start",
+    "db:stop": "DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock npx supabase stop"
+  }
+}
+```
 
 ### Script Pattern
 
