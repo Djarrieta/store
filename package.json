@@ -9,7 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "db:link": "npx supabase login && npx supabase link",
-    "db:reset": "npx supabase db query --linked -f supabase/migrations/01_profiles.sql && npx supabase db query --linked -f supabase/migrations/02_items.sql && npx supabase db query --linked -f supabase/migrations/03_unaccent_search.sql && npx supabase db query --linked -f supabase/migrations/04_storage.sql && npx supabase db query --linked -f supabase/seed/01_items.sql"
+    "db:reset": "node supabase/reset.js"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
