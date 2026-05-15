@@ -2,6 +2,26 @@
     "git.ignoreLimitWarning": true,
     "chat.tools.terminal.autoApprove": {
         "npx tsc": true,
-        "ForEach-Object": true
+        "ForEach-Object": true,
+        "/^npx eslint src$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^npx eslint src --format json$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^npx eslint src --format stylish$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^npx eslint src --debug$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^npx eslint src --max-warnings 0$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
     }
 }

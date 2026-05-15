@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ProductWithCategory } from "@/types";
 import { formatCurrency } from "@/lib/format";
+import AddToCartButton from "@/app/components/AddToCartButton";
 
 interface ProductCardProps {
   product: ProductWithCategory;
@@ -14,6 +15,9 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     product.discount > 0
       ? product.price * (1 - product.discount / 100)
       : null;
+
+  const payablePrice = effectivePrice ?? product.price;
+  const amountInCents = Math.round(payablePrice * 100);
 
   const categoryLabel = product.category
     ? product.category.parent
@@ -66,6 +70,13 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             </span>
           ))}
         </div>
+        <AddToCartButton
+          id={product.id}
+          title={product.title}
+          price={payablePrice}
+          amountInCents={amountInCents}
+          image={image}
+        />
       </div>
     </article>
   );

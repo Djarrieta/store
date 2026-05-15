@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ProductWithCategory } from "@/types";
 import { formatCurrency } from "@/lib/format";
 import Breadcrumb from "@/app/components/Breadcrumb";
+import AddToCartButton from "@/app/components/AddToCartButton";
 
 export default async function ProductDetailPage({
   params,
@@ -25,6 +26,9 @@ export default async function ProductDetailPage({
     product.discount > 0
       ? product.price * (1 - product.discount / 100)
       : null;
+
+  const payablePrice = effectivePrice ?? product.price;
+  const amountInCents = Math.round(payablePrice * 100);
 
   const categoryLabel = product.category
     ? product.category.parent
@@ -94,6 +98,14 @@ export default async function ProductDetailPage({
             ))}
           </div>
         )}
+
+        <AddToCartButton
+          id={product.id}
+          title={product.title}
+          price={payablePrice}
+          amountInCents={amountInCents}
+          image={product.images?.[0]?.url}
+        />
       </div>
     </article>
   );
