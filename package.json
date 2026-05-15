@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start -p 5000",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:link": "npx supabase login && npx supabase link",
+    "db:reset": "npx supabase db query --linked -f supabase/migrations/01_profiles.sql && npx supabase db query --linked -f supabase/migrations/02_items.sql && npx supabase db query --linked -f supabase/migrations/03_unaccent_search.sql && npx supabase db query --linked -f supabase/migrations/04_storage.sql && npx supabase db query --linked -f supabase/seed/01_items.sql"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
@@ -24,6 +26,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "supabase": "^2.98.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
