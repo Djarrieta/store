@@ -109,8 +109,7 @@ The `items` table includes: `id`, `user_id`, `title`, `description`, `tags`, `im
 
 ## Authentication
 
-- **Google OAuth** (production sign-in method)
-- **Dev login** (`seed@app.local / password123`) — available in development only
+- **Google OAuth** (sign-in method)
 
 ## Scripts
 

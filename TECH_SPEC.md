@@ -478,17 +478,6 @@ Without this, an attacker could craft `?next=//evil.com` to redirect users after
 
 ### Dev Login (local only)
 
-For development, a password-based login is available using a seed user:
-
-```ts
-await supabase.auth.signInWithPassword({
-  email: "seed@app.local",
-  password: "password123",
-});
-```
-
-This button is only rendered when `process.env.NODE_ENV === 'development'`.
-
 ### Using Auth in Pages
 
 - **Read-only pages**: Use `getUser()` — returns `null` if not logged in (page still renders)

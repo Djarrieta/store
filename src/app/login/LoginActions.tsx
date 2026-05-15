@@ -31,26 +31,6 @@ export default function LoginActions() {
     }
   };
 
-  const devLogin = async () => {
-    setIsLoading(true);
-    setError(null);
-    const supabase = createClient();
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: "seed@app.local",
-      password: "password123",
-    });
-
-    if (signInError) {
-      setError(signInError.message);
-      setIsLoading(false);
-      return;
-    }
-
-    router.push(next);
-    router.refresh();
-  };
-
   return (
     <div className="space-y-4">
       <button
@@ -61,17 +41,6 @@ export default function LoginActions() {
       >
         Continue with Google
       </button>
-
-      {process.env.NODE_ENV === "development" ? (
-        <button
-          type="button"
-          onClick={devLogin}
-          disabled={isLoading}
-          className="w-full rounded-lg border-2 border-black bg-white px-4 py-2 text-sm font-semibold"
-        >
-          Dev Login (seed@app.local)
-        </button>
-      ) : null}
 
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
     </div>
