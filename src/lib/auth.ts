@@ -36,17 +36,19 @@ export async function requireAuth() {
   return user;
 }
 
-export function isAdmin(userId?: string | null) {
+export async function isAdmin(userId?: string | null): Promise<boolean> {
   if (!userId) return false;
-  const admins = (process.env.ADMIN_USER_IDS ?? "")
-    .split(",")
-    .map((id) => id.trim())
-    .filter(Boolean);
-  return admins.includes(userId);
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", userId)
+    .single();
+  return data?.is_admin ?? false;
 }
 
 export async function requireAdmin() {
   const user = await requireAuth();
-  if (!isAdmin(user.id)) redirect("/items");
+  if (!(await isAdmin(user.id))) redirect("/");
   return user;
 }

@@ -49,8 +49,8 @@ export async function createItem(formData: FormData) {
   if (error) throw new Error(error.message);
 
   revalidatePath("/");
-  revalidatePath("/items");
-  redirect("/items");
+  revalidatePath("/admin/items");
+  redirect("/admin/items");
 }
 
 export async function updateItem(id: string, formData: FormData) {
@@ -67,7 +67,7 @@ export async function updateItem(id: string, formData: FormData) {
   if (error) throw new Error(error.message);
 
   revalidatePath("/");
-  revalidatePath("/items");
+  revalidatePath("/admin/items");
   revalidatePath(`/items/${id}`);
   redirect(`/items/${id}`);
 }
@@ -84,8 +84,8 @@ export async function deleteItem(id: string) {
   if (error) throw new Error(error.message);
 
   revalidatePath("/");
-  revalidatePath("/items");
-  redirect("/items");
+  revalidatePath("/admin/items");
+  redirect("/admin/items");
 }
 
 export async function deleteItems(ids: string[]) {

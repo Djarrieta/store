@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import { getUser } from "@/lib/auth";
+import { getUser, isAdmin } from "@/lib/auth";
 import UserMenu from "@/app/components/UserMenu";
 import NavLinks from "@/app/components/NavLinks";
 
@@ -27,6 +27,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const user = await getUser();
+  const adminStatus = await isAdmin(user?.id);
 
   return (
     <html lang="en" className={`${outfit.variable} ${inter.variable} antialiased`}>
@@ -37,7 +38,7 @@ export default async function RootLayout({
               <Link href="/" className="font-display text-2xl font-bold uppercase tracking-tight">
                 Store
               </Link>
-              <NavLinks isAuthenticated={Boolean(user)} />
+              <NavLinks isAuthenticated={Boolean(user)} isAdmin={adminStatus} />
               <UserMenu user={user} />
             </div>
           </header>

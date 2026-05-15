@@ -25,11 +25,11 @@ export default async function ItemDetailPage({
   if (!item) notFound();
 
   const user = await getUser();
-  const canManage = isAdmin(user?.id);
+  const canManage = await isAdmin(user?.id);
 
   return (
     <article className="space-y-4">
-      <Breadcrumb items={[{ label: "Items", href: "/items" }, { label: item.title }]} />
+      <Breadcrumb items={[{ label: "Items", href: "/" }, { label: item.title }]} />
       <div className="rounded-2xl border-4 border-black bg-white p-5 shadow-[6px_6px_0_0_#111]">
         <h1 className="font-display text-3xl font-bold">{item.title}</h1>
         <p className="mt-2 text-sm text-[var(--muted)]">{item.description ?? "No description"}</p>
@@ -71,7 +71,7 @@ export default async function ItemDetailPage({
         {canManage ? (
           <div className="mt-6 flex items-center gap-2">
             <Link
-              href={`/items/${id}/edit`}
+              href={`/admin/items/${id}/edit`}
               className="rounded-lg border-2 border-black bg-[var(--accent)] px-3 py-1 text-sm font-semibold"
             >
               Edit
