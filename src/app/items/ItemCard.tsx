@@ -5,9 +5,10 @@ import { formatCurrency, formatDate } from "@/lib/format";
 
 interface ItemCardProps {
   item: Item;
+  priority?: boolean;
 }
 
-export default function ItemCard({ item }: ItemCardProps) {
+export default function ItemCard({ item, priority = false }: ItemCardProps) {
   const image = item.images?.[0]?.url;
 
   return (
@@ -19,6 +20,8 @@ export default function ItemCard({ item }: ItemCardProps) {
           width={800}
           height={500}
           unoptimized
+          loading={priority ? "eager" : "lazy"}
+          priority={priority}
           className="h-40 w-full object-cover"
         />
       ) : (

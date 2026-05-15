@@ -66,8 +66,8 @@ export default async function ItemsPage({
         pageSize={PAGE_SIZE}
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {(items ?? []).map((item) => (
-            <ItemCard key={item.id} item={item} />
+          {(items ?? []).map((item, i) => (
+            <ItemCard key={item.id} item={item} priority={i === 0} />
           ))}
         </div>
       </FilterableList>
