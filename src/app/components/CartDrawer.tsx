@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/cart";
 import { formatCurrency } from "@/lib/format";
 import BuyNowButton from "@/app/components/BuyNowButton";
@@ -11,6 +13,7 @@ export default function CartDrawer() {
   const {
     items,
     isOpen,
+    isAuthenticated,
     closeCart,
     removeItem,
     setQuantity,
@@ -25,6 +28,8 @@ export default function CartDrawer() {
     clearAddress,
   } = useCart();
 
+  const pathname = usePathname();
+  const loginUrl = `/login?next=${encodeURIComponent(pathname + "?openCart=1")}`;
   const [addressModalOpen, setAddressModalOpen] = useState(false);
 
   return (
@@ -120,54 +125,56 @@ export default function CartDrawer() {
 
             {/* Footer */}
             <div className="space-y-3 border-t-4 border-black p-4">
-              {/* Address section */}
-              <div className="rounded-xl border-2 border-black bg-[var(--bg)] p-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
-                      Dirección de envío
-                    </p>
-                    {selectedAddress ? (
-                      <div className="mt-1">
-                        <p className="text-sm font-semibold leading-tight">
-                          {selectedAddress.recipient_name}
-                        </p>
-                        <p className="text-xs text-[var(--muted)]">
-                          {selectedAddress.address_line}
-                          {selectedAddress.neighborhood
-                            ? `, ${selectedAddress.neighborhood}`
-                            : ""}
-                        </p>
-                        <p className="text-xs text-[var(--muted)]">
-                          {selectedAddress.city}, {selectedAddress.department}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="mt-1 text-sm text-[var(--muted)]">
-                        Agrega una dirección de envío
+              {/* Address section — authenticated users only */}
+              {isAuthenticated && (
+                <div className="rounded-xl border-2 border-black bg-[var(--bg)] p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+                        Dirección de envío
                       </p>
-                    )}
-                  </div>
-                  <div className="flex shrink-0 flex-col gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setAddressModalOpen(true)}
-                      className="rounded-md border-2 border-black bg-white px-2 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-                    >
-                      {selectedAddress ? "Cambiar" : "Agregar"}
-                    </button>
-                    {selectedAddress && (
+                      {selectedAddress ? (
+                        <div className="mt-1">
+                          <p className="text-sm font-semibold leading-tight">
+                            {selectedAddress.recipient_name}
+                          </p>
+                          <p className="text-xs text-[var(--muted)]">
+                            {selectedAddress.address_line}
+                            {selectedAddress.neighborhood
+                              ? `, ${selectedAddress.neighborhood}`
+                              : ""}
+                          </p>
+                          <p className="text-xs text-[var(--muted)]">
+                            {selectedAddress.city}, {selectedAddress.department}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-sm text-[var(--muted)]">
+                          Agrega una dirección de envío
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex shrink-0 flex-col gap-1">
                       <button
                         type="button"
-                        onClick={clearAddress}
-                        className="text-xs text-[var(--muted)] underline hover:text-[var(--fg)]"
+                        onClick={() => setAddressModalOpen(true)}
+                        className="rounded-md border-2 border-black bg-white px-2 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                       >
-                        Quitar
+                        {selectedAddress ? "Cambiar" : "Agregar"}
                       </button>
-                    )}
+                      {selectedAddress && (
+                        <button
+                          type="button"
+                          onClick={clearAddress}
+                          className="text-xs text-[var(--muted)] underline hover:text-[var(--fg)]"
+                        >
+                          Quitar
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Totals breakdown */}
               <div className="space-y-1.5">
@@ -203,19 +210,28 @@ export default function CartDrawer() {
                 </div>
               </div>
 
-              <BuyNowButton
-                items={items}
-                shippingAddress={selectedAddress}
-                shippingCost={shippingCost}
-                disabled={!selectedAddress}
-                onOrderCreated={() => {
-                  clearCart();
-                  clearAddress();
-                }}
-                onSuccess={closeCart}
-              >
-                {selectedAddress ? "Comprar ahora" : "Agrega una dirección para comprar"}
-              </BuyNowButton>
+              {isAuthenticated ? (
+                <BuyNowButton
+                  items={items}
+                  shippingAddress={selectedAddress}
+                  shippingCost={shippingCost}
+                  disabled={!selectedAddress}
+                  onOrderCreated={() => {
+                    clearCart();
+                    clearAddress();
+                  }}
+                  onSuccess={closeCart}
+                >
+                  {selectedAddress ? "Comprar ahora" : "Agrega una dirección para comprar"}
+                </BuyNowButton>
+              ) : (
+                <Link
+                  href={loginUrl}
+                  className="block w-full rounded-xl border-2 border-black bg-black text-white px-6 py-3 font-bold shadow-[4px_4px_0_0_#555] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none text-center"
+                >
+                  Inicia sesión para comprar
+                </Link>
+              )}
             </div>
           </>
         )}

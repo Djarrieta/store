@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { getMyAddresses, createAddress } from "@/app/perfil/actions";
 import type { Address } from "@/types";
 
@@ -22,9 +22,9 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
   const [isLoadingList, startLoadTransition] = useTransition();
   const [isSaving, startSaveTransition] = useTransition();
 
-  function openModal() {
-    if (addresses !== null) return; // already loaded
-    setLoadError(null);
+  // Trigger load when modal opens
+  useEffect(() => {
+    if (!isOpen || addresses !== null) return;
     startLoadTransition(async () => {
       try {
         const list = await getMyAddresses();
@@ -34,16 +34,13 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
         setLoadError("No se pudieron cargar las direcciones.");
       }
     });
-  }
-
-  // Trigger load when modal opens
-  if (isOpen && addresses === null && !isLoadingList && !loadError) {
-    openModal();
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   function handleClose() {
     setMode("list");
     setFormError(null);
+    setLoadError(null);
     onClose();
   }
 

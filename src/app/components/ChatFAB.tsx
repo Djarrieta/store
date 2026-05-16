@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const SHOW_ON = ["/", "/about"];
-
 export default function ChatFAB() {
   const pathname = usePathname();
-  if (!SHOW_ON.includes(pathname)) return null;
+  const show =
+    pathname === "/" ||
+    pathname === "/about" ||
+    pathname.startsWith("/products/");
+  if (!show) return null;
 
   return (
     <Link

@@ -42,6 +42,7 @@ No llames una herramienta si la respuesta no la requiere.
 ## Pregunta actual
 {{userMessage}}
 
+{{guestInstructions}}
 ---
 {{assistantInstructions}}`;
 

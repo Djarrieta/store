@@ -6,22 +6,6 @@ import { createOrderAndCheckout, markOrderPaid, cancelOrder } from "@/app/action
 import type { CartItem } from "@/lib/cart";
 import type { Address } from "@/types";
 
-declare global {
-  interface Window {
-    WidgetCheckout: new (config: {
-      currency: string;
-      amountInCents: number;
-      reference: string;
-      publicKey: string;
-      signature: { integrity: string };
-    }) => {
-      open: (
-        callback: (result: { transaction: { id: string; status: string } }) => void,
-      ) => void;
-    };
-  }
-}
-
 interface Props {
   items: CartItem[];
   shippingAddress: Address | null;

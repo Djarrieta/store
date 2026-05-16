@@ -1,8 +1,8 @@
-import { requireAuth } from "@/lib/auth";
+import { getUser } from "@/lib/auth";
 import ChatWidget from "./ChatWidget";
 
 export default async function ChatPage() {
-  await requireAuth(); // redirects to /login if not authenticated
+  const user = await getUser();
   return (
     <div className="space-y-4">
       <div>
@@ -11,7 +11,7 @@ export default async function ChatPage() {
           Pregunta sobre productos, disponibilidad o realiza un pedido.
         </p>
       </div>
-      <ChatWidget />
+      <ChatWidget isAuthenticated={Boolean(user)} />
     </div>
   );
 }

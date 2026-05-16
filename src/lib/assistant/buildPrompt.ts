@@ -3,24 +3,49 @@ import { getHistory, type ChatMessage } from "./chatHistory";
 import { fetchStoreSnapshot } from "./contextTopics";
 import { ASSISTANT_PROMPT } from "./prompt";
 
-export async function buildPrompt(userMessage: string, userRef: string): Promise<string> {
+export async function buildPrompt(userMessage: string, userRef: string | null): Promise<string> {
   const supabase = createServiceClient();
 
-  const [{ data: pinnedContent }, { data: profile }, { data: addresses }, history, contextTopics] = await Promise.all([
-    supabase.from("content").select("key, value").eq("pinned", true),
-    supabase.from("profiles").select("display_name").eq("id", userRef).single(),
-    supabase.from("addresses").select("recipient_name, department, city, address_line, neighborhood, phone, is_default").eq("user_id", userRef).order("is_default", { ascending: false }),
-    getHistory(userRef),
-    fetchStoreSnapshot(),
-  ]);
+  const isGuest = userRef === null;
 
-  const userInfo = profile?.display_name
-    ? `${profile.display_name} (ID: ${userRef})`
-    : `ID: ${userRef}`;
+  const [{ data: pinnedContent }, profileResult, addressesResult, history, contextTopics] =
+    await Promise.all([
+      supabase.from("content").select("key, value").eq("pinned", true),
+      isGuest
+        ? Promise.resolve({ data: null })
+        : supabase.from("profiles").select("display_name").eq("id", userRef!).single(),
+      isGuest
+        ? Promise.resolve({ data: null })
+        : supabase
+            .from("addresses")
+            .select("recipient_name, department, city, address_line, neighborhood, phone, is_default")
+            .eq("user_id", userRef!)
+            .order("is_default", { ascending: false }),
+      isGuest ? Promise.resolve([]) : getHistory(userRef!),
+      fetchStoreSnapshot(),
+    ]);
 
-  const userAddresses =
-    addresses && addresses.length > 0
-      ? addresses
+  const profileData = profileResult.data as { display_name?: string } | null;
+  const addressesData = addressesResult.data as Array<{
+    recipient_name: string;
+    department: string;
+    city: string;
+    address_line: string;
+    neighborhood?: string | null;
+    phone: string;
+    is_default: boolean;
+  }> | null;
+
+  const userInfo = isGuest
+    ? "Usuario no autenticado (guest)"
+    : profileData?.display_name
+      ? `${profileData.display_name} (ID: ${userRef})`
+      : `ID: ${userRef}`;
+
+  const userAddresses = isGuest
+    ? "El usuario no tiene sesión iniciada."
+    : addressesData && addressesData.length > 0
+      ? addressesData
           .map((a) => {
             const label = a.is_default ? " [predeterminada]" : "";
             const neighborhood = a.neighborhood ? `, ${a.neighborhood}` : "";
@@ -47,7 +72,11 @@ export async function buildPrompt(userMessage: string, userRef: string): Promise
       : "Sin información fija de la tienda.";
 
   // Build conversation history block
-  const conversationHistory = buildHistoryBlock(history);
+  const conversationHistory = isGuest ? "Sin historial previo." : buildHistoryBlock(history as import("./chatHistory").ChatMessage[]);
+
+  const guestInstructions = isGuest
+    ? `> **USUARIO NO AUTENTICADO**: Puedes responder preguntas sobre productos, categorías, envíos y políticas. Si el usuario quiere comprar, hacer un pedido, ver sus pedidos o necesita datos de su cuenta, indícale que debe iniciar sesión y muéstrale el enlace: [Iniciar sesión](/login). No uses las herramientas \`bot_create_order\`, \`bot_get_my_orders\`, ni \`bot_get_order_status\`.`
+    : "";
 
   return ASSISTANT_PROMPT
     .replace("{{date}}", new Date().toLocaleDateString("es-CO"))
@@ -58,6 +87,7 @@ export async function buildPrompt(userMessage: string, userRef: string): Promise
     .replace("{{pinnedContent}}", pinnedContext)
     .replace("{{contextTopics}}", contextTopics)
     .replace("{{conversationHistory}}", conversationHistory)
+    .replace("{{guestInstructions}}", guestInstructions)
     .replace("{{userMessage}}", userMessage.trim().slice(0, 2000));
 }
 

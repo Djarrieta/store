@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useTransition } from "react";
 import ReactMarkdown from "react-markdown";
-import { sendMessage } from "./actions";
+import { sendMessage, migrateGuestChat } from "./actions";
 
 interface Message {
   role: "user" | "assistant";
@@ -11,19 +11,36 @@ interface Message {
 
 const STORAGE_KEY = "chat_messages";
 
-export default function ChatWidget() {
-  const [messages, setMessages] = useState<Message[]>([]);
+export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? (JSON.parse(stored) as Message[]) : [];
+    } catch {
+      return [];
+    }
+  });
   const [input, setInput] = useState("");
   const [isPending, startTransition] = useTransition();
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const hasMigratedRef = useRef(false);
 
+  // Migrate guest localStorage history to DB on login
   useEffect(() => {
+    if (!isAuthenticated || hasMigratedRef.current) return;
+    hasMigratedRef.current = true;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) setMessages(JSON.parse(stored) as Message[]);
+      if (!stored) return;
+      const msgs = JSON.parse(stored) as Message[];
+      if (!msgs.length) return;
+      migrateGuestChat(msgs).then(() => {
+        localStorage.removeItem(STORAGE_KEY);
+      }).catch(() => {/* silent — history stays in localStorage */});
     } catch {}
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -66,6 +83,11 @@ export default function ChatWidget() {
         {messages.length === 0 && (
           <p className="text-center text-sm text-[var(--muted)] mt-8">
             Hola 👋 Pregúntame sobre productos, precios o realiza un pedido.
+            {!isAuthenticated && (
+              <span className="block mt-1 text-xs">
+                <a href="/login" className="underline font-medium">Inicia sesión</a> para guardar tu historial y hacer pedidos.
+              </span>
+            )}
           </p>
         )}
         {messages.map((msg, i) => (

@@ -49,7 +49,7 @@ export default async function RootLayout({
   return (
     <html lang="es" className={`${outfit.variable} ${inter.variable} antialiased`}>
       <body className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
-        <CartProvider>
+        <CartProvider isAuthenticated={Boolean(user)}>
           <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-6 sm:px-8">
             <header className="mb-8 rounded-2xl border-4 border-black bg-[var(--card)] p-4 shadow-[6px_6px_0_0_#111]">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -68,7 +68,7 @@ export default async function RootLayout({
             <main className="flex-1">{children}</main>
           </div>
           <CartDrawer />
-          {user && <ChatFAB />}
+          <ChatFAB />
         </CartProvider>
       </body>
     </html>

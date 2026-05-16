@@ -194,8 +194,10 @@ const llmWithTools = new DeepSeekLLMProvider().getInstance().bindTools(TOOLS);
 // Public API
 // ---------------------------------------------------------------------------
 
-export async function generateResponse(prompt: string): Promise<string> {
+export async function generateResponse(prompt: string, userRef: string | null = null): Promise<string> {
   if (!prompt?.trim()) throw new Error("Prompt is empty");
+
+  const GUEST_BLOCKED_TOOLS = new Set(["bot_create_order", "bot_get_my_orders", "bot_get_order_status"]);
 
   const messages: BaseMessage[] = [new HumanMessage(prompt)];
 
@@ -206,15 +208,19 @@ export async function generateResponse(prompt: string): Promise<string> {
     if (!response.tool_calls?.length) break;
 
     for (const toolCall of response.tool_calls) {
-      const handler = HANDLERS[toolCall.name];
       let result: string;
-      if (!handler) {
-        result = JSON.stringify({ error: `Unknown tool: ${toolCall.name}` });
+      if (userRef === null && GUEST_BLOCKED_TOOLS.has(toolCall.name)) {
+        result = JSON.stringify({ error: "Esta acción requiere que el usuario haya iniciado sesión." });
       } else {
-        try {
-          result = await handler(toolCall.args as Args);
-        } catch (err) {
-          result = JSON.stringify({ error: (err as Error).message });
+        const handler = HANDLERS[toolCall.name];
+        if (!handler) {
+          result = JSON.stringify({ error: `Unknown tool: ${toolCall.name}` });
+        } else {
+          try {
+            result = await handler(toolCall.args as Args);
+          } catch (err) {
+            result = JSON.stringify({ error: (err as Error).message });
+          }
         }
       }
       messages.push(new ToolMessage({ content: result, tool_call_id: toolCall.id! }));

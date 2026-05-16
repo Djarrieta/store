@@ -131,6 +131,7 @@ type StoredCart = {
 type CartContextValue = {
   items: CartItem[];
   isOpen: boolean;
+  isAuthenticated: boolean;
   totalItems: number;
   subtotalAmountInCents: number;
   totalAmountInCents: number;
@@ -150,7 +151,7 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-export function CartProvider({ children }: { children: ReactNode }) {
+export function CartProvider({ children, isAuthenticated }: { children: ReactNode; isAuthenticated: boolean }) {
   const [state, dispatch] = useReducer(cartReducer, {
     items: [],
     isOpen: false,
@@ -235,6 +236,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     (item: Omit<CartItem, "quantity">) => {
       dispatch({ type: "ADD_ITEM", item });
       if (
+        isAuthenticated &&
         state.items.length === 0 &&
         !state.selectedAddress &&
         !hasAutoLoadedAddressRef.current
@@ -245,8 +247,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
         });
       }
     },
-    [state.items.length, state.selectedAddress],
+    [isAuthenticated, state.items.length, state.selectedAddress],
   );
+
+  // Auto-open cart when redirected back from login with ?openCart=1
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("openCart") === "1") {
+      dispatch({ type: "OPEN" });
+      params.delete("openCart");
+      const newSearch = params.toString();
+      const newUrl = window.location.pathname + (newSearch ? `?${newSearch}` : "") + window.location.hash;
+      window.history.replaceState(null, "", newUrl);
+    }
+  }, []);
 
   const totalItems = state.items.reduce((sum, i) => sum + i.quantity, 0);
   const subtotalAmountInCents = state.items.reduce(
@@ -261,6 +275,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       value={{
         items: state.items,
         isOpen: state.isOpen,
+        isAuthenticated,
         totalItems,
         subtotalAmountInCents,
         totalAmountInCents,

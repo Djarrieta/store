@@ -14,9 +14,8 @@ FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();
 
 ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "items: admin select"
-  ON public.items FOR SELECT
-  USING (public.is_admin(auth.uid()));
+CREATE POLICY "items: public read"
+  ON public.items FOR SELECT USING (true);
 
 CREATE POLICY "items: admin insert"
   ON public.items FOR INSERT
