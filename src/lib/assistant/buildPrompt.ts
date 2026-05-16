@@ -1,6 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { getHistory, type ChatMessage } from "./chatHistory";
-import { fetchContextTopics } from "./contextTopics";
+import { fetchStoreSnapshot } from "./contextTopics";
 import { ASSISTANT_PROMPT } from "./prompt";
 
 export async function buildPrompt(userMessage: string, userRef: string): Promise<string> {
@@ -9,7 +9,7 @@ export async function buildPrompt(userMessage: string, userRef: string): Promise
   const [{ data: pinnedContent }, history, contextTopics] = await Promise.all([
     supabase.from("content").select("key, value").eq("pinned", true),
     getHistory(userRef),
-    fetchContextTopics(),
+    fetchStoreSnapshot(),
   ]);
 
   const behaviorRow = pinnedContent?.find((c) => c.key === "assistant_behavior");

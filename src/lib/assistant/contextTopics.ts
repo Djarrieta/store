@@ -4,7 +4,7 @@ import { createServiceClient } from "@/lib/supabase/service";
  * Returns a short plain-text summary of dynamic store context to inject into the prompt.
  * Highlights: active discounts, low stock, new arrivals.
  */
-export async function fetchContextTopics(): Promise<string> {
+export async function fetchStoreSnapshot(): Promise<string> {
   const supabase = createServiceClient();
 
   const { data: onSale } = await supabase

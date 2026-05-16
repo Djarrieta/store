@@ -1,10 +1,8 @@
-export const ASSISTANT_PROMPT = `Eres un asistente útil y amable de una tienda en línea.
+export const ASSISTANT_PROMPT = `## Comportamiento
+{{assistantBehavior}}
 
 Fecha de hoy: {{date}}
 ID del usuario autenticado: {{userRef}}
-
-## Comportamiento
-{{assistantBehavior}}
 
 ## Información fija de la tienda
 {{pinnedContent}}
