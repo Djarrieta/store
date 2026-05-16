@@ -17,7 +17,6 @@ const SEGMENT_LABELS: Record<string, string> = {
 const NAV_LINKS = [
   { href: "/admin/categories", label: "Categorías" },
   { href: "/admin/products", label: "Productos" },
-  { href: "/admin/items", label: "Inventario" },
   { href: "/admin/content", label: "Contenido" },
   { href: "/admin/orders", label: "Pedidos" },
 ];

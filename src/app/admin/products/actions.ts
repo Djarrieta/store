@@ -45,12 +45,12 @@ export async function createProduct(formData: FormData) {
   const supabase = await createClient();
   const input = parseInput(formData);
 
-  const { error } = await supabase.from("products").insert(input);
+  const { data: product, error } = await supabase.from("products").insert(input).select("id").single();
   if (error) throw new Error(error.message);
 
   revalidatePath("/");
   revalidatePath("/admin/products");
-  redirect("/admin/products");
+  redirect(`/admin/products/${product.id}/edit`);
 }
 
 export async function updateProduct(id: string, formData: FormData) {

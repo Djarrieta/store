@@ -13,7 +13,7 @@ export default function NavLinks({ isAuthenticated, isAdmin }: NavLinksProps) {
       </Link>
       {isAdmin && (
         <Link
-          href="/admin/items"
+          href="/admin/products"
           className="rounded-lg border-2 border-black bg-[var(--card)] px-3 py-1 text-sm font-semibold"
         >
           Admin

@@ -88,14 +88,21 @@ export default function ProductCard({ product, items = [], priority = false }: P
             items={items}
             product={{ title: product.title, price: payablePrice, amountInCents, image }}
           />
-        ) : (
+        ) : singleItem ? (
           <AddToCartButton
-            id={singleItem!.id}
+            id={singleItem.id}
             title={product.title}
             price={payablePrice}
             amountInCents={amountInCents}
             image={image}
           />
+        ) : (
+          <Link
+            href={`/products/${product.id}`}
+            className="mt-1 block w-full rounded-xl border-2 border-black bg-[var(--accent)] px-4 py-2 text-center text-sm font-bold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+          >
+            Ver producto
+          </Link>
         )}
       </div>
     </article>
