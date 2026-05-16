@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Category } from "@/types";
 import { createCategory } from "../actions";
+import NameWithSlug from "@/app/components/NameWithSlug";
 
 export default async function NewCategoryPage() {
   const supabase = await createClient();
@@ -18,24 +19,7 @@ export default async function NewCategoryPage() {
         action={createCategory}
         className="min-w-0 space-y-4 rounded-xl border-2 border-black bg-white p-5"
       >
-        <label className="grid gap-1 text-sm font-medium">
-          Nombre
-          <input
-            name="name"
-            required
-            placeholder="ej. Cámaras"
-            className="w-full rounded-md border-2 border-black px-3 py-2"
-          />
-        </label>
-
-        <label className="grid gap-1 text-sm font-medium">
-          Slug
-          <input
-            name="slug"
-            placeholder="ej. camaras (se genera automáticamente desde el nombre si se deja en blanco)"
-            className="w-full rounded-md border-2 border-black px-3 py-2"
-          />
-        </label>
+        <NameWithSlug namePlaceholder="ej. Cámaras" />
 
         <label className="grid gap-1 text-sm font-medium">
           Categoría padre (dejar en blanco para nivel superior)
@@ -49,14 +33,6 @@ export default async function NewCategoryPage() {
                 {cat.name}
               </option>
             ))}
-          </select>
-        </label>
-
-        <label className="grid gap-1 text-sm font-medium">
-          Tipo
-          <select name="type" className="w-full rounded-md border-2 border-black px-3 py-2 bg-white">
-            <option value="product">Producto — clasifica el producto</option>
-            <option value="variant">Variante — dimensión o valor de variante (talla, color, modelo…)</option>
           </select>
         </label>
 

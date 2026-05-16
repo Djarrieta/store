@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { Category, Product } from "@/types";
+import type { Product } from "@/types";
 import { updateProduct } from "../../actions";
 import ProductForm from "../../ProductForm";
 import ProductItemsSection from "../../ProductItemsSection";
@@ -13,16 +13,11 @@ export default async function EditProductPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: product }, { data: categories }] = await Promise.all([
-    supabase.from("products").select("*").eq("id", id).single<Product>(),
-    supabase
-      .from("categories")
-      .select("*")
-      .eq("type", "product")
-      .order("parent_id", { ascending: true, nullsFirst: true })
-      .order("name")
-      .returns<Category[]>(),
-  ]);
+  const { data: product } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .single<Product>();
 
   if (!product) notFound();
 
@@ -34,7 +29,6 @@ export default async function EditProductPage({
       <ProductForm
         action={updateWithId}
         defaultValues={product}
-        categories={categories ?? []}
       />
       <ProductItemsSection productId={id} />
     </section>

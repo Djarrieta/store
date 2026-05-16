@@ -21,7 +21,6 @@ export default async function ProductItemsSection({ productId }: { productId: st
     supabase
       .from("categories")
       .select("*, parent:parent_id(id, name)")
-      .eq("type", "variant")
       .not("parent_id", "is", null)
       .order("parent_id")
       .order("name")

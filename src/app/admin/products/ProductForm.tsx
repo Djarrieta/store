@@ -2,30 +2,17 @@
 
 import { useMemo, useState } from "react";
 import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
-import type { Category, Product, ProductImage } from "@/types";
+import type { Product, ProductImage } from "@/types";
 
 interface ProductFormProps {
   action: (formData: FormData) => Promise<void>;
   defaultValues?: Partial<Product>;
-  categories: Category[];
 }
 
 export default function ProductForm({
   action,
   defaultValues,
-  categories,
 }: ProductFormProps) {
-  const topLevel = categories.filter((c) => c.parent_id === null);
-  const subcategories = (parentId: string) =>
-    categories.filter((c) => c.parent_id === parentId);
-
-  const defaultParentId =
-    defaultValues?.category_id
-      ? (categories.find((c) => c.id === defaultValues.category_id)?.parent_id ?? "")
-      : "";
-
-  const [selectedParent, setSelectedParent] = useState(defaultParentId);
-
   const [imagesText, setImagesText] = useState(
     (defaultValues?.images ?? []).map((img: ProductImage) => img.url).join(", "),
   );
@@ -90,40 +77,6 @@ export default function ProductForm({
             defaultValue={defaultValues?.discount ?? 0}
             className="w-full rounded-md border-2 border-black px-3 py-2"
           />
-        </label>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-1 text-sm font-medium">
-          Categoría
-          <select
-            value={selectedParent}
-            onChange={(e) => setSelectedParent(e.target.value)}
-            className="w-full rounded-md border-2 border-black px-3 py-2 bg-white"
-          >
-            <option value="">— Ninguna —</option>
-            {topLevel.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="grid gap-1 text-sm font-medium">
-          Subcategoría
-          <select
-            name="category_id"
-            defaultValue={defaultValues?.category_id ?? ""}
-            className="w-full rounded-md border-2 border-black px-3 py-2 bg-white"
-          >
-            <option value="">— Ninguna —</option>
-            {(selectedParent ? subcategories(selectedParent) : []).map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
         </label>
       </div>
 
