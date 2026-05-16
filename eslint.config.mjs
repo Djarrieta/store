@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Supabase utility scripts use CommonJS
     "supabase/**",
+    // Custom MCP server uses CommonJS (requires @modelcontextprotocol/sdk and supabase-js)
+    "mcp-server.cjs",
   ]),
 ]);
 
