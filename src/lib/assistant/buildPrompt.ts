@@ -6,11 +6,16 @@ import { ASSISTANT_PROMPT } from "./prompt";
 export async function buildPrompt(userMessage: string, userRef: string): Promise<string> {
   const supabase = createServiceClient();
 
-  const [{ data: pinnedContent }, history, contextTopics] = await Promise.all([
+  const [{ data: pinnedContent }, { data: profile }, history, contextTopics] = await Promise.all([
     supabase.from("content").select("key, value").eq("pinned", true),
+    supabase.from("profiles").select("display_name").eq("id", userRef).single(),
     getHistory(userRef),
     fetchStoreSnapshot(),
   ]);
+
+  const userInfo = profile?.display_name
+    ? `${profile.display_name} (ID: ${userRef})`
+    : `ID: ${userRef}`;
 
   const behaviorRow = pinnedContent?.find((c) => c.key === "assistant_behavior");
   const assistantBehavior = behaviorRow?.value ?? "";
@@ -34,7 +39,7 @@ export async function buildPrompt(userMessage: string, userRef: string): Promise
 
   return ASSISTANT_PROMPT
     .replace("{{date}}", new Date().toLocaleDateString("es-CO"))
-    .replace("{{userRef}}", userRef)
+    .replace("{{userInfo}}", userInfo)
     .replace("{{assistantBehavior}}", assistantBehavior)
     .replace("{{assistantInstructions}}", assistantInstructions)
     .replace("{{pinnedContent}}", pinnedContext)

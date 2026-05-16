@@ -2,7 +2,7 @@ export const ASSISTANT_PROMPT = `## Comportamiento
 {{assistantBehavior}}
 
 Fecha de hoy: {{date}}
-ID del usuario autenticado: {{userRef}}
+Usuario autenticado: {{userInfo}}
 
 ## Información fija de la tienda
 {{pinnedContent}}
