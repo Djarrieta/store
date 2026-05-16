@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
-import { signOut } from "@/app/components/user-actions";
 import Image from "next/image";
 
 interface UserMenuProps {
@@ -39,14 +38,6 @@ export default function UserMenu({ user, avatarUrl }: UserMenuProps) {
           </div>
         )}
       </Link>
-      <form action={signOut}>
-        <button
-          type="submit"
-          className="rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-semibold"
-        >
-          Cerrar sesión
-        </button>
-      </form>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import type { Address } from "@/types";
 import type { Order, OrderStatus } from "@/types";
 import { deleteAddress, setDefaultAddress } from "./actions";
+import { signOut } from "@/app/components/user-actions";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   created: "Creado",
@@ -50,7 +51,17 @@ export default async function PerfilPage() {
 
   return (
     <main className="mx-auto max-w-2xl space-y-10 px-4 py-8">
-      <h1 className="font-display text-3xl font-bold">Mi perfil</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-display text-3xl font-bold">Mi perfil</h1>
+        <form action={signOut}>
+          <button
+            type="submit"
+            className="rounded-lg border-2 border-black bg-white px-4 py-2 text-sm font-semibold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+          >
+            Cerrar sesión
+          </button>
+        </form>
+      </div>
 
       {/* ── Addresses ── */}
       <section className="space-y-4">
