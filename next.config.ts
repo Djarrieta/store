@@ -2,10 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: [
-    "mcp-use",
     "@langchain/openai",
     "langchain",
-    "@modelcontextprotocol/sdk",
   ],
   images: {
     remotePatterns: [

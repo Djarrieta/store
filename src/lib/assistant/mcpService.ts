@@ -1,59 +1,208 @@
-import { MCPAgent, MCPClient } from "mcp-use";
-import { readFile } from "fs/promises";
-import path from "path";
+import { HumanMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
+import { createServiceClient } from "@/lib/supabase/service";
 import { DeepSeekLLMProvider } from "./deepseekProvider";
 
-let agent: MCPAgent | null = null;
-let client: MCPClient | null = null;
-
 const MAX_STEPS = 10;
+
+// ---------------------------------------------------------------------------
+// Tool definitions (OpenAI function-calling format, works with DeepSeek too)
+// ---------------------------------------------------------------------------
+
+const TOOLS = [
+  {
+    type: "function" as const,
+    function: {
+      name: "query_products",
+      description: "Returns the full product catalog with current stock information.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "query_categories",
+      description: "Returns all product categories.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "query_items",
+      description: "Returns all stock items (variants) for all products.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "query_content",
+      description: "Returns store content entries (store info, policies, etc.).",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "bot_create_order",
+      description: "Creates a new pending order and returns its UUID.",
+      parameters: {
+        type: "object",
+        properties: {
+          user_ref:  { type: "string",  description: "User UUID" },
+          user_name: { type: "string",  description: "User display name" },
+          items:     { type: "object",  description: "Order line items as JSON array" },
+          total:     { type: "number",  description: "Total order amount" },
+          notes:     { type: "string",  description: "Optional delivery or order notes" },
+        },
+        required: ["user_ref", "user_name", "items", "total"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "bot_get_my_orders",
+      description: "Returns the 20 most recent orders for a given user.",
+      parameters: {
+        type: "object",
+        properties: {
+          user_ref: { type: "string", description: "User UUID" },
+        },
+        required: ["user_ref"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "bot_get_order_status",
+      description: "Returns the status of a single order owned by the user.",
+      parameters: {
+        type: "object",
+        properties: {
+          order_id: { type: "string", description: "Order UUID" },
+          user_ref: { type: "string", description: "User UUID" },
+        },
+        required: ["order_id", "user_ref"],
+      },
+    },
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Tool handlers — all use the service Supabase client (HTTPS, IPv4-safe)
+// ---------------------------------------------------------------------------
+
+type Args = Record<string, unknown>;
+type Handler = (args: Args) => Promise<string>;
+
+const HANDLERS: Record<string, Handler> = {
+  query_products: async () => {
+    const sb = createServiceClient();
+    const { data, error } = await sb
+      .from("products")
+      .select("id, title, description, price, discount, tags, category:category_id(name), items(id, stock, attributes)")
+      .order("title");
+    if (error) throw new Error(error.message);
+    return JSON.stringify(data ?? []);
+  },
+
+  query_categories: async () => {
+    const sb = createServiceClient();
+    const { data, error } = await sb.from("categories").select("id, name, description").order("name");
+    if (error) throw new Error(error.message);
+    return JSON.stringify(data ?? []);
+  },
+
+  query_items: async () => {
+    const sb = createServiceClient();
+    const { data, error } = await sb
+      .from("items")
+      .select("id, stock, attributes, product:product_id(title, price)")
+      .order("id");
+    if (error) throw new Error(error.message);
+    return JSON.stringify(data ?? []);
+  },
+
+  query_content: async () => {
+    const sb = createServiceClient();
+    const { data, error } = await sb.from("content").select("key, value").order("key");
+    if (error) throw new Error(error.message);
+    return JSON.stringify(data ?? []);
+  },
+
+  bot_create_order: async (args) => {
+    const sb = createServiceClient();
+    const { data, error } = await sb.rpc("bot_create_order", {
+      p_user_ref:  String(args.user_ref),
+      p_user_name: String(args.user_name),
+      p_items:     args.items,
+      p_total:     Number(args.total),
+      p_notes:     (args.notes as string | undefined) ?? null,
+    });
+    if (error) throw new Error(error.message);
+    return JSON.stringify({ order_id: data });
+  },
+
+  bot_get_my_orders: async (args) => {
+    const sb = createServiceClient();
+    const { data, error } = await sb.rpc("bot_get_my_orders", {
+      p_user_ref: String(args.user_ref),
+    });
+    if (error) throw new Error(error.message);
+    return JSON.stringify(data ?? []);
+  },
+
+  bot_get_order_status: async (args) => {
+    const sb = createServiceClient();
+    const { data, error } = await sb.rpc("bot_get_order_status", {
+      p_order_id: String(args.order_id),
+      p_user_ref: String(args.user_ref),
+    });
+    if (error) throw new Error(error.message);
+    return JSON.stringify({ status: data });
+  },
+};
+
+// ---------------------------------------------------------------------------
+// LLM instance (reused across calls within the same server process)
+// ---------------------------------------------------------------------------
+
+const llmWithTools = new DeepSeekLLMProvider().getInstance().bindTools(TOOLS);
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
 
 export async function generateResponse(prompt: string): Promise<string> {
   if (!prompt?.trim()) throw new Error("Prompt is empty");
 
-  if (!agent) {
-    const config = await loadMCPConfig();
-    client = MCPClient.fromDict(config);
-    const llm = new DeepSeekLLMProvider().getInstance();
-    agent = new MCPAgent({ llm, client, maxSteps: MAX_STEPS });
+  const messages: BaseMessage[] = [new HumanMessage(prompt)];
+
+  for (let step = 0; step < MAX_STEPS; step++) {
+    const response = await llmWithTools.invoke(messages);
+    messages.push(response);
+
+    if (!response.tool_calls?.length) break;
+
+    for (const toolCall of response.tool_calls) {
+      const handler = HANDLERS[toolCall.name];
+      let result: string;
+      if (!handler) {
+        result = JSON.stringify({ error: `Unknown tool: ${toolCall.name}` });
+      } else {
+        try {
+          result = await handler(toolCall.args as Args);
+        } catch (err) {
+          result = JSON.stringify({ error: (err as Error).message });
+        }
+      }
+      messages.push(new ToolMessage({ content: result, tool_call_id: toolCall.id! }));
+    }
   }
 
-  return agent.run(prompt, MAX_STEPS);
-}
-
-export async function closeMCPAgent(): Promise<void> {
-  if (client) {
-    await client.closeAllSessions();
-  }
-  agent = null;
-  client = null;
-}
-
-async function loadMCPConfig(): Promise<Record<string, unknown>> {
-  const file = path.join(process.cwd(), "mcp.config.json");
-
-  let raw: string;
-  try {
-    raw = await readFile(file, "utf8");
-  } catch {
-    throw new Error(
-      "mcp.config.json not found. Create it in the project root to define mcpServers.",
-    );
-  }
-
-  // Interpolate ${ENV_VAR} placeholders
-  raw = raw.replace(/\$\{([^}]+)\}/g, (_, key: string) => process.env[key] ?? "");
-
-  let parsed: Record<string, unknown>;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (err) {
-    throw new Error("Invalid JSON in mcp.config.json: " + (err as Error).message);
-  }
-
-  if (!parsed.mcpServers || typeof parsed.mcpServers !== "object") {
-    throw new Error("mcp.config.json must include a 'mcpServers' object.");
-  }
-
-  return parsed;
+  const last = messages.at(-1);
+  if (!last) throw new Error("No response from AI");
+  return typeof last.content === "string" ? last.content : JSON.stringify(last.content);
 }
