@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { useCart } from "@/lib/cart";
 import { formatCurrency } from "@/lib/format";
 import BuyNowButton from "@/app/components/BuyNowButton";
+import AddressModal from "@/app/components/AddressModal";
 
 export default function CartDrawer() {
   const {
@@ -12,9 +14,18 @@ export default function CartDrawer() {
     closeCart,
     removeItem,
     setQuantity,
+    subtotalAmountInCents,
     totalAmountInCents,
+    shippingCost,
+    shippingDisplay,
+    shippingInfo,
+    selectedAddress,
+    setSelectedAddress,
     clearCart,
+    clearAddress,
   } = useCart();
+
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
 
   return (
     <>
@@ -109,20 +120,115 @@ export default function CartDrawer() {
 
             {/* Footer */}
             <div className="space-y-3 border-t-4 border-black p-4">
-              <div className="flex justify-between font-bold">
-                <span>Total</span>
-                <span>{formatCurrency(totalAmountInCents / 100)}</span>
+              {/* Address section */}
+              <div className="rounded-xl border-2 border-black bg-[var(--bg)] p-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+                      Dirección de envío
+                    </p>
+                    {selectedAddress ? (
+                      <div className="mt-1">
+                        <p className="text-sm font-semibold leading-tight">
+                          {selectedAddress.recipient_name}
+                        </p>
+                        <p className="text-xs text-[var(--muted)]">
+                          {selectedAddress.address_line}
+                          {selectedAddress.neighborhood
+                            ? `, ${selectedAddress.neighborhood}`
+                            : ""}
+                        </p>
+                        <p className="text-xs text-[var(--muted)]">
+                          {selectedAddress.city}, {selectedAddress.department}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="mt-1 text-sm text-[var(--muted)]">
+                        Agrega una dirección de envío
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 flex-col gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setAddressModalOpen(true)}
+                      className="rounded-md border-2 border-black bg-white px-2 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+                    >
+                      {selectedAddress ? "Cambiar" : "Agregar"}
+                    </button>
+                    {selectedAddress && (
+                      <button
+                        type="button"
+                        onClick={clearAddress}
+                        className="text-xs text-[var(--muted)] underline hover:text-[var(--fg)]"
+                      >
+                        Quitar
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
+
+              {/* Totals breakdown */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-sm">
+                  <span className="text-[var(--muted)]">Subtotal</span>
+                  <span>{formatCurrency(subtotalAmountInCents / 100)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-[var(--muted)]">Envío</span>
+                  <span>
+                    {shippingDisplay === "none" && "—"}
+                    {shippingDisplay === "loading" && (
+                      <span className="text-[var(--muted)]">...</span>
+                    )}
+                    {shippingDisplay === "free" && (
+                      <span className="font-semibold text-green-700">Gratis</span>
+                    )}
+                    {shippingDisplay === "price" && formatCurrency(shippingCost)}
+                    {shippingDisplay === "unknown_city" && (
+                      <span className="text-orange-600">A coordinar</span>
+                    )}
+                  </span>
+                </div>
+                {shippingInfo?.estimated_days && shippingDisplay === "price" && (
+                  <p className="text-right text-xs text-[var(--muted)]">
+                    ~{shippingInfo.estimated_days} día
+                    {shippingInfo.estimated_days !== 1 ? "s" : ""} hábiles
+                  </p>
+                )}
+                <div className="flex justify-between border-t-2 border-black pt-2 font-bold">
+                  <span>Total</span>
+                  <span>{formatCurrency(totalAmountInCents / 100)}</span>
+                </div>
+              </div>
+
               <BuyNowButton
                 items={items}
-                onSuccess={() => { clearCart(); closeCart(); }}
+                shippingAddress={selectedAddress}
+                shippingCost={shippingCost}
+                disabled={!selectedAddress}
+                onSuccess={() => {
+                  clearCart();
+                  clearAddress();
+                  closeCart();
+                }}
               >
-                Comprar ahora
+                {selectedAddress ? "Comprar ahora" : "Agrega una dirección para comprar"}
               </BuyNowButton>
             </div>
           </>
         )}
       </aside>
+
+      <AddressModal
+        isOpen={addressModalOpen}
+        onClose={() => setAddressModalOpen(false)}
+        onSelect={(address) => {
+          setSelectedAddress(address);
+          setAddressModalOpen(false);
+        }}
+      />
     </>
   );
 }

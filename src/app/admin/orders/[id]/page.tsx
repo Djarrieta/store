@@ -61,6 +61,44 @@ export default async function OrderDetailPage({
         )}
       </div>
 
+      {/* Shipping */}
+      {order.shipping_address && (
+        <div className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-3">
+          <h2 className="font-bold">Dirección de envío</h2>
+          <div className="flex justify-between text-sm">
+            <span className="text-[var(--muted)]">Destinatario</span>
+            <span className="font-semibold">{order.shipping_address.recipient_name}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-[var(--muted)]">Dirección</span>
+            <span className="text-right">
+              {order.shipping_address.address_line}
+              {order.shipping_address.neighborhood
+                ? `, ${order.shipping_address.neighborhood}`
+                : ""}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-[var(--muted)]">Ciudad</span>
+            <span>
+              {order.shipping_address.city}, {order.shipping_address.department}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-[var(--muted)]">Teléfono</span>
+            <span>{order.shipping_address.phone}</span>
+          </div>
+          <div className="flex justify-between text-sm border-t border-black/10 pt-2">
+            <span className="text-[var(--muted)]">Costo de envío</span>
+            <span className="font-semibold">
+              {order.shipping_cost > 0
+                ? formatCurrency(order.shipping_cost)
+                : "Gratis / A coordinar"}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Line items */}
       <div className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] overflow-hidden">
         <table className="w-full text-sm">
@@ -90,6 +128,26 @@ export default async function OrderDetailPage({
             ))}
           </tbody>
           <tfoot className="border-t-2 border-black">
+            {order.shipping_cost > 0 && (
+              <tr>
+                <td colSpan={3} className="p-3 text-right text-sm text-[var(--muted)]">
+                  Subtotal productos
+                </td>
+                <td className="p-3 text-right text-sm">
+                  {formatCurrency(order.total - order.shipping_cost)}
+                </td>
+              </tr>
+            )}
+            {order.shipping_cost > 0 && (
+              <tr>
+                <td colSpan={3} className="p-3 text-right text-sm text-[var(--muted)]">
+                  Envío
+                </td>
+                <td className="p-3 text-right text-sm">
+                  {formatCurrency(order.shipping_cost)}
+                </td>
+              </tr>
+            )}
             <tr>
               <td colSpan={3} className="p-3 text-right font-bold">
                 Total

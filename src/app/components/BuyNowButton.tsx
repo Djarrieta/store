@@ -4,6 +4,7 @@ import { useState } from "react";
 import Script from "next/script";
 import { createOrderAndCheckout, markOrderPaid, cancelOrder } from "@/app/actions/orders";
 import type { CartItem } from "@/lib/cart";
+import type { Address } from "@/types";
 
 declare global {
   interface Window {
@@ -23,6 +24,8 @@ declare global {
 
 interface Props {
   items: CartItem[];
+  shippingAddress: Address | null;
+  shippingCost: number;
   disabled?: boolean;
   onSuccess?: () => void;
   className?: string;
@@ -31,6 +34,8 @@ interface Props {
 
 export default function BuyNowButton({
   items,
+  shippingAddress,
+  shippingCost,
   disabled = false,
   onSuccess,
   className,
@@ -39,11 +44,20 @@ export default function BuyNowButton({
   const [loading, setLoading] = useState(false);
 
   async function handleBuy() {
-    if (loading || disabled || items.length === 0) return;
+    if (loading || disabled || items.length === 0 || !shippingAddress) return;
     setLoading(true);
     try {
+      const snapshot = {
+        recipient_name: shippingAddress.recipient_name,
+        department: shippingAddress.department,
+        city: shippingAddress.city,
+        address_line: shippingAddress.address_line,
+        neighborhood: shippingAddress.neighborhood,
+        phone: shippingAddress.phone,
+      };
+
       const { orderId, reference, integrityHash, amountInCents } =
-        await createOrderAndCheckout(items);
+        await createOrderAndCheckout(items, snapshot, shippingCost);
 
       const checkout = new window.WidgetCheckout({
         currency: "COP",
@@ -76,7 +90,7 @@ export default function BuyNowButton({
       <button
         type="button"
         onClick={handleBuy}
-        disabled={loading || disabled}
+        disabled={loading || disabled || !shippingAddress}
         className={
           className ??
           "w-full rounded-xl border-2 border-black bg-black text-white px-6 py-3 font-bold shadow-[4px_4px_0_0_#555] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-40 disabled:pointer-events-none"

@@ -5,8 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { generateWompiSignature } from "@/lib/wompi";
 import type { CartItem } from "@/lib/cart";
+import type { ShippingAddressSnapshot } from "@/types";
 
-export async function createOrderAndCheckout(cartItems: CartItem[]): Promise<{
+export async function createOrderAndCheckout(
+  cartItems: CartItem[],
+  shippingAddress: ShippingAddressSnapshot,
+  shippingCost: number,
+): Promise<{
   orderId: string;
   reference: string;
   integrityHash: string;
@@ -15,11 +20,14 @@ export async function createOrderAndCheckout(cartItems: CartItem[]): Promise<{
   const user = await requireAuth();
   const supabase = await createClient();
 
-  const total = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const amountInCents = cartItems.reduce(
+  const itemsSubtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const total = itemsSubtotal + shippingCost;
+
+  const itemsAmountInCents = cartItems.reduce(
     (sum, i) => sum + i.amountInCents * i.quantity,
     0,
   );
+  const amountInCents = itemsAmountInCents + Math.round(shippingCost * 100);
 
   const orderItems = cartItems.map((item) => ({
     product_id: item.id,
@@ -43,6 +51,8 @@ export async function createOrderAndCheckout(cartItems: CartItem[]): Promise<{
       status: "created",
       items: orderItems,
       total,
+      shipping_address: shippingAddress,
+      shipping_cost: shippingCost,
     })
     .select("id")
     .single();

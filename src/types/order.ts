@@ -16,6 +16,9 @@ export interface Order {
   items: OrderItem[];
   total: number;
   notes: string | null;
+  shipping_address: import("./address").ShippingAddressSnapshot | null;
+  shipping_cost: number;
+  address_id: string | null;
   created_at: string;
   updated_at: string;
 }

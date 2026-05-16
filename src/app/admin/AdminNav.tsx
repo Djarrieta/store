@@ -10,6 +10,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   items: "Inventario",
   content: "Contenido",
   orders: "Pedidos",
+  ships: "Envíos",
   new: "Nuevo",
   edit: "Editar",
 };
@@ -19,6 +20,7 @@ const NAV_LINKS = [
   { href: "/admin/products", label: "Productos" },
   { href: "/admin/content", label: "Contenido" },
   { href: "/admin/orders", label: "Pedidos" },
+  { href: "/admin/ships", label: "Envíos" },
 ];
 
 function isUUID(segment: string) {
@@ -50,7 +52,7 @@ export default function AdminNav() {
 
   // Deep page: build breadcrumb, skipping UUIDs
   // Only section-level segments are linkable (admin has no page, slugs/IDs/actions are not)
-  const LINKABLE_SEGMENTS = new Set(["categories", "products", "items", "content", "orders"]);
+  const LINKABLE_SEGMENTS = new Set(["categories", "products", "items", "content", "orders", "ships"]);
 
   const crumbs: { label: string; href?: string }[] = [];
   let accPath = "";
