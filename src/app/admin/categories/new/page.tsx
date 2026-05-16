@@ -13,17 +13,17 @@ export default async function NewCategoryPage() {
 
   return (
     <section className="space-y-4">
-      <h1 className="font-display text-3xl font-bold">New Category</h1>
+      <h1 className="font-display text-3xl font-bold">Nueva categoría</h1>
       <form
         action={createCategory}
         className="min-w-0 space-y-4 rounded-xl border-2 border-black bg-white p-5"
       >
         <label className="grid gap-1 text-sm font-medium">
-          Name
+          Nombre
           <input
             name="name"
             required
-            placeholder="e.g. Cameras"
+            placeholder="ej. Cámaras"
             className="w-full rounded-md border-2 border-black px-3 py-2"
           />
         </label>
@@ -32,18 +32,18 @@ export default async function NewCategoryPage() {
           Slug
           <input
             name="slug"
-            placeholder="e.g. cameras (auto-generated from name if blank)"
+            placeholder="ej. camaras (se genera automáticamente desde el nombre si se deja en blanco)"
             className="w-full rounded-md border-2 border-black px-3 py-2"
           />
         </label>
 
         <label className="grid gap-1 text-sm font-medium">
-          Parent category (leave blank for top-level)
+          Categoría padre (dejar en blanco para nivel superior)
           <select
             name="parent_id"
             className="w-full rounded-md border-2 border-black px-3 py-2 bg-white"
           >
-            <option value="">— Top level —</option>
+            <option value="">— Nivel superior —</option>
             {(topLevel ?? []).map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -56,7 +56,7 @@ export default async function NewCategoryPage() {
           type="submit"
           className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-semibold"
         >
-          Create Category
+          Crear categoría
         </button>
       </form>
     </section>

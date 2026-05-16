@@ -28,7 +28,7 @@ export default async function EditProductPage({
 
   return (
     <section className="space-y-4">
-      <h1 className="font-display text-3xl font-bold">Edit Product</h1>
+      <h1 className="font-display text-3xl font-bold">Editar producto</h1>
       <ProductForm
         action={updateWithId}
         defaultValues={product}

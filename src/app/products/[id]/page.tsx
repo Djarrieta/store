@@ -40,7 +40,7 @@ export default async function ProductDetailPage({
     <article className="space-y-4">
       <Breadcrumb
         items={[
-          { label: "Products", href: "/" },
+          { label: "Productos", href: "/" },
           { label: product.title },
         ]}
       />
@@ -64,7 +64,7 @@ export default async function ProductDetailPage({
 
         <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
           <p>
-            <strong>Price:</strong>{" "}
+            <strong>Precio:</strong>{" "}
             {effectivePrice !== null ? (
               <>
                 <span>{formatCurrency(effectivePrice)}</span>
@@ -81,7 +81,7 @@ export default async function ProductDetailPage({
           </p>
           {categoryLabel && (
             <p>
-              <strong>Category:</strong> {categoryLabel}
+              <strong>Categoría:</strong> {categoryLabel}
             </p>
           )}
         </div>

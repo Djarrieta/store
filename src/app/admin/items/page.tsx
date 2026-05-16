@@ -37,11 +37,11 @@ export default async function AdminItemsPage({
 
   return (
     <PageHeader
-      title="Stock (Items)"
+      title="Inventario"
       createHref="/admin/items/new"
-      createLabel="New Item"
+      createLabel="Nuevo artículo"
       isEmpty={total === 0 && !q}
-      emptyText="No stock items yet."
+      emptyText="Aún no hay artículos en stock."
     >
       <FilterableList
         q={q}
@@ -57,7 +57,7 @@ export default async function AdminItemsPage({
             >
               <div className="min-w-0">
                 <p className="truncate font-semibold">
-                  {item.product?.title ?? <span className="text-[var(--muted)]">Unknown product</span>}
+                  {item.product?.title ?? <span className="text-[var(--muted)]">Producto desconocido</span>}
                 </p>
                 <p className="text-xs text-[var(--muted)]">
                   Stock: <strong>{item.stock}</strong>
@@ -69,14 +69,14 @@ export default async function AdminItemsPage({
                   href={`/admin/items/${item.id}/edit`}
                   className="rounded-lg border-2 border-black bg-[var(--accent)] px-3 py-1 text-sm font-semibold shadow-[2px_2px_0_0_#111] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
                 >
-                  Edit
+                  Editar
                 </Link>
                 <form action={deleteItem.bind(null, item.id)}>
                   <button
                     type="submit"
                     className="rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-semibold shadow-[2px_2px_0_0_#111] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
                   >
-                    Delete
+                    Eliminar
                   </button>
                 </form>
               </div>

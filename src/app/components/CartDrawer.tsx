@@ -69,14 +69,14 @@ export default function CartDrawer() {
 
       {/* Drawer */}
       <aside
-        aria-label="Shopping cart"
+        aria-label="Carrito de compras"
         className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col border-l-4 border-black bg-[var(--card)] shadow-[-6px_0_0_0_#111] transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b-4 border-black p-4">
-          <h2 className="font-display text-xl font-bold">Cart</h2>
+          <h2 className="font-display text-xl font-bold">Carrito</h2>
           <button
             type="button"
             onClick={closeCart}
@@ -89,7 +89,7 @@ export default function CartDrawer() {
         {/* Empty state */}
         {items.length === 0 ? (
           <div className="flex flex-1 items-center justify-center text-sm text-[var(--muted)]">
-            Your cart is empty.
+            Tu carrito está vacío.
           </div>
         ) : (
           <>
@@ -158,7 +158,7 @@ export default function CartDrawer() {
                 onClick={handleCheckout}
                 className="w-full rounded-xl border-2 border-black bg-[var(--accent)] px-6 py-3 font-bold shadow-[4px_4px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
               >
-                Pay with Wompi
+                Pagar con Wompi
               </button>
             </div>
           </>

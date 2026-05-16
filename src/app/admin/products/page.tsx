@@ -44,11 +44,11 @@ export default async function AdminProductsPage({
 
   return (
     <PageHeader
-      title="Manage Products"
+      title="Gestionar productos"
       createHref="/admin/products/new"
-      createLabel="New Product"
+      createLabel="Nuevo producto"
       isEmpty={total === 0 && !q && activeTags.length === 0}
-      emptyText="No products yet."
+      emptyText="Aún no hay productos."
     >
       <FilterableList
         q={q}
@@ -83,7 +83,7 @@ export default async function AdminProductsPage({
                   href={`/admin/products/${product.id}/edit`}
                   className="rounded-md border-2 border-black px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                 >
-                  Edit
+                  Editar
                 </Link>
                 <form
                   action={async () => {
@@ -95,7 +95,7 @@ export default async function AdminProductsPage({
                     type="submit"
                     className="rounded-md border-2 border-black bg-red-100 px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                   >
-                    Delete
+                    Eliminar
                   </button>
                 </form>
               </div>

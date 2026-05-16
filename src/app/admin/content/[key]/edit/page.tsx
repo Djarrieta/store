@@ -23,12 +23,12 @@ export default async function AdminEditContentPage({
 
   return (
     <section className="space-y-4">
-      <h1 className="font-display text-3xl font-bold">Edit Content</h1>
+      <h1 className="font-display text-3xl font-bold">Editar contenido</h1>
       <p className="font-mono text-sm text-[var(--muted)]">key: {entry.key}</p>
       <form action={updateWithKey} className="space-y-4">
         <div className="space-y-1">
           <label htmlFor="value" className="block text-sm font-semibold">
-            Value
+            Valor
           </label>
           <textarea
             id="value"
@@ -43,13 +43,13 @@ export default async function AdminEditContentPage({
             type="submit"
             className="rounded-xl border-2 border-black bg-[var(--accent)] px-5 py-2 text-sm font-bold shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
           >
-            Save
+            Guardar
           </button>
           <a
             href="/admin/content"
             className="rounded-xl border-2 border-black bg-white px-5 py-2 text-sm font-bold shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
           >
-            Cancel
+            Cancelar
           </a>
         </div>
       </form>

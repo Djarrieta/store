@@ -32,7 +32,7 @@ export default function PageHeader({
       </div>
 
       {isEmpty ? (
-        <div className="rounded-xl border-2 border-black bg-white p-4 text-sm">{emptyText ?? "No data."}</div>
+        <div className="rounded-xl border-2 border-black bg-white p-4 text-sm">{emptyText ?? "Sin datos."}</div>
       ) : (
         children
       )}

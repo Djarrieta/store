@@ -14,9 +14,9 @@ export default async function AdminContentPage() {
 
   return (
     <PageHeader
-      title="Manage Content"
+      title="Gestionar contenido"
       createHref="/admin/content/new"
-      createLabel="New Content"
+      createLabel="Nuevo contenido"
       isEmpty={false}
     >
       <div className="space-y-3">
@@ -28,7 +28,7 @@ export default async function AdminContentPage() {
             <div className="min-w-0">
               <p className="truncate font-semibold font-mono">{entry.key}</p>
               <p className="mt-1 max-w-xl truncate text-xs text-[var(--muted)]">
-                {entry.value || <span className="italic">empty</span>}
+                {entry.value || <span className="italic">vacío</span>}
               </p>
             </div>
             <div className="ml-4 flex shrink-0 gap-2">
@@ -36,7 +36,7 @@ export default async function AdminContentPage() {
                 href={`/admin/content/${entry.key}/edit`}
                 className="rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
               >
-                Edit
+                Editar
               </Link>
               <form
                 action={async () => {
@@ -48,7 +48,7 @@ export default async function AdminContentPage() {
                   type="submit"
                   className="rounded-lg border-2 border-black bg-red-100 px-3 py-1 text-sm font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                 >
-                  Delete
+                  Eliminar
                 </button>
               </form>
             </div>

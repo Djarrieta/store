@@ -9,7 +9,7 @@ export default function NavLinks({ isAuthenticated, isAdmin }: NavLinksProps) {
   return (
     <nav className="flex items-center gap-2">
       <Link href="/about" className="rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-semibold">
-        About
+        Nosotros
       </Link>
       {isAdmin && (
         <Link
@@ -24,7 +24,7 @@ export default function NavLinks({ isAuthenticated, isAdmin }: NavLinksProps) {
           href="/login"
           className="rounded-lg border-2 border-black bg-[var(--accent)] px-3 py-1 text-sm font-semibold"
         >
-          Login
+          Ingresar
         </Link>
       )}
     </nav>

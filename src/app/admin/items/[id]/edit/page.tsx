@@ -26,20 +26,20 @@ export default async function AdminEditItemPage({
 
   return (
     <section className="space-y-4">
-      <h1 className="font-display text-3xl font-bold">Edit Stock Item</h1>
+      <h1 className="font-display text-3xl font-bold">Editar artículo de inventario</h1>
       <form
         action={updateWithId}
         className="min-w-0 space-y-4 rounded-xl border-2 border-black bg-white p-5"
       >
         <label className="grid gap-1 text-sm font-medium">
-          Product
+          Producto
           <select
             name="product_id"
             required
             defaultValue={item.product_id}
             className="w-full rounded-md border-2 border-black px-3 py-2 bg-white"
           >
-            <option value="">— Select a product —</option>
+            <option value="">— Selecciona un producto —</option>
             {(products ?? []).map((p) => (
               <option key={p.id} value={p.id}>
                 {p.title}
@@ -49,10 +49,10 @@ export default async function AdminEditItemPage({
         </label>
 
         <label className="grid gap-1 text-sm font-medium">
-          SKU (optional)
+          SKU (opcional)
           <input
             name="sku"
-            placeholder="e.g. RED-L"
+            placeholder="ej. ROJO-L"
             defaultValue={item.sku ?? ""}
             className="w-full rounded-md border-2 border-black px-3 py-2"
           />
@@ -75,7 +75,7 @@ export default async function AdminEditItemPage({
           type="submit"
           className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-semibold"
         >
-          Update Item
+          Actualizar artículo
         </button>
       </form>
     </section>

@@ -38,7 +38,7 @@ export default function LoginActions() {
         disabled={isLoading}
         className="w-full rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-semibold"
       >
-        Continue with Google
+        Continuar con Google
       </button>
 
       {error ? <p className="text-sm text-red-700">{error}</p> : null}

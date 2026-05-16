@@ -9,8 +9,8 @@ export default async function LoginPage() {
 
   return (
     <section className="mx-auto max-w-md rounded-2xl border-4 border-black bg-[var(--card)] p-6 shadow-[6px_6px_0_0_#111]">
-      <h1 className="font-display text-3xl font-bold">Welcome Back</h1>
-      <p className="mt-2 text-sm text-[var(--muted)]">Sign in to manage items and your profile.</p>
+      <h1 className="font-display text-3xl font-bold">Bienvenido</h1>
+      <p className="mt-2 text-sm text-[var(--muted)]">Inicia sesión para gestionar tus pedidos y perfil.</p>
       <div className="mt-5">
         <Suspense>
           <LoginActions />

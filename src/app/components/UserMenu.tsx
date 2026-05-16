@@ -41,7 +41,7 @@ export default function UserMenu({ user, avatarUrl }: UserMenuProps) {
           type="submit"
           className="rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-semibold"
         >
-          Logout
+          Cerrar sesión
         </button>
       </form>
     </div>

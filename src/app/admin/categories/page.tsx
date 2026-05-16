@@ -20,11 +20,11 @@ export default async function AdminCategoriesPage() {
 
   return (
     <PageHeader
-      title="Categories"
+      title="Categorías"
       createHref="/admin/categories/new"
-      createLabel="New Category"
+      createLabel="Nueva categoría"
       isEmpty={all.length === 0}
-      emptyText="No categories yet."
+      emptyText="Aún no hay categorías."
     >
       <div className="space-y-4">
         {topLevel.map((parent) => (
@@ -42,7 +42,7 @@ export default async function AdminCategoriesPage() {
                   href={`/admin/categories/${parent.id}/edit`}
                   className="rounded-md border-2 border-black px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                 >
-                  Edit
+                  Editar
                 </Link>
                 <form
                   className="flex items-center"
@@ -55,7 +55,7 @@ export default async function AdminCategoriesPage() {
                     type="submit"
                     className="rounded-md border-2 border-black bg-red-100 px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                   >
-                    Delete
+                    Eliminar
                   </button>
                 </form>
               </div>
@@ -74,7 +74,7 @@ export default async function AdminCategoriesPage() {
                         href={`/admin/categories/${sub.id}/edit`}
                         className="rounded-md border-2 border-black px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                       >
-                        Edit
+                        Editar
                       </Link>
                       <form
                         className="flex items-center"
@@ -87,7 +87,7 @@ export default async function AdminCategoriesPage() {
                           type="submit"
                           className="rounded-md border-2 border-black bg-red-100 px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                         >
-                          Delete
+                          Eliminar
                         </button>
                       </form>
                     </div>

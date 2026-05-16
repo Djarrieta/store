@@ -5,21 +5,21 @@ import { usePathname } from "next/navigation";
 
 const SEGMENT_LABELS: Record<string, string> = {
   admin: "Admin",
-  categories: "Categories",
-  products: "Products",
-  items: "Stock",
-  content: "Content",
-  orders: "Orders",
-  new: "New",
-  edit: "Edit",
+  categories: "Categorías",
+  products: "Productos",
+  items: "Inventario",
+  content: "Contenido",
+  orders: "Pedidos",
+  new: "Nuevo",
+  edit: "Editar",
 };
 
 const NAV_LINKS = [
-  { href: "/admin/categories", label: "Categories" },
-  { href: "/admin/products", label: "Products" },
-  { href: "/admin/items", label: "Stock" },
-  { href: "/admin/content", label: "Content" },
-  { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/categories", label: "Categorías" },
+  { href: "/admin/products", label: "Productos" },
+  { href: "/admin/items", label: "Inventario" },
+  { href: "/admin/content", label: "Contenido" },
+  { href: "/admin/orders", label: "Pedidos" },
 ];
 
 function isUUID(segment: string) {
@@ -78,11 +78,11 @@ export default function AdminNav() {
         return (
           <span key={index} className="flex items-center gap-1.5">
             {crumb.href ? (
-              <Link href={crumb.href} className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors">
+              <Link href={crumb.href} className="font-semibold underline underline-offset-2 hover:opacity-70 transition-opacity">
                 {crumb.label}
               </Link>
             ) : (
-              <span className="font-semibold">{crumb.label}</span>
+              <span className="text-[var(--muted)]">{crumb.label}</span>
             )}
             {!isLast && <span className="text-[var(--muted)]">/</span>}
           </span>

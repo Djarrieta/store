@@ -36,7 +36,7 @@ export default function FilterableList({
           type="text"
           name="q"
           defaultValue={q ?? ""}
-          placeholder="Search"
+          placeholder="Buscar"
           className="rounded-md border-2 border-black px-3 py-2 text-sm sm:col-span-2"
         />
         <input
@@ -50,7 +50,7 @@ export default function FilterableList({
           type="submit"
           className="rounded-md border-2 border-black bg-[var(--accent)] px-3 py-2 text-sm font-semibold sm:col-span-3"
         >
-          Apply Filters
+          Aplicar filtros
         </button>
       </form>
 
@@ -59,17 +59,17 @@ export default function FilterableList({
       {totalPages > 1 && (
         <div className="flex items-center justify-between rounded-xl border-2 border-black bg-white p-3 text-sm">
           <span>
-            Page {page} of {totalPages}
+            Página {page} de {totalPages}
           </span>
           <div className="flex gap-2">
             <Link
               href={buildHref(previousPage)}
               className="rounded-md border-2 border-black px-2 py-1 disabled:pointer-events-none"
             >
-              Prev
+              Anterior
             </Link>
             <Link href={buildHref(nextPage)} className="rounded-md border-2 border-black px-2 py-1">
-              Next
+              Siguiente
             </Link>
           </div>
         </div>

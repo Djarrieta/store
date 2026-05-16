@@ -21,7 +21,7 @@ export default function AddToCartButton(props: Props) {
       onClick={handleAdd}
       className="mt-4 w-full rounded-xl border-2 border-black bg-[var(--accent)] px-6 py-3 font-bold shadow-[4px_4px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
     >
-      {added ? "✓ Added!" : "Add to cart"}
+      {added ? "✓ Agregado!" : "Agregar al carrito"}
     </button>
   );
 }

@@ -14,7 +14,7 @@ export default async function NewProductPage() {
 
   return (
     <section className="space-y-4">
-      <h1 className="font-display text-3xl font-bold">New Product</h1>
+      <h1 className="font-display text-3xl font-bold">Nuevo producto</h1>
       <ProductForm action={createProduct} categories={categories ?? []} />
     </section>
   );

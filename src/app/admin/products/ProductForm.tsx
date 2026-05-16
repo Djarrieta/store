@@ -42,24 +42,24 @@ export default function ProductForm({
   return (
     <form action={action} className="min-w-0 space-y-4 rounded-xl border-2 border-black bg-white p-5">
       <label className="grid gap-1 text-sm font-medium">
-        Title
+        Título
         <input
           name="title"
           maxLength={MAX_TITLE_LENGTH}
           required
-          placeholder="e.g. Vintage Leather Jacket"
+          placeholder="ej. Chaqueta de cuero vintage"
           defaultValue={defaultValues?.title ?? ""}
           className="w-full rounded-md border-2 border-black px-3 py-2"
         />
       </label>
 
       <label className="grid gap-1 text-sm font-medium">
-        Description
+        Descripción
         <textarea
           name="description"
           maxLength={MAX_DESCRIPTION_LENGTH}
           rows={5}
-          placeholder="Describe the product…"
+          placeholder="Describe el producto…"
           defaultValue={defaultValues?.description ?? ""}
           className="w-full rounded-md border-2 border-black px-3 py-2"
         />
@@ -67,7 +67,7 @@ export default function ProductForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-medium">
-          Price
+          Precio
           <input
             name="price"
             type="number"
@@ -80,7 +80,7 @@ export default function ProductForm({
         </label>
 
         <label className="grid gap-1 text-sm font-medium">
-          Discount (%)
+          Descuento (%)
           <input
             name="discount"
             type="number"
@@ -95,13 +95,13 @@ export default function ProductForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-medium">
-          Category
+          Categoría
           <select
             value={selectedParent}
             onChange={(e) => setSelectedParent(e.target.value)}
             className="w-full rounded-md border-2 border-black px-3 py-2 bg-white"
           >
-            <option value="">— None —</option>
+            <option value="">— Ninguna —</option>
             {topLevel.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -111,13 +111,13 @@ export default function ProductForm({
         </label>
 
         <label className="grid gap-1 text-sm font-medium">
-          Subcategory
+          Subcategoría
           <select
             name="category_id"
             defaultValue={defaultValues?.category_id ?? ""}
             className="w-full rounded-md border-2 border-black px-3 py-2 bg-white"
           >
-            <option value="">— None —</option>
+            <option value="">— Ninguna —</option>
             {(selectedParent ? subcategories(selectedParent) : []).map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -128,22 +128,22 @@ export default function ProductForm({
       </div>
 
       <label className="grid gap-1 text-sm font-medium">
-        Tags
+        Etiquetas
         <input
           name="tags"
-          placeholder="e.g. vintage, leather, jacket"
+          placeholder="ej. vintage, cuero, chaqueta"
           defaultValue={(defaultValues?.tags ?? []).join(", ")}
           className="w-full rounded-md border-2 border-black px-3 py-2"
         />
       </label>
 
       <label className="grid gap-1 text-sm font-medium">
-        Image URLs
+        URLs de imágenes
         <textarea
           value={imagesText}
           onChange={(e) => setImagesText(e.target.value)}
           rows={3}
-          placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+          placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"
           className="w-full rounded-md border-2 border-black px-3 py-2"
         />
       </label>
@@ -154,7 +154,7 @@ export default function ProductForm({
         type="submit"
         className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-semibold"
       >
-        {defaultValues?.id ? "Update Product" : "Create Product"}
+        {defaultValues?.id ? "Actualizar producto" : "Crear producto"}
       </button>
     </form>
   );

@@ -52,9 +52,9 @@ export default async function Home({
 
   return (
     <PageHeader
-      title="Products"
+      title="Productos"
       isEmpty={total === 0 && !q && activeTags.length === 0}
-      emptyText="No products yet."
+      emptyText="Aún no hay productos."
     >
       <FilterableList
         q={q}

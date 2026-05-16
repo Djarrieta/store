@@ -28,13 +28,13 @@ export default async function EditCategoryPage({
 
   return (
     <section className="space-y-4">
-      <h1 className="font-display text-3xl font-bold">Edit Category</h1>
+      <h1 className="font-display text-3xl font-bold">Editar categoría</h1>
       <form
         action={updateWithId}
         className="min-w-0 space-y-4 rounded-xl border-2 border-black bg-white p-5"
       >
         <label className="grid gap-1 text-sm font-medium">
-          Name
+          Nombre
           <input
             name="name"
             required
@@ -53,13 +53,13 @@ export default async function EditCategoryPage({
         </label>
 
         <label className="grid gap-1 text-sm font-medium">
-          Parent category
+          Categoría padre
           <select
             name="parent_id"
             defaultValue={category.parent_id ?? ""}
             className="w-full rounded-md border-2 border-black px-3 py-2 bg-white"
           >
-            <option value="">— Top level —</option>
+            <option value="">— Nivel superior —</option>
             {(topLevel ?? []).map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -72,7 +72,7 @@ export default async function EditCategoryPage({
           type="submit"
           className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-semibold"
         >
-          Update Category
+          Actualizar categoría
         </button>
       </form>
     </section>

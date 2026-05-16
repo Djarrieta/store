@@ -22,8 +22,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Store",
-  description: "A full-stack store built with Next.js and Supabase",
+  title: "Tienda",
+  description: "Una tienda completa construida con Next.js y Supabase",
 };
 
 export default async function RootLayout({
@@ -46,7 +46,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${outfit.variable} ${inter.variable} antialiased`}>
+    <html lang="es" className={`${outfit.variable} ${inter.variable} antialiased`}>
       <body className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
         <CartProvider>
           <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-6 sm:px-8">
@@ -54,7 +54,7 @@ export default async function RootLayout({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Link href="/" className="font-display text-2xl font-bold uppercase tracking-tight">
-                    Store
+                    Tienda
                   </Link>
                   <NavLinks isAuthenticated={Boolean(user)} isAdmin={adminStatus} />
                 </div>
@@ -67,6 +67,17 @@ export default async function RootLayout({
             <main className="flex-1">{children}</main>
           </div>
           <CartDrawer />
+          {user && (
+            <Link
+              href="/chat"
+              title="Asistente"
+              className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full border-3 border-black bg-[var(--accent)] shadow-[4px_4px_0_0_#111] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </Link>
+          )}
         </CartProvider>
       </body>
     </html>
