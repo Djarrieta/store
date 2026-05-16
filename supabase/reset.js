@@ -40,6 +40,33 @@ loadEnvLocal();
 runDir("supabase/migrations");
 runDir("supabase/seed");
 
+// Grant admin to users listed in ADMIN_USER_IDS (comma-separated UUIDs).
+// Sets both profiles.is_admin (UI visibility) and admin_users table (RLS).
+const adminUserIds = (process.env.ADMIN_USER_IDS ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter((s) => /^[0-9a-f-]{36}$/i.test(s)); // validate UUID format
+
+if (adminUserIds.length > 0) {
+  console.log(`→ Granting admin to ${adminUserIds.length} user(s) from ADMIN_USER_IDS...`);
+  for (const uid of adminUserIds) {
+    const sql = `
+      INSERT INTO public.profiles (id, display_name, avatar_url)
+        SELECT id,
+               coalesce(raw_user_meta_data->>'display_name', split_part(email,'@',1)),
+               raw_user_meta_data->>'avatar_url'
+        FROM auth.users WHERE id = '${uid}'
+        ON CONFLICT (id) DO NOTHING;
+      UPDATE public.profiles SET is_admin = true WHERE id = '${uid}';
+      INSERT INTO public.admin_users (user_id) VALUES ('${uid}') ON CONFLICT DO NOTHING;
+    `;
+    execSync(`npx supabase db query --linked "${sql.replace(/\n\s*/g, " ").trim()}"`, { stdio: "inherit" });
+  }
+  console.log("✓ Admin users seeded.");
+} else {
+  console.warn("⚠  ADMIN_USER_IDS not set or invalid — skipping. Add comma-separated UUIDs to .env.local and re-run db:reset.");
+}
+
 // Set assistant_bot password after the role has been created by migration 12
 const botPassword = process.env.ASSISTANT_BOT_PASSWORD;
 if (botPassword) {
