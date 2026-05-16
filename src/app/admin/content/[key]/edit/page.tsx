@@ -38,6 +38,15 @@ export default async function AdminEditContentPage({
             className="w-full rounded-xl border-2 border-black p-3 text-sm shadow-[3px_3px_0_0_#111] focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
+        <label className="flex items-center gap-3 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            name="pinned"
+            defaultChecked={entry.pinned}
+            className="h-4 w-4 rounded border-2 border-black accent-[var(--accent)]"
+          />
+          <span className="text-sm font-semibold">Inyectar siempre en el asistente</span>
+        </label>
         <div className="flex gap-3">
           <button
             type="submit"

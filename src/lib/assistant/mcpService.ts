@@ -36,6 +36,14 @@ const TOOLS = [
   {
     type: "function" as const,
     function: {
+      name: "query_shipping_rates",
+      description: "Returns shipping rates by department/city and the free-shipping threshold. Use when the user asks about shipping costs, delivery times, or whether their city is covered.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
       name: "query_content",
       description: "Returns store content entries (store info, policies, etc.).",
       parameters: { type: "object", properties: {}, required: [] },
@@ -125,6 +133,17 @@ const HANDLERS: Record<string, Handler> = {
     return JSON.stringify(data ?? []);
   },
 
+  query_shipping_rates: async () => {
+    const sb = createServiceClient();
+    const [{ data: rates, error: e1 }, { data: config, error: e2 }] = await Promise.all([
+      sb.from("ships").select("department, city, price_cop, estimated_days").order("department").order("city"),
+      sb.from("ships_config").select("free_above_cop").single(),
+    ]);
+    if (e1) throw new Error(e1.message);
+    if (e2) throw new Error(e2.message);
+    return JSON.stringify({ free_above_cop: config?.free_above_cop ?? null, rates: rates ?? [] });
+  },
+
   query_content: async () => {
     const sb = createServiceClient();
     const { data, error } = await sb.from("content").select("key, value").order("key");
@@ -161,7 +180,7 @@ const HANDLERS: Record<string, Handler> = {
       p_user_ref: String(args.user_ref),
     });
     if (error) throw new Error(error.message);
-    return JSON.stringify({ status: data });
+    return JSON.stringify(data ?? { status: null, tracking_code: null });
   },
 };
 

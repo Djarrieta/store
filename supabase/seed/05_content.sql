@@ -1,5 +1,9 @@
-INSERT INTO public.content (key, value)
+INSERT INTO public.content (key, value, pinned)
 VALUES
-  ('about_paragraph', 'Un catálogo comunitario construido con Next.js y Supabase.'),
-  ('about_paragraph_2', 'Explora el catálogo, descubre productos seleccionados por nuestros administradores y contáctanos si encuentras algo que te encante.')
+  ('about_paragraph', 'Un catálogo comunitario construido con Next.js y Supabase.', false),
+  ('about_paragraph_2', 'Explora el catálogo, descubre productos seleccionados por nuestros administradores y contáctanos si encuentras algo que te encante.', false),
+  ('assistant_behavior', 'Sé directo y conciso. No extiendas innecesariamente la conversación. Responde solo lo que el usuario preguntó. Si necesitas confirmar datos, hazlo en una sola pregunta clara. Evita saludos largos ni despedidas formales. No repitas información que ya diste en el mismo hilo. Usa listas cortas cuando tengas varios datos que mostrar.', true),
+  ('assistant_instructions', 'Instrucciones:\n- Responde siempre en español, de forma concisa y amable.\n- Nunca inventes precios, stock ni información de envío o pago; usa solo los datos de las herramientas.\n- Cuando el usuario quiera hacer un pedido, CONFIRMA los productos y cantidades con él ANTES de llamar a bot_create_order.\n- Después de crear un pedido, informa al usuario el ID del pedido y que está pendiente de aprobación por la tienda.\n- Si no sabes algo, dilo claramente.', true),
+  ('logistics_shipping', 'Realizamos envíos a todo el país. Trabajamos con las transportadoras TCC y Servientrega. Los pedidos aprobados se despachan en un plazo de 1 a 2 días hábiles. También puedes recoger tu pedido directamente en nuestra bodega ubicada en Bogotá, Calle 72 #10-45 (lunes a viernes de 9 a.m. a 5 p.m.). Una vez despachado tu pedido, el administrador te suministrará el código de guía para que puedas rastrear tu envío directamente en el sitio web de la transportadora.', false),
+  ('logistics_payment', 'Aceptamos los siguientes métodos de pago: pago contra entrega (disponible en ciudades principales), transferencia bancaria a Bancolombia cuenta de ahorros 123-456789-00 a nombre de La Tienda S.A.S., y pago por Nequi al número 300 123 4567. Para pagos por transferencia o Nequi, envía el comprobante al correo pagos@latienda.co o por WhatsApp al mismo número. El pedido se aprueba una vez confirmado el pago.', false)
 ON CONFLICT (key) DO NOTHING;

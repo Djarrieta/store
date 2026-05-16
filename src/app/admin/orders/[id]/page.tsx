@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
 import type { Order, OrderItem, OrderStatus } from "@/types";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { approveOrder, rejectOrder, fulfillOrder } from "../actions";
+import { approveOrder, rejectOrder, fulfillOrder, updateTrackingCode } from "../actions";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   created: "Creado (sin pagar)",
@@ -99,6 +99,37 @@ export default async function OrderDetailPage({
           </div>
         </div>
       )}
+
+      {/* Tracking */}
+      <div className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-3">
+        <h2 className="font-bold">Seguimiento de envío</h2>
+        <form
+          action={async (fd: FormData) => {
+            "use server";
+            await updateTrackingCode(order.id, fd);
+          }}
+          className="flex gap-2 items-center"
+        >
+          <input
+            name="tracking_code"
+            defaultValue={order.tracking_code ?? ""}
+            placeholder="Código de guía (ej: TCC-123456789)"
+            className="flex-1 rounded-xl border-2 border-black p-2 text-sm shadow-[2px_2px_0_0_#111] focus:outline-none focus:ring-2 focus:ring-black font-mono"
+          />
+          <button
+            type="submit"
+            className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-bold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+          >
+            Guardar
+          </button>
+        </form>
+        {order.tracking_code && (
+          <p className="text-xs text-[var(--muted)]">
+            Código actual:{" "}
+            <span className="font-mono font-semibold text-black">{order.tracking_code}</span>
+          </p>
+        )}
+      </div>
 
       {/* Line items */}
       <div className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] overflow-hidden">

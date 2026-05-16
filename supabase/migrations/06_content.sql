@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS public.content CASCADE;
 CREATE TABLE public.content (
   key text PRIMARY KEY,
   value text NOT NULL DEFAULT '',
+  pinned boolean NOT NULL DEFAULT false,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 

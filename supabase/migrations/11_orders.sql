@@ -9,6 +9,7 @@ CREATE TABLE public.orders (
   items            jsonb NOT NULL DEFAULT '[]',
   total            numeric(10,2) NOT NULL DEFAULT 0,
   notes            text,
+  tracking_code    text,
   shipping_address jsonb,
   shipping_cost    numeric(10,2) NOT NULL DEFAULT 0,
   address_id       uuid,

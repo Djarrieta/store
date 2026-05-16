@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS public.chat_messages CASCADE;
 CREATE TABLE public.chat_messages (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_ref   text NOT NULL,
-  role       text NOT NULL CHECK (role IN ('user', 'assistant')),
+  role       text NOT NULL CHECK (role IN ('user', 'assistant', 'summary')),
   message    text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );

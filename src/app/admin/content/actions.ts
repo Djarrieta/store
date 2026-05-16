@@ -11,8 +11,9 @@ export async function createContent(formData: FormData) {
 
   const key = ((formData.get("key") as string) ?? "").trim();
   const value = ((formData.get("value") as string) ?? "").trim();
+  const pinned = formData.get("pinned") === "on";
 
-  const { error } = await supabase.from("content").insert({ key, value });
+  const { error } = await supabase.from("content").insert({ key, value, pinned });
   if (error) throw new Error(error.message);
 
   revalidatePath("/about");
@@ -25,10 +26,11 @@ export async function updateContent(key: string, formData: FormData) {
   const supabase = await createClient();
 
   const value = ((formData.get("value") as string) ?? "").trim();
+  const pinned = formData.get("pinned") === "on";
 
   const { error } = await supabase
     .from("content")
-    .update({ value })
+    .update({ value, pinned })
     .eq("key", key);
 
   if (error) throw new Error(error.message);

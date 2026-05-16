@@ -69,3 +69,15 @@ export async function updateOrder(id: string, data: UpdateOrderData) {
   revalidatePath(`/admin/orders/${id}`);
   redirect(`/admin/orders/${id}`);
 }
+
+export async function updateTrackingCode(id: string, formData: FormData) {
+  await requireAdmin();
+  const supabase = createServiceClient();
+  const tracking_code = ((formData.get("tracking_code") as string) ?? "").trim() || null;
+  const { error } = await supabase
+    .from("orders")
+    .update({ tracking_code })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/admin/orders/${id}`);
+}

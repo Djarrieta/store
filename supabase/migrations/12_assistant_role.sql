@@ -18,10 +18,12 @@ REVOKE ALL ON SCHEMA public FROM assistant_bot;
 GRANT USAGE ON SCHEMA public TO assistant_bot;
 
 -- Read-only access to public catalog tables only
-GRANT SELECT ON public.products   TO assistant_bot;
-GRANT SELECT ON public.categories TO assistant_bot;
-GRANT SELECT ON public.items      TO assistant_bot;
-GRANT SELECT ON public.content    TO assistant_bot;
+GRANT SELECT ON public.products      TO assistant_bot;
+GRANT SELECT ON public.categories    TO assistant_bot;
+GRANT SELECT ON public.items         TO assistant_bot;
+GRANT SELECT ON public.content       TO assistant_bot;
+GRANT SELECT ON public.ships         TO assistant_bot;
+GRANT SELECT ON public.ships_config  TO assistant_bot;
 -- NO direct access to orders or chat_messages
 
 -- Controlled write: insert an order, returns the new order id
@@ -56,11 +58,16 @@ $$;
 GRANT EXECUTE ON FUNCTION public.bot_get_my_orders TO assistant_bot;
 
 -- Controlled read: single order status, own orders only
+DROP FUNCTION IF EXISTS public.bot_get_order_status(uuid, text);
 CREATE OR REPLACE FUNCTION public.bot_get_order_status(p_order_id uuid, p_user_ref text)
-RETURNS text
+RETURNS jsonb
 LANGUAGE sql SECURITY DEFINER SET search_path = public
 AS $$
-  SELECT status FROM public.orders
+  SELECT jsonb_build_object(
+    'status', status,
+    'tracking_code', tracking_code
+  )
+  FROM public.orders
   WHERE id = p_order_id AND user_ref = p_user_ref;
 $$;
 GRANT EXECUTE ON FUNCTION public.bot_get_order_status TO assistant_bot;
