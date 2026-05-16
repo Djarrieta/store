@@ -14,8 +14,15 @@ FROM (
       'Pantalón Estampado Fresas',
       'Pantalón de algodón con estampado de fresas. Corte recto y cómodo, ideal para looks casuales y de verano.',
       39.99, 0,
-      '[{"url":"https://images.unsplash.com/photo-1594938298603-c8148c4b4f7e?q=80&w=1200"}]',
+      '[{"url":"https://http2.mlstatic.com/D_NQ_NP_2X_607610-MCO94686907877_102025-F.webp"}]',
       ARRAY['pantalon','ropa','estampado','fresas','verano']
+    ),
+    (
+      'Carcasa para Celular',
+      'Carcasa de silicona flexible con bordes reforzados y acabado mate. Protección contra caídas sin añadir grosor al celular.',
+      14.99, 0,
+      '[{"url":"https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=1200"}]',
+      ARRAY['carcasa','celular','accesorios','silicona']
     )
 ) AS p(title, description, price, discount, images, tags)
 WHERE NOT EXISTS (SELECT 1 FROM public.products LIMIT 1);

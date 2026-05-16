@@ -45,7 +45,33 @@ BEGIN
   END IF;
 END $$;
 
--- Pantalón Estampado Fresas — Talla Pantalón (32/34/36/38/40) × Color (Blanco/Negro/Azul Marino)
+-- Carcasa para Celular — un item por Modelo de celular
+-- UUIDs: Modelo b30 | valores b31..b37
+DO $$
+DECLARE
+  v_product_id uuid;
+  v_item_id    uuid;
+BEGIN
+  SELECT id INTO v_product_id FROM public.products WHERE title = 'Carcasa para Celular';
+  IF v_product_id IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM public.items WHERE product_id = v_product_id
+  ) THEN
+    INSERT INTO public.items (product_id, stock) VALUES (v_product_id, 30) RETURNING id INTO v_item_id;
+    INSERT INTO public.item_categories VALUES (v_item_id, 'b1000000-0000-0000-0000-000000000031'); -- iPhone 13
+    INSERT INTO public.items (product_id, stock) VALUES (v_product_id, 25) RETURNING id INTO v_item_id;
+    INSERT INTO public.item_categories VALUES (v_item_id, 'b1000000-0000-0000-0000-000000000032'); -- iPhone 14
+    INSERT INTO public.items (product_id, stock) VALUES (v_product_id, 20) RETURNING id INTO v_item_id;
+    INSERT INTO public.item_categories VALUES (v_item_id, 'b1000000-0000-0000-0000-000000000033'); -- iPhone 15
+    INSERT INTO public.items (product_id, stock) VALUES (v_product_id, 18) RETURNING id INTO v_item_id;
+    INSERT INTO public.item_categories VALUES (v_item_id, 'b1000000-0000-0000-0000-000000000034'); -- iPhone 15 Pro
+    INSERT INTO public.items (product_id, stock) VALUES (v_product_id, 22) RETURNING id INTO v_item_id;
+    INSERT INTO public.item_categories VALUES (v_item_id, 'b1000000-0000-0000-0000-000000000035'); -- Galaxy S24
+    INSERT INTO public.items (product_id, stock) VALUES (v_product_id, 20) RETURNING id INTO v_item_id;
+    INSERT INTO public.item_categories VALUES (v_item_id, 'b1000000-0000-0000-0000-000000000036'); -- Galaxy S25
+    INSERT INTO public.items (product_id, stock) VALUES (v_product_id, 15) RETURNING id INTO v_item_id;
+    INSERT INTO public.item_categories VALUES (v_item_id, 'b1000000-0000-0000-0000-000000000037'); -- Galaxy A55
+  END IF;
+END $$;
 -- UUIDs: Talla Pantalón b10..b15 | Color b20..b23
 DO $$
 DECLARE
