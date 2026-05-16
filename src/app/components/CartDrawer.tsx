@@ -208,11 +208,11 @@ export default function CartDrawer() {
                 shippingAddress={selectedAddress}
                 shippingCost={shippingCost}
                 disabled={!selectedAddress}
-                onSuccess={() => {
+                onOrderCreated={() => {
                   clearCart();
                   clearAddress();
-                  closeCart();
                 }}
+                onSuccess={closeCart}
               >
                 {selectedAddress ? "Comprar ahora" : "Agrega una dirección para comprar"}
               </BuyNowButton>

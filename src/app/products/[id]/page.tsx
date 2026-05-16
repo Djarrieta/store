@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { ItemWithCategories, ProductWithCategory } from "@/types";
@@ -6,6 +5,7 @@ import { formatCurrency } from "@/lib/format";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import AddToCartButton from "@/app/components/AddToCartButton";
 import VariantSelector from "@/app/components/VariantSelector";
+import ProductImageCarousel from "@/app/components/ProductImageCarousel";
 
 export default async function ProductDetailPage({
   params,
@@ -58,17 +58,7 @@ export default async function ProductDetailPage({
         ]}
       />
       <div className="rounded-2xl border-4 border-black bg-white p-5 shadow-[6px_6px_0_0_#111]">
-        {product.images.length > 0 && (
-          <Image
-            src={product.images[0].url}
-            alt={product.title}
-            width={1200}
-            height={600}
-            unoptimized
-            priority
-            className="mb-5 h-64 w-full rounded-xl border-2 border-black object-cover"
-          />
-        )}
+        <ProductImageCarousel images={product.images} title={product.title} />
 
         <h1 className="font-display text-3xl font-bold">{product.title}</h1>
         {product.description && (

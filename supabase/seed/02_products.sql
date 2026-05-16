@@ -7,7 +7,7 @@ FROM (
       'Camiseta Básica',
       'Camiseta de algodón 100% con cuello redondo y corte regular. Suave, transpirable y perfecta para el día a día.',
       59900, 0,
-      '[{"url":"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200"}]',
+      '[{"url":"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200","description":"Vista frontal — blanca"},{"url":"https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?q=80&w=1200","description":"Vista trasera — blanca"},{"url":"https://images.unsplash.com/photo-1503341504253-dff4815485f1?q=80&w=1200","description":"Vista lateral — negra"},{"url":"https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=1200","description":"Detalle tejido"}]',
       ARRAY['camiseta','ropa','basica','algodon','unisex']
     ),
     (

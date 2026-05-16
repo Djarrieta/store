@@ -27,6 +27,7 @@ interface Props {
   shippingAddress: Address | null;
   shippingCost: number;
   disabled?: boolean;
+  onOrderCreated?: () => void;
   onSuccess?: () => void;
   className?: string;
   children?: React.ReactNode;
@@ -37,6 +38,7 @@ export default function BuyNowButton({
   shippingAddress,
   shippingCost,
   disabled = false,
+  onOrderCreated,
   onSuccess,
   className,
   children,
@@ -58,6 +60,8 @@ export default function BuyNowButton({
 
       const { orderId, reference, integrityHash, amountInCents } =
         await createOrderAndCheckout(items, snapshot, shippingCost);
+
+      onOrderCreated?.();
 
       const checkout = new window.WidgetCheckout({
         currency: "COP",
