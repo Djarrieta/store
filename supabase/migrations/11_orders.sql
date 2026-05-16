@@ -4,8 +4,8 @@ CREATE TABLE public.orders (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_ref   text NOT NULL,
   user_name  text,
-  status     text NOT NULL DEFAULT 'pending_approval'
-               CHECK (status IN ('pending_approval', 'approved', 'rejected', 'fulfilled')),
+  status     text NOT NULL DEFAULT 'created'
+               CHECK (status IN ('created', 'pending_approval', 'approved', 'rejected', 'fulfilled', 'cancelled')),
   items      jsonb NOT NULL DEFAULT '[]',
   total      numeric(10,2) NOT NULL DEFAULT 0,
   notes      text,
@@ -27,3 +27,13 @@ CREATE POLICY "orders: no public access"
 CREATE POLICY "orders: admin all"
   ON public.orders FOR ALL
   USING (public.is_admin(auth.uid()));
+
+-- Authenticated users can create their own orders
+CREATE POLICY "orders: user insert"
+  ON public.orders FOR INSERT
+  WITH CHECK (auth.uid()::text = user_ref);
+
+-- Authenticated users can read their own orders
+CREATE POLICY "orders: user select own"
+  ON public.orders FOR SELECT
+  USING (auth.uid()::text = user_ref);

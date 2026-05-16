@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
+import type { CartItem } from "@/lib/cart";
+import BuyNowButton from "@/app/components/BuyNowButton";
 
 interface VariantCategory {
   id: string;
@@ -70,6 +72,18 @@ export default function VariantSelector({
 
   const inStock = resolvedItem ? resolvedItem.stock > 0 : false;
 
+  const buyNowItem: CartItem | null =
+    resolvedItem && inStock
+      ? {
+          id: resolvedItem.id,
+          title: product.title,
+          price: product.price,
+          amountInCents: product.amountInCents,
+          image: product.image,
+          quantity: 1,
+        }
+      : null;
+
   function handleAdd() {
     if (!resolvedItem || !inStock) return;
     addItem({
@@ -109,14 +123,22 @@ export default function VariantSelector({
         </p>
       )}
 
-      <button
-        type="button"
-        onClick={handleAdd}
-        disabled={!allSelected || !inStock}
-        className="w-full rounded-xl border-2 border-black bg-[var(--accent)] px-6 py-3 font-bold shadow-[4px_4px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-40 disabled:pointer-events-none"
-      >
-        {added ? "✓ Agregado!" : "Agregar al carrito"}
-      </button>
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={handleAdd}
+          disabled={!allSelected || !inStock}
+          className="w-full rounded-xl border-2 border-black bg-[var(--accent)] px-6 py-3 font-bold shadow-[4px_4px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-40 disabled:pointer-events-none"
+        >
+          {added ? "✓ Agregado!" : "Agregar al carrito"}
+        </button>
+        <BuyNowButton
+          items={buyNowItem ? [buyNowItem] : []}
+          disabled={!buyNowItem}
+        >
+          Comprar ahora
+        </BuyNowButton>
+      </div>
     </div>
   );
 }

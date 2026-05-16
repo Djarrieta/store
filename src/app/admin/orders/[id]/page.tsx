@@ -5,10 +5,12 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import { approveOrder, rejectOrder, fulfillOrder } from "../actions";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
+  created: "Creado (sin pagar)",
   pending_approval: "Pendiente de aprobación",
   approved: "Aprobado",
   rejected: "Rechazado",
   fulfilled: "Entregado",
+  cancelled: "Cancelado",
 };
 
 export default async function OrderDetailPage({

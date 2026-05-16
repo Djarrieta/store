@@ -6,7 +6,7 @@ export interface OrderItem {
   sku: string | null;
 }
 
-export type OrderStatus = "pending_approval" | "approved" | "rejected" | "fulfilled";
+export type OrderStatus = "created" | "pending_approval" | "approved" | "rejected" | "fulfilled" | "cancelled";
 
 export interface Order {
   id: string;

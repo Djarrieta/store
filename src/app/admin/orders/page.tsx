@@ -5,20 +5,24 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import PageHeader from "@/app/components/PageHeader";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
+  created: "Creado",
   pending_approval: "Pendiente",
   approved: "Aprobado",
   rejected: "Rechazado",
   fulfilled: "Entregado",
+  cancelled: "Cancelado",
 };
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
+  created: "bg-blue-100 text-blue-800",
   pending_approval: "bg-[var(--accent)] text-black",
   approved: "bg-green-200 text-green-900",
   rejected: "bg-red-200 text-red-900",
   fulfilled: "bg-gray-200 text-gray-700",
+  cancelled: "bg-gray-100 text-gray-500",
 };
 
-const STATUS_ORDER: OrderStatus[] = ["pending_approval", "approved", "fulfilled", "rejected"];
+const STATUS_ORDER: OrderStatus[] = ["created", "pending_approval", "approved", "fulfilled", "rejected", "cancelled"];
 
 export default async function AdminOrdersPage() {
   const supabase = createServiceClient();

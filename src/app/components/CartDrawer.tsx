@@ -1,27 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Script from "next/script";
 import { useCart } from "@/lib/cart";
-import { createWompiCheckout } from "@/app/actions/wompi";
 import { formatCurrency } from "@/lib/format";
-
-declare global {
-  interface Window {
-    WidgetCheckout: new (config: {
-      currency: string;
-      amountInCents: number;
-      reference: string;
-      publicKey: string;
-      signature: { integrity: string };
-      redirectUrl?: string;
-    }) => {
-      open: (
-        callback: (result: { transaction: { id: string; status: string } }) => void
-      ) => void;
-    };
-  }
-}
+import BuyNowButton from "@/app/components/BuyNowButton";
 
 export default function CartDrawer() {
   const {
@@ -34,30 +16,8 @@ export default function CartDrawer() {
     clearCart,
   } = useCart();
 
-  async function handleCheckout() {
-    if (items.length === 0) return;
-    const { reference, integrityHash } = await createWompiCheckout(totalAmountInCents);
-
-    const checkout = new window.WidgetCheckout({
-      currency: "COP",
-      amountInCents: totalAmountInCents,
-      reference,
-      publicKey: process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY!,
-      signature: { integrity: integrityHash },
-    });
-
-    checkout.open(({ transaction }) => {
-      if (transaction.status === "APPROVED") {
-        clearCart();
-        closeCart();
-      }
-    });
-  }
-
   return (
     <>
-      <Script src="https://checkout.wompi.co/widget.js" strategy="lazyOnload" />
-
       {/* Backdrop */}
       {isOpen && (
         <div
@@ -153,13 +113,12 @@ export default function CartDrawer() {
                 <span>Total</span>
                 <span>{formatCurrency(totalAmountInCents / 100)}</span>
               </div>
-              <button
-                type="button"
-                onClick={handleCheckout}
-                className="w-full rounded-xl border-2 border-black bg-[var(--accent)] px-6 py-3 font-bold shadow-[4px_4px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+              <BuyNowButton
+                items={items}
+                onSuccess={() => { clearCart(); closeCart(); }}
               >
-                Pagar con Wompi
-              </button>
+                Comprar ahora
+              </BuyNowButton>
             </div>
           </>
         )}
