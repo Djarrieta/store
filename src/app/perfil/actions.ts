@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAuth } from "@/lib/auth";
+import { getUser, requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { Address } from "@/types";
 
@@ -96,4 +96,19 @@ export async function setDefaultAddress(id: string): Promise<void> {
 
   if (error) throw new Error(error.message);
   revalidatePath("/perfil");
+}
+
+export async function getDefaultAddress(): Promise<Address | null> {
+  const user = await getUser();
+  if (!user) return null;
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("addresses")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("is_default", true)
+    .single<Address>();
+
+  return data ?? null;
 }

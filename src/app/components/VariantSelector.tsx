@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
-import type { CartItem } from "@/lib/cart";
-import BuyNowButton from "@/app/components/BuyNowButton";
 
 interface VariantCategory {
   id: string;
@@ -72,18 +70,6 @@ export default function VariantSelector({
 
   const inStock = resolvedItem ? resolvedItem.stock > 0 : false;
 
-  const buyNowItem: CartItem | null =
-    resolvedItem && inStock
-      ? {
-          id: resolvedItem.id,
-          title: product.title,
-          price: product.price,
-          amountInCents: product.amountInCents,
-          image: product.image,
-          quantity: 1,
-        }
-      : null;
-
   function handleAdd() {
     if (!resolvedItem || !inStock) return;
     addItem({
@@ -123,8 +109,7 @@ export default function VariantSelector({
         </p>
       )}
 
-      <div className="flex flex-col gap-2">
-        <button
+      <button
           type="button"
           onClick={handleAdd}
           disabled={!allSelected || !inStock}
@@ -132,13 +117,6 @@ export default function VariantSelector({
         >
           {added ? "✓ Agregado!" : "Agregar al carrito"}
         </button>
-        <BuyNowButton
-          items={buyNowItem ? [buyNowItem] : []}
-          disabled={!buyNowItem}
-        >
-          Comprar ahora
-        </BuyNowButton>
-      </div>
     </div>
   );
 }

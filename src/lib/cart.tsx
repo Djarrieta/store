@@ -6,9 +6,11 @@ import {
   useReducer,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
 import { getShippingCost, type ShippingResult } from "@/app/actions/shipping";
+import { getDefaultAddress } from "@/app/perfil/actions";
 import type { Address } from "@/types";
 
 export type CartItem = {
@@ -227,6 +229,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "CLEAR_ADDRESS" });
   }, []);
 
+  // Auto-load the default address once per session when the first item is added
+  const hasAutoLoadedAddressRef = useRef(false);
+  const addItem = useCallback(
+    (item: Omit<CartItem, "quantity">) => {
+      dispatch({ type: "ADD_ITEM", item });
+      if (
+        state.items.length === 0 &&
+        !state.selectedAddress &&
+        !hasAutoLoadedAddressRef.current
+      ) {
+        hasAutoLoadedAddressRef.current = true;
+        getDefaultAddress().then((addr) => {
+          if (addr) dispatch({ type: "SET_ADDRESS", address: addr });
+        });
+      }
+    },
+    [state.items.length, state.selectedAddress],
+  );
+
   const totalItems = state.items.reduce((sum, i) => sum + i.quantity, 0);
   const subtotalAmountInCents = state.items.reduce(
     (sum, i) => sum + i.amountInCents * i.quantity,
@@ -247,7 +268,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         shippingDisplay: shipping.display,
         shippingInfo: shipping.info,
         selectedAddress: state.selectedAddress,
-        addItem: (item) => dispatch({ type: "ADD_ITEM", item }),
+        addItem,
         removeItem: (id) => dispatch({ type: "REMOVE_ITEM", id }),
         setQuantity: (id, quantity) => dispatch({ type: "SET_QUANTITY", id, quantity }),
         clearCart: () => dispatch({ type: "CLEAR" }),

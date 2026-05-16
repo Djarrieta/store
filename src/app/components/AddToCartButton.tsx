@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useCart, type CartItem } from "@/lib/cart";
-import BuyNowButton from "@/app/components/BuyNowButton";
 
 type Props = Omit<CartItem, "quantity">;
 
@@ -16,10 +15,8 @@ export default function AddToCartButton(props: Props) {
     setTimeout(() => setAdded(false), 1500);
   }
 
-  const cartItem: CartItem = { ...props, quantity: 1 };
-
   return (
-    <div className="mt-4 flex flex-col gap-2">
+    <div className="mt-4">
       <button
         type="button"
         onClick={handleAdd}
@@ -27,7 +24,6 @@ export default function AddToCartButton(props: Props) {
       >
         {added ? "✓ Agregado!" : "Agregar al carrito"}
       </button>
-      <BuyNowButton items={[cartItem]}>Comprar ahora</BuyNowButton>
     </div>
   );
 }
