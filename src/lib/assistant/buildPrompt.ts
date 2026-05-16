@@ -6,9 +6,10 @@ import { ASSISTANT_PROMPT } from "./prompt";
 export async function buildPrompt(userMessage: string, userRef: string): Promise<string> {
   const supabase = createServiceClient();
 
-  const [{ data: pinnedContent }, { data: profile }, history, contextTopics] = await Promise.all([
+  const [{ data: pinnedContent }, { data: profile }, { data: addresses }, history, contextTopics] = await Promise.all([
     supabase.from("content").select("key, value").eq("pinned", true),
     supabase.from("profiles").select("display_name").eq("id", userRef).single(),
+    supabase.from("addresses").select("recipient_name, department, city, address_line, neighborhood, phone, is_default").eq("user_id", userRef).order("is_default", { ascending: false }),
     getHistory(userRef),
     fetchStoreSnapshot(),
   ]);
@@ -16,6 +17,17 @@ export async function buildPrompt(userMessage: string, userRef: string): Promise
   const userInfo = profile?.display_name
     ? `${profile.display_name} (ID: ${userRef})`
     : `ID: ${userRef}`;
+
+  const userAddresses =
+    addresses && addresses.length > 0
+      ? addresses
+          .map((a) => {
+            const label = a.is_default ? " [predeterminada]" : "";
+            const neighborhood = a.neighborhood ? `, ${a.neighborhood}` : "";
+            return `- ${a.recipient_name}${label}: ${a.address_line}${neighborhood}, ${a.city}, ${a.department}. Tel: ${a.phone}`;
+          })
+          .join("\n")
+      : "El usuario no tiene direcciones registradas.";
 
   const behaviorRow = pinnedContent?.find((c) => c.key === "assistant_behavior");
   const assistantBehavior = behaviorRow?.value ?? "";
@@ -40,6 +52,7 @@ export async function buildPrompt(userMessage: string, userRef: string): Promise
   return ASSISTANT_PROMPT
     .replace("{{date}}", new Date().toLocaleDateString("es-CO"))
     .replace("{{userInfo}}", userInfo)
+    .replace("{{userAddresses}}", userAddresses)
     .replace("{{assistantBehavior}}", assistantBehavior)
     .replace("{{assistantInstructions}}", assistantInstructions)
     .replace("{{pinnedContent}}", pinnedContext)
