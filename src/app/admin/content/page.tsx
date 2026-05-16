@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Content } from "@/types";
+import { deleteContent } from "./actions";
 import PageHeader from "@/app/components/PageHeader";
 
 export default async function AdminContentPage() {
@@ -12,7 +13,12 @@ export default async function AdminContentPage() {
     .returns<Content[]>();
 
   return (
-    <PageHeader title="Manage Content" isEmpty={false}>
+    <PageHeader
+      title="Manage Content"
+      createHref="/admin/content/new"
+      createLabel="New Content"
+      isEmpty={false}
+    >
       <div className="space-y-3">
         {(entries ?? []).map((entry) => (
           <div
@@ -25,13 +31,26 @@ export default async function AdminContentPage() {
                 {entry.value || <span className="italic">empty</span>}
               </p>
             </div>
-            <div className="ml-4 shrink-0">
+            <div className="ml-4 flex shrink-0 gap-2">
               <Link
                 href={`/admin/content/${entry.key}/edit`}
                 className="rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
               >
                 Edit
               </Link>
+              <form
+                action={async () => {
+                  "use server";
+                  await deleteContent(entry.key);
+                }}
+              >
+                <button
+                  type="submit"
+                  className="rounded-lg border-2 border-black bg-red-100 px-3 py-1 text-sm font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+                >
+                  Delete
+                </button>
+              </form>
             </div>
           </div>
         ))}

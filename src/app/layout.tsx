@@ -3,11 +3,13 @@ import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { getUser, isAdmin } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import UserMenu from "@/app/components/UserMenu";
 import NavLinks from "@/app/components/NavLinks";
 import { CartProvider } from "@/lib/cart";
 import CartIcon from "@/app/components/CartIcon";
 import CartDrawer from "@/app/components/CartDrawer";
+import type { Profile } from "@/types";
 
 const outfit = Outfit({
   variable: "--font-display",
@@ -32,6 +34,17 @@ export default async function RootLayout({
   const user = await getUser();
   const adminStatus = await isAdmin(user?.id);
 
+  let profile: Profile | null = null;
+  if (user) {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single<Profile>();
+    profile = data;
+  }
+
   return (
     <html lang="en" className={`${outfit.variable} ${inter.variable} antialiased`}>
       <body className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
@@ -47,7 +60,7 @@ export default async function RootLayout({
                 </div>
                 <div className="flex items-center gap-2">
                   <CartIcon />
-                  <UserMenu user={user} />
+                  <UserMenu user={user} avatarUrl={profile?.avatar_url ?? null} />
                 </div>
               </div>
             </header>

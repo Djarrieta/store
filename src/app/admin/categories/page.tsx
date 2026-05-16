@@ -45,6 +45,7 @@ export default async function AdminCategoriesPage() {
                   Edit
                 </Link>
                 <form
+                  className="flex items-center"
                   action={async () => {
                     "use server";
                     await deleteCategory(parent.id);
@@ -76,6 +77,7 @@ export default async function AdminCategoriesPage() {
                         Edit
                       </Link>
                       <form
+                        className="flex items-center"
                         action={async () => {
                           "use server";
                           await deleteCategory(sub.id);

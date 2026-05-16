@@ -5,6 +5,21 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
 
+export async function createContent(formData: FormData) {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const key = ((formData.get("key") as string) ?? "").trim();
+  const value = ((formData.get("value") as string) ?? "").trim();
+
+  const { error } = await supabase.from("content").insert({ key, value });
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/about");
+  revalidatePath("/admin/content");
+  redirect("/admin/content");
+}
+
 export async function updateContent(key: string, formData: FormData) {
   await requireAdmin();
   const supabase = await createClient();
@@ -21,4 +36,15 @@ export async function updateContent(key: string, formData: FormData) {
   revalidatePath("/about");
   revalidatePath("/admin/content");
   redirect("/admin/content");
+}
+
+export async function deleteContent(key: string) {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const { error } = await supabase.from("content").delete().eq("key", key);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/about");
+  revalidatePath("/admin/content");
 }
