@@ -15,6 +15,7 @@ export default function ChatWidget() {
   const [input, setInput] = useState("");
   const [isPending, startTransition] = useTransition();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     try {
@@ -31,6 +32,10 @@ export default function ChatWidget() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isPending]);
+
+  useEffect(() => {
+    if (!isPending) inputRef.current?.focus();
+  }, [isPending]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -91,6 +96,7 @@ export default function ChatWidget() {
       {/* Input */}
       <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
         <input
+          ref={inputRef}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}

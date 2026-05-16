@@ -110,7 +110,7 @@ const HANDLERS: Record<string, Handler> = {
     const sb = createServiceClient();
     const { data, error } = await sb
       .from("products")
-      .select("id, title, description, price, discount, tags, category:category_id(name), items(id, stock, attributes)")
+      .select("id, title, description, price, discount, tags, category:category_id(name), items(id, stock, item_categories(category:category_id(id, name)))")
       .order("title");
     if (error) throw new Error(error.message);
     return JSON.stringify(data ?? []);
@@ -118,7 +118,7 @@ const HANDLERS: Record<string, Handler> = {
 
   query_categories: async () => {
     const sb = createServiceClient();
-    const { data, error } = await sb.from("categories").select("id, name, description").order("name");
+    const { data, error } = await sb.from("categories").select("id, name, slug").order("name");
     if (error) throw new Error(error.message);
     return JSON.stringify(data ?? []);
   },
@@ -127,7 +127,7 @@ const HANDLERS: Record<string, Handler> = {
     const sb = createServiceClient();
     const { data, error } = await sb
       .from("items")
-      .select("id, stock, attributes, product:product_id(title, price)")
+      .select("id, stock, item_categories(category:category_id(id, name)), product:product_id(title, price)")
       .order("id");
     if (error) throw new Error(error.message);
     return JSON.stringify(data ?? []);
@@ -223,5 +223,7 @@ export async function generateResponse(prompt: string): Promise<string> {
 
   const last = messages.at(-1);
   if (!last) throw new Error("No response from AI");
-  return typeof last.content === "string" ? last.content : JSON.stringify(last.content);
+  const content = typeof last.content === "string" ? last.content : JSON.stringify(last.content);
+  
+  return content;
 }
