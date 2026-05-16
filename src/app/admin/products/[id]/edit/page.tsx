@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Category, Product } from "@/types";
 import { updateProduct } from "../../actions";
 import ProductForm from "../../ProductForm";
+import ProductItemsSection from "../../ProductItemsSection";
 
 export default async function EditProductPage({
   params,
@@ -17,6 +18,7 @@ export default async function EditProductPage({
     supabase
       .from("categories")
       .select("*")
+      .eq("type", "product")
       .order("parent_id", { ascending: true, nullsFirst: true })
       .order("name")
       .returns<Category[]>(),
@@ -27,13 +29,15 @@ export default async function EditProductPage({
   const updateWithId = updateProduct.bind(null, id);
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-6">
       <h1 className="font-display text-3xl font-bold">Editar producto</h1>
       <ProductForm
         action={updateWithId}
         defaultValues={product}
         categories={categories ?? []}
       />
+      <ProductItemsSection productId={id} />
     </section>
   );
 }
+

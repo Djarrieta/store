@@ -52,6 +52,14 @@ export default async function NewCategoryPage() {
           </select>
         </label>
 
+        <label className="grid gap-1 text-sm font-medium">
+          Tipo
+          <select name="type" className="w-full rounded-md border-2 border-black px-3 py-2 bg-white">
+            <option value="product">Producto — clasifica el producto</option>
+            <option value="variant">Variante — dimensión o valor de variante (talla, color, modelo…)</option>
+          </select>
+        </label>
+
         <button
           type="submit"
           className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-semibold"

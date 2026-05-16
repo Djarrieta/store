@@ -8,6 +8,7 @@ export default async function NewProductPage() {
   const { data: categories } = await supabase
     .from("categories")
     .select("*")
+    .eq("type", "product")
     .order("parent_id", { ascending: true, nullsFirst: true })
     .order("name")
     .returns<Category[]>();

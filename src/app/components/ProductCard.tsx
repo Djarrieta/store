@@ -1,15 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ProductWithCategory } from "@/types";
+import type { ItemWithCategories, ProductWithCategory } from "@/types";
 import { formatCurrency } from "@/lib/format";
 import AddToCartButton from "@/app/components/AddToCartButton";
+import VariantSelector from "@/app/components/VariantSelector";
 
 interface ProductCardProps {
   product: ProductWithCategory;
+  items?: ItemWithCategories[];
   priority?: boolean;
 }
 
-export default function ProductCard({ product, priority = false }: ProductCardProps) {
+export default function ProductCard({ product, items = [], priority = false }: ProductCardProps) {
   const image = product.images?.[0]?.url;
   const effectivePrice =
     product.discount > 0
@@ -24,6 +26,9 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       ? `${product.category.parent.name} / ${product.category.name}`
       : product.category.name
     : null;
+
+  const hasVariants = items.some((i) => i.item_categories.length > 0);
+  const singleItem = !hasVariants && items.length === 1 ? items[0] : null;
 
   return (
     <article className="overflow-hidden rounded-xl border-2 border-black bg-white shadow-[4px_4px_0_0_#111]">
@@ -70,13 +75,28 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             </span>
           ))}
         </div>
-        <AddToCartButton
-          id={product.id}
-          title={product.title}
-          price={payablePrice}
-          amountInCents={amountInCents}
-          image={image}
-        />
+
+        {items.length === 0 ? (
+          <Link
+            href={`/products/${product.id}`}
+            className="mt-1 block w-full rounded-xl border-2 border-black bg-[var(--accent)] px-4 py-2 text-center text-sm font-bold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+          >
+            Ver producto
+          </Link>
+        ) : hasVariants ? (
+          <VariantSelector
+            items={items}
+            product={{ title: product.title, price: payablePrice, amountInCents, image }}
+          />
+        ) : (
+          <AddToCartButton
+            id={singleItem!.id}
+            title={product.title}
+            price={payablePrice}
+            amountInCents={amountInCents}
+            image={image}
+          />
+        )}
       </div>
     </article>
   );

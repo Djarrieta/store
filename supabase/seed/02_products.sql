@@ -50,6 +50,22 @@ FROM (
       '[{"url":"https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200"}]',
       'a1000000-0000-0000-0000-000000000012',
       ARRAY['zapatillas','atletismo','exterior']
+    ),
+    (
+      'Carcasa Universal Silicona',
+      'Carcasa de silicona flexible con bordes reforzados. Compatible con múltiples modelos Apple.',
+      12.99, 0,
+      '[{"url":"https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=1200"}]',
+      'a1000000-0000-0000-0000-000000000001',
+      ARRAY['carcasa','telefono','silicona','apple']
+    ),
+    (
+      'Pantalón Estampado Manzanas',
+      'Pantalón de algodón con estampado de manzanas. Corte recto, cómodo para el día a día.',
+      34.99, 0,
+      '[{"url":"https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=1200"}]',
+      'a1000000-0000-0000-0000-000000000011',
+      ARRAY['pantalon','moda','estampado','ropa']
     )
 ) AS p(title, description, price, discount, images, category_id, tags)
 WHERE NOT EXISTS (SELECT 1 FROM public.products LIMIT 1);

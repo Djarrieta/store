@@ -1,10 +1,11 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { ProductWithCategory } from "@/types";
+import type { ItemWithCategories, ProductWithCategory } from "@/types";
 import { formatCurrency } from "@/lib/format";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import AddToCartButton from "@/app/components/AddToCartButton";
+import VariantSelector from "@/app/components/VariantSelector";
 
 export default async function ProductDetailPage({
   params,
@@ -14,11 +15,18 @@ export default async function ProductDetailPage({
   const { id } = await params;
 
   const supabase = await createClient();
-  const { data: product } = await supabase
-    .from("products")
-    .select("*, category:category_id(*, parent:parent_id(*))")
-    .eq("id", id)
-    .single<ProductWithCategory>();
+  const [{ data: product }, { data: items }] = await Promise.all([
+    supabase
+      .from("products")
+      .select("*, category:category_id(*, parent:parent_id(*))")
+      .eq("id", id)
+      .single<ProductWithCategory>(),
+    supabase
+      .from("items")
+      .select("id, stock, item_categories(category:category_id(id, name, parent_id, parent:parent_id(id, name)))")
+      .eq("product_id", id)
+      .returns<ItemWithCategories[]>(),
+  ]);
 
   if (!product) notFound();
 
@@ -35,6 +43,11 @@ export default async function ProductDetailPage({
       ? `${product.category.parent.name} / ${product.category.name}`
       : product.category.name
     : null;
+
+  const itemList = items ?? [];
+  const hasVariants = itemList.some((i) => i.item_categories.length > 0);
+  const singleItem = !hasVariants && itemList.length === 1 ? itemList[0] : null;
+  const isPurchasable = itemList.length > 0;
 
   return (
     <article className="space-y-4">
@@ -99,13 +112,22 @@ export default async function ProductDetailPage({
           </div>
         )}
 
-        <AddToCartButton
-          id={product.id}
-          title={product.title}
-          price={payablePrice}
-          amountInCents={amountInCents}
-          image={product.images?.[0]?.url}
-        />
+        {!isPurchasable ? (
+          <p className="mt-4 text-sm font-semibold text-red-600">Sin stock</p>
+        ) : hasVariants ? (
+          <VariantSelector
+            items={itemList}
+            product={{ title: product.title, price: payablePrice, amountInCents, image: product.images?.[0]?.url }}
+          />
+        ) : (
+          <AddToCartButton
+            id={singleItem!.id}
+            title={product.title}
+            price={payablePrice}
+            amountInCents={amountInCents}
+            image={product.images?.[0]?.url}
+          />
+        )}
       </div>
     </article>
   );

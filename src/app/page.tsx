@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { ProductWithCategory } from "@/types";
+import type { ItemWithCategories, ProductWithCategory } from "@/types";
 import ProductCard from "@/app/components/ProductCard";
 import PageHeader from "@/app/components/PageHeader";
 import FilterableList from "@/app/components/FilterableList";
@@ -48,6 +48,21 @@ export default async function Home({
 
   const { data: products, count } = await query.range(from, to).returns<ProductWithCategory[]>();
 
+  // Load items with variant categories for all products on this page
+  const productIds = (products ?? []).map((p) => p.id);
+  const itemsByProduct = new Map<string, ItemWithCategories[]>();
+  if (productIds.length > 0) {
+    const { data: allItems } = await supabase
+      .from("items")
+      .select("id, product_id, stock, item_categories(category:category_id(id, name, parent_id, parent:parent_id(id, name)))")
+      .in("product_id", productIds)
+      .returns<ItemWithCategories[]>();
+    for (const item of allItems ?? []) {
+      if (!itemsByProduct.has(item.product_id)) itemsByProduct.set(item.product_id, []);
+      itemsByProduct.get(item.product_id)!.push(item);
+    }
+  }
+
   const total = count ?? 0;
 
   return (
@@ -65,7 +80,7 @@ export default async function Home({
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(products ?? []).map((product, i) => (
-            <ProductCard key={product.id} product={product} priority={i === 0} />
+            <ProductCard key={product.id} product={product} items={itemsByProduct.get(product.id) ?? []} priority={i === 0} />
           ))}
         </div>
       </FilterableList>

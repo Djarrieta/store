@@ -27,6 +27,7 @@
         "npm run db:reset": true,
         "npx supabase db push": true,
         "npx supabase db query": true,
-        "npx eslint": true
+        "npx eslint": true,
+        "npx next": true
     }
 }

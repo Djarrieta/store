@@ -8,6 +8,7 @@ import FilterableList from "@/app/components/FilterableList";
 
 interface ItemWithProduct extends Item {
   product: Pick<Product, "id" | "title"> | null;
+  item_categories: Array<{ category: { id: string; name: string } | null }>;
 }
 
 export default async function AdminItemsPage({
@@ -25,7 +26,7 @@ export default async function AdminItemsPage({
 
   let query = supabase
     .from("items")
-    .select("*, product:product_id(id, title)", { count: "exact" })
+    .select("*, product:product_id(id, title), item_categories(category:category_id(id, name))", { count: "exact" })
     .order("created_at", { ascending: false });
 
   if (q?.trim()) {
@@ -61,7 +62,9 @@ export default async function AdminItemsPage({
                 </p>
                 <p className="text-xs text-[var(--muted)]">
                   Stock: <strong>{item.stock}</strong>
-                  {item.sku && <> &middot; SKU: {item.sku}</>}
+                  {item.item_categories.length > 0 && (
+                    <> &middot; {item.item_categories.map((ic) => ic.category?.name).filter(Boolean).join(" / ")}</>
+                  )}
                 </p>
               </div>
               <div className="ml-4 flex shrink-0 items-center gap-2">

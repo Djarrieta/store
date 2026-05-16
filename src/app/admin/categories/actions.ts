@@ -11,8 +11,9 @@ function parseInput(formData: FormData): CreateCategoryInput {
   const slug = (formData.get("slug") as string | null)?.trim() ||
     name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const parent_id = (formData.get("parent_id") as string | null)?.trim() || null;
+  const type = ((formData.get("type") as string | null)?.trim() || "product") as "product" | "variant";
 
-  return { name, slug, parent_id: parent_id || null };
+  return { name, slug, parent_id: parent_id || null, type };
 }
 
 export async function createCategory(formData: FormData) {

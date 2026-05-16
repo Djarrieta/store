@@ -5,6 +5,7 @@ CREATE TABLE public.categories (
   name        text NOT NULL,
   slug        text NOT NULL,
   parent_id   uuid REFERENCES public.categories(id) ON DELETE RESTRICT,
+  type        text NOT NULL DEFAULT 'product' CHECK (type IN ('product', 'variant')),
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 
