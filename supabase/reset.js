@@ -1,8 +1,26 @@
 // Runs all migrations then all seed files in sort order against the linked project.
 // Add new .sql files to supabase/migrations/ or supabase/seed/ — no other changes needed.
 const { execSync } = require("child_process");
-const { readdirSync } = require("fs");
+const { readdirSync, readFileSync } = require("fs");
 const { join } = require("path");
+
+// Load .env.local so env vars are available without requiring a separate shell export
+function loadEnvLocal() {
+  try {
+    const raw = readFileSync(join(__dirname, "../.env.local"), "utf8");
+    for (const line of raw.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eq = trimmed.indexOf("=");
+      if (eq === -1) continue;
+      const key = trimmed.slice(0, eq).trim();
+      const value = trimmed.slice(eq + 1).trim();
+      if (!(key in process.env)) process.env[key] = value;
+    }
+  } catch {
+    // .env.local not found — rely on shell environment
+  }
+}
 
 const runDir = (dir) => {
   const files = readdirSync(dir)
@@ -18,5 +36,17 @@ const runDir = (dir) => {
   }
 };
 
+loadEnvLocal();
 runDir("supabase/migrations");
 runDir("supabase/seed");
+
+// Set assistant_bot password after the role has been created by migration 12
+const botPassword = process.env.ASSISTANT_BOT_PASSWORD;
+if (botPassword) {
+  console.log("→ Setting assistant_bot password...");
+  const escaped = botPassword.replace(/'/g, "''");
+  execSync(`npx supabase db query --linked "ALTER ROLE assistant_bot WITH PASSWORD '${escaped}'"`, { stdio: "inherit" });
+  console.log("✓ assistant_bot password set.");
+} else {
+  console.warn("⚠  ASSISTANT_BOT_PASSWORD not set — skipping. Add it to .env.local and re-run db:reset.");
+}

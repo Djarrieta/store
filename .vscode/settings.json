@@ -22,6 +22,11 @@
         "/^npx eslint src --max-warnings 0$/": {
             "approve": true,
             "matchCommandLine": true
-        }
+        },
+        "npm install": true,
+        "npm run db:reset": true,
+        "npx supabase db push": true,
+        "npx supabase db query": true,
+        "npx eslint": true
     }
 }

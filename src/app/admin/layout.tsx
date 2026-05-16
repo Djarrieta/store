@@ -34,6 +34,12 @@ export default async function AdminLayout({
         >
           Content
         </Link>
+        <Link
+          href="/admin/orders"
+          className="rounded-lg border-2 border-black bg-[var(--accent)] px-3 py-1 text-sm font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+        >
+          Orders
+        </Link>
       </nav>
       {children}
     </div>
