@@ -214,7 +214,7 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
                 />
               </label>
 
-              <input type="hidden" name="is_default" value="false" />
+              <Input type="hidden" name="is_default" value="false" />
 
               <div className="flex gap-2 pt-1">
                 {addresses !== null && addresses.length > 0 && (

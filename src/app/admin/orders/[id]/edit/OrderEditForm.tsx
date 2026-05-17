@@ -252,12 +252,13 @@ export default function OrderEditForm({ order }: Props) {
                   {formatCurrency(item.unit_price)}
                 </td>
                 <td className="p-3 text-right">
-                  <input
+                  <Input
                     type="number"
                     min={1}
                     value={item.qty}
                     onChange={(e) => updateItemQty(i, Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-16 rounded border-2 border-black px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    fullWidth={false}
+                    className="w-16 px-2 py-1 text-center"
                   />
                 </td>
                 <td className="p-3 text-right font-semibold whitespace-nowrap">

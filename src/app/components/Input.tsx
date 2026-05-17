@@ -59,3 +59,16 @@ export function Select({ shadow = false, fullWidth = true, className, children, 
     </select>
   );
 }
+
+// ── Checkbox ──────────────────────────────────────────────────────────────────
+type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
+
+export function Checkbox({ className, ...props }: CheckboxProps) {
+  return (
+    <input
+      type="checkbox"
+      className={clsx("h-4 w-4 cursor-pointer rounded border-2 border-black accent-[var(--accent)]", className)}
+      {...props}
+    />
+  );
+}

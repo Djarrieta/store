@@ -3,7 +3,7 @@ import { requireAuth } from "@/lib/auth";
 import { createAddress } from "../../actions";
 import Button from "@/app/components/Button";
 import Breadcrumb from "@/app/components/Breadcrumb";
-import Input from "@/app/components/Input";
+import Input, { Checkbox } from "@/app/components/Input";
 import { FormField, FormActions } from "@/app/components/FormCard";
 
 export default async function NewAddressPage() {
@@ -90,11 +90,9 @@ export default async function NewAddressPage() {
         </FormField>
 
         <label className="flex cursor-pointer select-none items-center gap-2 text-sm font-medium">
-          <input
-            type="checkbox"
+          <Checkbox
             name="is_default"
             value="true"
-            className="h-4 w-4 rounded border-2 border-black"
           />
           Usar como dirección principal
         </label>
