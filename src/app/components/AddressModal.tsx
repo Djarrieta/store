@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
-import Input from "@/app/components/Input";
+import Input, { LabeledField } from "@/app/components/Input";
 import { createAddress,getMyAddresses } from "@/app/perfil/actions";
 import type { Address } from "@/types";
 
@@ -13,8 +13,6 @@ interface AddressModalProps {
   onClose: () => void;
   onSelect: (address: Address) => void;
 }
-
-const LABEL_CLASS = "grid gap-1 text-sm font-medium";
 
 export default function AddressModal({ isOpen, onClose, onSelect }: AddressModalProps) {
   const [mode, setMode] = useState<"list" | "form">("list");
@@ -161,60 +159,54 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
                 </p>
               )}
 
-              <label className={LABEL_CLASS}>
-                Nombre del destinatario
+              <LabeledField label="Nombre del destinatario">
                 <Input
                   name="recipient_name"
                   required
                   placeholder="ej. María García"
                 />
-              </label>
+              </LabeledField>
 
               <div className="grid grid-cols-2 gap-3">
-                <label className={LABEL_CLASS}>
-                  Departamento
+                <LabeledField label="Departamento">
                   <Input
                     name="department"
                     required
                     placeholder="ej. Antioquia"
                   />
-                </label>
-                <label className={LABEL_CLASS}>
-                  Ciudad
+                </LabeledField>
+                <LabeledField label="Ciudad">
                   <Input
                     name="city"
                     required
                     placeholder="ej. Medellín"
                   />
-                </label>
+                </LabeledField>
               </div>
 
-              <label className={LABEL_CLASS}>
-                Dirección
+              <LabeledField label="Dirección">
                 <Input
                   name="address_line"
                   required
                   placeholder="ej. Cra 7 # 45-20 Apto 301"
                 />
-              </label>
+              </LabeledField>
 
-              <label className={LABEL_CLASS}>
-                Barrio <span className="font-normal text-[var(--muted)]">(opcional)</span>
+              <LabeledField label={<>Barrio <span className="font-normal text-[var(--muted)]">(opcional)</span></>}>
                 <Input
                   name="neighborhood"
                   placeholder="ej. El Poblado"
                 />
-              </label>
+              </LabeledField>
 
-              <label className={LABEL_CLASS}>
-                Teléfono de contacto
+              <LabeledField label="Teléfono de contacto">
                 <Input
                   name="phone"
                   required
                   type="tel"
                   placeholder="ej. 300 123 4567"
                 />
-              </label>
+              </LabeledField>
 
               <Input type="hidden" name="is_default" value="false" />
 
