@@ -6,6 +6,9 @@ Usuario autenticado: {{userInfo}}
 Direcciones del usuario:
 {{userAddresses}}
 
+## Carrito de compras actual del usuario
+{{cartSummary}}
+
 ## Información fija de la tienda
 {{pinnedContent}}
 

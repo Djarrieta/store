@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useTransition } from "react";
 import ReactMarkdown from "react-markdown";
 import { sendMessage, migrateGuestChat } from "./actions";
+import { useCart } from "@/lib/cart";
 
 interface Message {
   role: "user" | "assistant";
@@ -12,6 +13,7 @@ interface Message {
 const STORAGE_KEY = "chat_messages";
 
 export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const { items: cartItems } = useCart();
   const [messages, setMessages] = useState<Message[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -65,7 +67,7 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
 
     startTransition(async () => {
       try {
-        const response = await sendMessage(text);
+        const response = await sendMessage(text, cartItems);
         setMessages((prev) => [...prev, { role: "assistant", text: response }]);
       } catch {
         setMessages((prev) => [

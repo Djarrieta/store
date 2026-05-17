@@ -2,8 +2,16 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { getHistory, type ChatMessage } from "./chatHistory";
 import { fetchStoreSnapshot } from "./contextTopics";
 import { ASSISTANT_PROMPT } from "./prompt";
+import { formatCurrency } from "@/lib/format";
+import type { CartItem } from "@/lib/cart";
 
-export async function buildPrompt(userMessage: string, userRef: string | null): Promise<string> {
+const MAX_CART_ITEMS = 50;
+
+export async function buildPrompt(
+  userMessage: string,
+  userRef: string | null,
+  cartItems: CartItem[] = [],
+): Promise<string> {
   const supabase = createServiceClient();
 
   const isGuest = userRef === null;
@@ -78,6 +86,23 @@ export async function buildPrompt(userMessage: string, userRef: string | null): 
     ? `> **USUARIO NO AUTENTICADO**: Puedes responder preguntas sobre productos, categorías, envíos y políticas. Si el usuario quiere comprar, hacer un pedido, ver sus pedidos o necesita datos de su cuenta, indícale que debe iniciar sesión y muéstrale el enlace: [Iniciar sesión](/login). No uses las herramientas \`bot_create_order\`, \`bot_get_my_orders\`, ni \`bot_get_order_status\`.`
     : "";
 
+  const safeCartItems = cartItems.slice(0, MAX_CART_ITEMS);
+  let cartSummary: string;
+  if (safeCartItems.length === 0) {
+    cartSummary = "El carrito está vacío.";
+  } else {
+    const lines = safeCartItems.map(
+      (item) =>
+        `- ${item.title} × ${item.quantity} — ${formatCurrency(item.price)} c/u`,
+    );
+    const subtotal = safeCartItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+    lines.push(`Subtotal: ${formatCurrency(subtotal)}`);
+    cartSummary = lines.join("\n");
+  }
+
   return ASSISTANT_PROMPT
     .replace("{{date}}", new Date().toLocaleDateString("es-CO"))
     .replace("{{userInfo}}", userInfo)
@@ -87,6 +112,7 @@ export async function buildPrompt(userMessage: string, userRef: string | null): 
     .replace("{{pinnedContent}}", pinnedContext)
     .replace("{{contextTopics}}", contextTopics)
     .replace("{{conversationHistory}}", conversationHistory)
+    .replace("{{cartSummary}}", cartSummary)
     .replace("{{guestInstructions}}", guestInstructions)
     .replace("{{userMessage}}", userMessage.trim().slice(0, 2000));
 }
