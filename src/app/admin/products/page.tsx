@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { ProductWithCategory } from "@/types";
 import { deleteProduct } from "./actions";
@@ -80,12 +79,14 @@ export default async function AdminProductsPage({
                 </p>
               </div>
               <div className="ml-4 flex shrink-0 items-center gap-2">
-                <Link
+                <Button
                   href={`/admin/products/${product.id}/edit`}
-                  className="rounded-md border-2 border-black px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+                  variant="secondary"
+                  size="sm"
+                  shadow
                 >
                   Editar
-                </Link>
+                </Button>
                 <form
                   action={async () => {
                     "use server";

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
 import type { Order, OrderItem, OrderStatus } from "@/types";
@@ -192,12 +191,14 @@ export default async function OrderDetailPage({
 
       {/* Actions */}
       <div className="flex flex-wrap gap-3">
-        <Link
+        <Button
           href={`/admin/orders/${order.id}/edit`}
-          className="rounded-lg border-2 border-black bg-[var(--background)] px-4 py-2 font-bold shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
+          variant="secondary"
+          size="lg"
+          shadow
         >
           Editar
-        </Link>
+        </Button>
         {order.status === "pending_approval" && (
           <>
             <form

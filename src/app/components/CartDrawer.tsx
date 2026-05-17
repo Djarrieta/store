@@ -125,7 +125,7 @@ export default function CartDrawer() {
             </ul>
 
             {/* Footer */}
-            <div className="space-y-3 border-t-4 border-black p-4">
+            <div className="space-y-3 border-t-4 border-black p-4 pb-8">
               {/* Address section — authenticated users only */}
               {isAuthenticated && (
                 <div className="rounded-xl border-2 border-black bg-[var(--bg)] p-3">

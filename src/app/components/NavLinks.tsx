@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Button from "@/app/components/Button";
 
 interface NavLinksProps {
   isAuthenticated: boolean;
@@ -8,24 +8,18 @@ interface NavLinksProps {
 export default function NavLinks({ isAuthenticated, isAdmin }: NavLinksProps) {
   return (
     <nav className="flex items-center gap-2">
-      <Link href="/about" className="rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-semibold">
+      <Button href="/about" variant="secondary" size="sm">
         Nosotros
-      </Link>
+      </Button>
       {isAdmin && (
-        <Link
-          href="/admin/products"
-          className="rounded-lg border-2 border-black bg-[var(--card)] px-3 py-1 text-sm font-semibold"
-        >
+        <Button href="/admin/products" variant="secondary" size="sm">
           Admin
-        </Link>
+        </Button>
       )}
       {!isAuthenticated && (
-        <Link
-          href="/login"
-          className="rounded-lg border-2 border-black bg-[var(--accent)] px-3 py-1 text-sm font-semibold"
-        >
+        <Button href="/login" variant="primary" size="sm" shadow>
           Ingresar
-        </Link>
+        </Button>
       )}
     </nav>
   );

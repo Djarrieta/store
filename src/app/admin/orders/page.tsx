@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/service";
 import type { Order, OrderStatus } from "@/types";
 import { formatCurrency, formatDate } from "@/lib/format";
 import PageHeader from "@/app/components/PageHeader";
+import Button from "@/app/components/Button";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   created: "Creado",
@@ -73,12 +73,14 @@ export default async function AdminOrdersPage() {
                       >
                         {STATUS_LABEL[order.status]}
                       </span>
-                      <Link
+                      <Button
                         href={`/admin/orders/${order.id}`}
-                        className="rounded-md border-2 border-black px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+                        variant="secondary"
+                        size="sm"
+                        shadow
                       >
                         Ver
-                      </Link>
+                      </Button>
                     </div>
                   </div>
                 </div>

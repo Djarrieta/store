@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import Button from "@/app/components/Button";
 
@@ -115,12 +114,9 @@ export default function FilterableList({
                 Aplicar filtros
               </Button>
               {hasFilters && (
-                <Link
-                  href="?"
-                  className="rounded-md border-2 border-black px-3 py-2 text-sm font-semibold hover:bg-gray-100"
-                >
+                <Button href="?" variant="secondary" size="md">
                   Limpiar
-                </Link>
+                </Button>
               )}
             </div>
           </form>
@@ -135,15 +131,16 @@ export default function FilterableList({
             Página {page} de {totalPages}
           </span>
           <div className="flex gap-2">
-            <Link
+            <Button
               href={buildHref(previousPage)}
-              className="rounded-md border-2 border-black px-2 py-1 disabled:pointer-events-none"
+              variant="secondary"
+              size="sm"
             >
               Anterior
-            </Link>
-            <Link href={buildHref(nextPage)} className="rounded-md border-2 border-black px-2 py-1">
+            </Button>
+            <Button href={buildHref(nextPage)} variant="secondary" size="sm">
               Siguiente
-            </Link>
+            </Button>
           </div>
         </div>
       )}

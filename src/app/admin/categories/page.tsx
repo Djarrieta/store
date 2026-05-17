@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Category } from "@/types";
 import { deleteCategory } from "./actions";
@@ -39,12 +38,9 @@ export default async function AdminCategoriesPage() {
                 <p className="text-xs text-[var(--muted)]">{parent.slug}</p>
               </div>
               <div className="flex gap-2">
-                <Link
-                  href={`/admin/categories/${parent.id}/edit`}
-                  className="rounded-md border-2 border-black px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-                >
+                <Button href={`/admin/categories/${parent.id}/edit`} variant="secondary" size="sm" shadow>
                   Editar
-                </Link>
+                </Button>
                 <form
                   className="flex items-center"
                   action={async () => {
@@ -68,12 +64,9 @@ export default async function AdminCategoriesPage() {
                       <span className="ml-2 text-xs text-[var(--muted)]">{sub.slug}</span>
                     </div>
                     <div className="flex gap-2">
-                      <Link
-                        href={`/admin/categories/${sub.id}/edit`}
-                        className="rounded-md border-2 border-black px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-                      >
+                      <Button href={`/admin/categories/${sub.id}/edit`} variant="secondary" size="sm" shadow>
                         Editar
-                      </Link>
+                      </Button>
                       <form
                         className="flex items-center"
                         action={async () => {

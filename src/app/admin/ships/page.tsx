@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/format";
@@ -63,12 +62,14 @@ export default async function AdminShipsPage() {
                     <td className="p-3 text-right">{ship.estimated_days}</td>
                     <td className="p-3">
                       <div className="flex justify-end gap-2">
-                        <Link
+                        <Button
                           href={`/admin/ships/${ship.id}/edit`}
-                          className="rounded-md border-2 border-black px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] transition-all hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+                          variant="secondary"
+                          size="sm"
+                          shadow
                         >
                           Editar
-                        </Link>
+                        </Button>
                         <form
                           className="flex items-center"
                           action={async () => {
