@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
 import type { Product, ProductImage } from "@/types";
+import Button from "@/app/components/Button";
 
 interface ProductFormProps {
   action: (formData: FormData) => Promise<void>;
@@ -103,12 +104,9 @@ export default function ProductForm({
 
       <input type="hidden" name="images" value={serializedImages} />
 
-      <button
-        type="submit"
-        className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-semibold"
-      >
+      <Button variant="primary" size="lg" type="submit">
         {defaultValues?.id ? "Actualizar producto" : "Crear producto"}
-      </button>
+      </Button>
     </form>
   );
 }

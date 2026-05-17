@@ -6,6 +6,7 @@ import type { Order, OrderItem, OrderStatus } from "@/types";
 import type { ShippingAddressSnapshot } from "@/types";
 import { updateOrder } from "../../actions";
 import { formatCurrency } from "@/lib/format";
+import Button from "@/app/components/Button";
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   created: "Creado (sin pagar)",
@@ -123,9 +124,8 @@ export default function OrderEditForm({ order }: Props) {
         <h2 className="font-bold text-base">Estado del pedido</h2>
         <div className="flex flex-wrap gap-2">
           {ALL_STATUSES.map((s) => (
-            <button
+            <Button
               key={s}
-              type="button"
               onClick={() => setStatus(s)}
               className={`rounded-lg border-2 border-black px-3 py-1.5 text-sm font-semibold transition-all ${
                 status === s
@@ -134,7 +134,7 @@ export default function OrderEditForm({ order }: Props) {
               }`}
             >
               {STATUS_LABELS[s]}
-            </button>
+            </Button>
           ))}
         </div>
       </section>
@@ -270,15 +270,14 @@ export default function OrderEditForm({ order }: Props) {
                   {formatCurrency(item.unit_price * item.qty)}
                 </td>
                 <td className="p-3 text-center">
-                  <button
-                    type="button"
+                  <Button
                     onClick={() => removeItem(i)}
                     disabled={items.length === 1}
                     aria-label="Eliminar ítem"
                     className="text-red-600 hover:text-red-800 disabled:opacity-30 disabled:cursor-not-allowed text-lg leading-none font-bold"
                   >
                     ×
-                  </button>
+                  </Button>
                 </td>
               </tr>
             ))}
@@ -318,21 +317,26 @@ export default function OrderEditForm({ order }: Props) {
 
       {/* Actions */}
       <div className="flex items-center gap-3">
-        <button
+        <Button
+          variant="primary"
+          size="lg"
+          shadow
           type="submit"
           disabled={isPending}
-          className="rounded-lg border-2 border-black bg-[var(--accent)] px-5 py-2.5 font-bold shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-5 py-2.5"
         >
           {isPending ? "Guardando..." : "Guardar cambios"}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="secondary"
+          size="lg"
+          shadow
           onClick={() => router.back()}
           disabled={isPending}
-          className="rounded-lg border-2 border-black bg-[var(--background)] px-5 py-2.5 font-semibold shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all disabled:opacity-60"
+          className="px-5 py-2.5"
         >
           Cancelar
-        </button>
+        </Button>
       </div>
     </form>
   );

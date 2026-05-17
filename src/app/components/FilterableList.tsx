@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import Button from "@/app/components/Button";
 
 interface FilterableListProps {
   q?: string;
@@ -57,8 +58,7 @@ export default function FilterableList({
     <div className="space-y-4">
       {/* Filter toggle bar */}
       <div className="rounded-xl border-2 border-black bg-white">
-        <button
-          type="button"
+        <Button
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold"
@@ -89,7 +89,7 @@ export default function FilterableList({
           >
             <path d="M6 9l6 6 6-6" />
           </svg>
-        </button>
+        </Button>
 
         {open && (
           <form
@@ -111,12 +111,9 @@ export default function FilterableList({
               className="rounded-md border-2 border-black px-3 py-2 text-sm"
             />
             <div className="flex gap-2 sm:col-span-3">
-              <button
-                type="submit"
-                className="flex-1 rounded-md border-2 border-black bg-[var(--accent)] px-3 py-2 text-sm font-semibold"
-              >
+              <Button variant="primary" size="md" type="submit" className="flex-1">
                 Aplicar filtros
-              </button>
+              </Button>
               {hasFilters && (
                 <Link
                   href="?"

@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import type { Order, OrderItem, OrderStatus } from "@/types";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { approveOrder, rejectOrder, fulfillOrder, updateTrackingCode } from "../actions";
+import Button from "@/app/components/Button";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   created: "Creado (sin pagar)",
@@ -116,12 +117,9 @@ export default async function OrderDetailPage({
             placeholder="Código de guía (ej: TCC-123456789)"
             className="flex-1 rounded-xl border-2 border-black p-2 text-sm shadow-[2px_2px_0_0_#111] focus:outline-none focus:ring-2 focus:ring-black font-mono"
           />
-          <button
-            type="submit"
-            className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-bold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-          >
+          <Button variant="primary" size="lg" shadow type="submit">
             Guardar
-          </button>
+          </Button>
         </form>
         {order.tracking_code && (
           <p className="text-xs text-[var(--muted)]">
@@ -208,12 +206,9 @@ export default async function OrderDetailPage({
                 await approveOrder(order.id);
               }}
             >
-              <button
-                type="submit"
-                className="rounded-lg border-2 border-black bg-green-300 px-4 py-2 font-bold shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
-              >
+              <Button variant="success" size="lg" shadow type="submit">
                 Aprobar
-              </button>
+              </Button>
             </form>
             <form
               action={async () => {
@@ -221,12 +216,9 @@ export default async function OrderDetailPage({
                 await rejectOrder(order.id);
               }}
             >
-              <button
-                type="submit"
-                className="rounded-lg border-2 border-black bg-red-300 px-4 py-2 font-bold shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
-              >
+              <Button variant="danger" size="lg" shadow type="submit">
                 Rechazar
-              </button>
+              </Button>
             </form>
           </>
         )}
@@ -237,12 +229,9 @@ export default async function OrderDetailPage({
               await fulfillOrder(order.id);
             }}
           >
-            <button
-              type="submit"
-              className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 font-bold shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
-            >
+            <Button variant="primary" size="lg" shadow type="submit">
               Marcar como entregado
-            </button>
+            </Button>
           </form>
         )}
       </div>

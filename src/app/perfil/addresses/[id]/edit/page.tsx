@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { Address } from "@/types";
 import { updateAddress } from "../../../actions";
+import Button from "@/app/components/Button";
 
 export default async function EditAddressPage({
   params,
@@ -117,12 +118,15 @@ export default async function EditAddressPage({
           >
             Cancelar
           </Link>
-          <button
+          <Button
+            variant="primary"
+            size="xl"
+            shadow
             type="submit"
-            className="flex-1 rounded-xl border-2 border-black bg-[var(--accent)] px-5 py-2.5 text-sm font-bold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+            className="flex-1"
           >
             Guardar cambios
-          </button>
+          </Button>
         </div>
       </form>
     </main>

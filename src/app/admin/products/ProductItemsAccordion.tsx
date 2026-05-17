@@ -6,6 +6,7 @@ import {
   updateItemFromProduct,
   deleteItemFromProduct,
 } from "@/app/admin/items/actions";
+import Button from "@/app/components/Button";
 
 interface CategoryValue {
   id: string;
@@ -93,8 +94,7 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
         return (
           <div key={item.id} className="overflow-hidden rounded-xl border-2 border-black shadow-[2px_2px_0_0_#111]">
             {/* Header row */}
-            <button
-              type="button"
+            <Button
               onClick={() => setOpenItemId(isOpen ? null : item.id)}
               className="flex w-full items-center justify-between bg-[var(--card)] px-4 py-3 text-left transition-colors hover:bg-[var(--bg)]"
             >
@@ -103,7 +103,7 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
                 Stock: <strong className="text-black">{item.stock}</strong>
                 <span className="text-base leading-none">{isOpen ? "▲" : "▼"}</span>
               </span>
-            </button>
+            </Button>
 
             {/* Expanded body */}
             {isOpen && (
@@ -123,21 +123,15 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
                     />
                   </label>
 
-                  <button
-                    type="submit"
-                    className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-1.5 text-sm font-semibold shadow-[2px_2px_0_0_#111] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
-                  >
+                  <Button variant="primary" size="md" shadow type="submit">
                     Guardar
-                  </button>
+                  </Button>
                 </form>
 
                 <form action={deleteAction} className="border-t-2 border-dashed border-black pt-3">
-                  <button
-                    type="submit"
-                    className="rounded-lg border-2 border-black bg-white px-4 py-1.5 text-sm font-semibold shadow-[2px_2px_0_0_#111] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
-                  >
-                    Eliminar variante
-                  </button>
+                <Button variant="secondary" size="md" shadow type="submit">
+                  Eliminar variante
+                </Button>
                 </form>
               </div>
             )}
@@ -147,13 +141,12 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
 
       {/* Add variant */}
       {!showAddForm ? (
-        <button
-          type="button"
+        <Button
           onClick={() => setShowAddForm(true)}
           className="mt-1 rounded-xl border-2 border-dashed border-black bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[var(--bg)]"
         >
           + Agregar variante
-        </button>
+        </Button>
       ) : (
         <form
           action={createAction}
@@ -176,19 +169,12 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
           </label>
 
           <div className="flex gap-2">
-            <button
-              type="submit"
-              className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-semibold shadow-[3px_3px_0_0_#111] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
-            >
+            <Button variant="primary" size="lg" shadow type="submit">
               Agregar
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowAddForm(false)}
-              className="rounded-lg border-2 border-black bg-white px-4 py-2 text-sm font-semibold shadow-[2px_2px_0_0_#111] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
-            >
+            </Button>
+            <Button variant="secondary" size="lg" shadow onClick={() => setShowAddForm(false)}>
               Cancelar
-            </button>
+            </Button>
           </div>
         </form>
       )}

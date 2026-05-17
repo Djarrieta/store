@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Category } from "@/types";
 import { updateCategory } from "../../actions";
 import NameWithSlug from "@/app/components/NameWithSlug";
+import Button from "@/app/components/Button";
 
 export default async function EditCategoryPage({
   params,
@@ -52,12 +53,9 @@ export default async function EditCategoryPage({
           </select>
         </label>
 
-        <button
-          type="submit"
-          className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-semibold"
-        >
+        <Button variant="primary" size="lg" type="submit">
           Actualizar categoría
-        </button>
+        </Button>
       </form>
     </section>
   );

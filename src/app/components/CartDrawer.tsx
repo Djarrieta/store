@@ -8,6 +8,7 @@ import { useCart } from "@/lib/cart";
 import { formatCurrency } from "@/lib/format";
 import BuyNowButton from "@/app/components/BuyNowButton";
 import AddressModal from "@/app/components/AddressModal";
+import Button from "@/app/components/Button";
 
 export default function CartDrawer() {
   const {
@@ -53,13 +54,13 @@ export default function CartDrawer() {
         {/* Header */}
         <div className="flex items-center justify-between border-b-4 border-black p-4">
           <h2 className="font-display text-xl font-bold">Carrito</h2>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={closeCart}
-            className="rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-bold hover:bg-[var(--bg)]"
+            className="px-3 py-1 text-sm font-bold rounded-lg"
           >
             ✕
-          </button>
+          </Button>
         </div>
 
         {/* Empty state */}
@@ -91,32 +92,32 @@ export default function CartDrawer() {
                       {formatCurrency(item.price)}
                     </p>
                     <div className="mt-auto flex items-center gap-2">
-                      <button
-                        type="button"
+                      <Button
+                        variant="secondary"
+                        size="icon"
                         onClick={() => setQuantity(item.id, item.quantity - 1)}
-                        className="flex h-6 w-6 items-center justify-center rounded border-2 border-black text-sm font-bold hover:bg-[var(--bg)]"
                         aria-label="Decrease quantity"
                       >
                         −
-                      </button>
+                      </Button>
                       <span className="min-w-[1.5rem] text-center text-sm font-semibold">
                         {item.quantity}
                       </span>
-                      <button
-                        type="button"
+                      <Button
+                        variant="secondary"
+                        size="icon"
                         onClick={() => setQuantity(item.id, item.quantity + 1)}
-                        className="flex h-6 w-6 items-center justify-center rounded border-2 border-black text-sm font-bold hover:bg-[var(--bg)]"
                         aria-label="Increase quantity"
                       >
                         +
-                      </button>
-                      <button
-                        type="button"
+                      </Button>
+                      <Button
+                        variant="ghost"
                         onClick={() => removeItem(item.id)}
-                        className="ml-auto text-xs text-[var(--muted)] underline hover:text-[var(--fg)]"
+                        className="ml-auto text-xs"
                       >
                         Remove
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </li>
@@ -155,21 +156,22 @@ export default function CartDrawer() {
                       )}
                     </div>
                     <div className="flex shrink-0 flex-col gap-1">
-                      <button
-                        type="button"
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        shadow
                         onClick={() => setAddressModalOpen(true)}
-                        className="rounded-md border-2 border-black bg-white px-2 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                       >
                         {selectedAddress ? "Cambiar" : "Agregar"}
-                      </button>
+                      </Button>
                       {selectedAddress && (
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
                           onClick={clearAddress}
-                          className="text-xs text-[var(--muted)] underline hover:text-[var(--fg)]"
+                          className="text-xs"
                         >
                           Quitar
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>

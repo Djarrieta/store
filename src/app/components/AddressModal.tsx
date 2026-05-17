@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import { getMyAddresses, createAddress } from "@/app/perfil/actions";
 import type { Address } from "@/types";
+import Button from "@/app/components/Button";
 
 interface AddressModalProps {
   isOpen: boolean;
@@ -88,13 +89,13 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
           <h2 className="font-display text-lg font-bold">
             {mode === "list" ? "Dirección de envío" : "Nueva dirección"}
           </h2>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={handleClose}
-            className="rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-bold hover:bg-[var(--bg)]"
+            className="px-3 py-1 text-sm font-bold rounded-lg"
           >
             ✕
-          </button>
+          </Button>
         </div>
 
         <div className="p-4">
@@ -113,9 +114,8 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
               {!isLoadingList && !loadError && addresses !== null && (
                 <div className="space-y-3">
                   {addresses.map((addr) => (
-                    <button
+                    <Button
                       key={addr.id}
-                      type="button"
                       onClick={() => handleSelect(addr)}
                       className="w-full rounded-xl border-2 border-black bg-white p-4 text-left shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
                     >
@@ -137,16 +137,15 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
                           </span>
                         )}
                       </div>
-                    </button>
+                    </Button>
                   ))}
 
-                  <button
-                    type="button"
+                  <Button
                     onClick={() => setMode("form")}
                     className="mt-1 w-full rounded-xl border-2 border-dashed border-black bg-[var(--bg)] py-3 text-sm font-semibold hover:bg-[var(--card)]"
                   >
                     + Agregar nueva dirección
-                  </button>
+                  </Button>
                 </div>
               )}
             </>
@@ -225,21 +224,25 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
 
               <div className="flex gap-2 pt-1">
                 {addresses !== null && addresses.length > 0 && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    shadow
                     onClick={() => setMode("list")}
-                    className="rounded-lg border-2 border-black bg-white px-4 py-2 text-sm font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                   >
                     Volver
-                  </button>
+                  </Button>
                 )}
-                <button
+                <Button
+                  variant="primary"
+                  size="lg"
+                  shadow
                   type="submit"
                   disabled={isSaving}
-                  className="flex-1 rounded-xl border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-40"
+                  className="flex-1 rounded-xl"
                 >
                   {isSaving ? "Guardando..." : "Guardar y usar"}
-                </button>
+                </Button>
               </div>
             </form>
           )}

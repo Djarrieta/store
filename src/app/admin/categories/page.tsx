@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Category } from "@/types";
 import { deleteCategory } from "./actions";
 import PageHeader from "@/app/components/PageHeader";
+import Button from "@/app/components/Button";
 
 export default async function AdminCategoriesPage() {
   const supabase = await createClient();
@@ -51,12 +52,9 @@ export default async function AdminCategoriesPage() {
                     await deleteCategory(parent.id);
                   }}
                 >
-                  <button
-                    type="submit"
-                    className="rounded-md border-2 border-black bg-red-100 px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-                  >
+                  <Button variant="danger" size="sm" shadow type="submit" className="bg-red-100">
                     Eliminar
-                  </button>
+                  </Button>
                 </form>
               </div>
             </div>
@@ -83,12 +81,9 @@ export default async function AdminCategoriesPage() {
                           await deleteCategory(sub.id);
                         }}
                       >
-                        <button
-                          type="submit"
-                          className="rounded-md border-2 border-black bg-red-100 px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-                        >
+                      <Button variant="danger" size="sm" shadow type="submit" className="bg-red-100">
                           Eliminar
-                        </button>
+                        </Button>
                       </form>
                     </div>
                   </li>

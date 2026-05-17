@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Category } from "@/types";
 import { createCategory } from "../actions";
 import NameWithSlug from "@/app/components/NameWithSlug";
+import Button from "@/app/components/Button";
 
 export default async function NewCategoryPage() {
   const supabase = await createClient();
@@ -36,12 +37,9 @@ export default async function NewCategoryPage() {
           </select>
         </label>
 
-        <button
-          type="submit"
-          className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-semibold"
-        >
+        <Button variant="primary" size="lg" type="submit">
           Crear categoría
-        </button>
+        </Button>
       </form>
     </section>
   );

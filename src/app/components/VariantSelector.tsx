@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
+import Button from "@/app/components/Button";
 
 interface VariantCategory {
   id: string;
@@ -109,14 +110,16 @@ export default function VariantSelector({
         </p>
       )}
 
-      <button
-          type="button"
-          onClick={handleAdd}
-          disabled={!allSelected || !inStock}
-          className="w-full rounded-xl border-2 border-black bg-[var(--accent)] px-6 py-3 font-bold shadow-[4px_4px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-40 disabled:pointer-events-none"
-        >
-          {added ? "✓ Agregado!" : "Agregar al carrito"}
-        </button>
+      <Button
+        variant="primary"
+        size="xl"
+        shadow
+        fullWidth
+        onClick={handleAdd}
+        disabled={!allSelected || !inStock}
+      >
+        {added ? "✓ Agregado!" : "Agregar al carrito"}
+      </Button>
     </div>
   );
 }

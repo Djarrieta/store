@@ -6,6 +6,7 @@ import PageHeader from "@/app/components/PageHeader";
 import FilterableList from "@/app/components/FilterableList";
 import { PAGE_SIZE } from "@/lib/constants";
 import { formatCurrency } from "@/lib/format";
+import Button from "@/app/components/Button";
 
 export default async function AdminProductsPage({
   searchParams,
@@ -91,12 +92,9 @@ export default async function AdminProductsPage({
                     await deleteProduct(product.id);
                   }}
                 >
-                  <button
-                    type="submit"
-                    className="rounded-md border-2 border-black bg-red-100 px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-                  >
+                  <Button variant="danger" size="sm" shadow type="submit" className="bg-red-100">
                     Eliminar
-                  </button>
+                  </Button>
                 </form>
               </div>
             </div>

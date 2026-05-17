@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Script from "next/script";
 import { createOrderAndCheckout, markOrderPaid, cancelOrder } from "@/app/actions/orders";
+import Button from "@/app/components/Button";
 import type { CartItem } from "@/lib/cart";
 import type { Address } from "@/types";
 
@@ -75,17 +76,16 @@ export default function BuyNowButton({
   return (
     <>
       <Script src="https://checkout.wompi.co/widget.js" strategy="lazyOnload" />
-      <button
-        type="button"
+      <Button
         onClick={handleBuy}
         disabled={loading || disabled || !shippingAddress}
         className={
           className ??
-          "w-full rounded-xl border-2 border-black bg-black text-white px-6 py-3 font-bold shadow-[4px_4px_0_0_#555] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-40 disabled:pointer-events-none"
+          "w-full rounded-xl border-2 border-black bg-black text-white px-6 py-3 font-bold shadow-[4px_4px_0_0_#555] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
         }
       >
         {loading ? "Procesando..." : (children ?? "Comprar ahora")}
-      </button>
+      </Button>
     </>
   );
 }

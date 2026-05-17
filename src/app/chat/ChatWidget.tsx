@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useTransition } from "react";
 import ReactMarkdown from "react-markdown";
 import { sendMessage, migrateGuestChat } from "./actions";
 import { useCart } from "@/lib/cart";
+import Button from "@/app/components/Button";
 
 interface Message {
   role: "user" | "assistant";
@@ -144,13 +145,16 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
           disabled={isPending}
           className="flex-1 rounded-lg border-2 border-black bg-[var(--card)] px-4 py-2 text-sm font-medium shadow-[2px_2px_0_0_#111] placeholder:text-[var(--muted)] focus:outline-none focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px] transition-all disabled:opacity-50"
         />
-        <button
+        <Button
+          variant="primary"
+          size="md"
+          shadow
           type="submit"
           disabled={isPending || !input.trim()}
-          className="rounded-lg border-2 border-black bg-[var(--accent)] px-5 py-2 text-sm font-bold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-5 font-bold"
         >
           Enviar
-        </button>
+        </Button>
       </form>
     </div>
   );

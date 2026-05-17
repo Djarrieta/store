@@ -1,13 +1,13 @@
 "use client";
 
 import { useCart } from "@/lib/cart";
+import Button from "@/app/components/Button";
 
 export default function CartIcon() {
   const { totalItems, openCart } = useCart();
 
   return (
-    <button
-      type="button"
+    <Button
       onClick={openCart}
       aria-label="Open cart"
       className="relative rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-bold shadow-[2px_2px_0_0_#111] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
@@ -18,6 +18,6 @@ export default function CartIcon() {
           {totalItems > 99 ? "99+" : totalItems}
         </span>
       )}
-    </button>
+    </Button>
   );
 }

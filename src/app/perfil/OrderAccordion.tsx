@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { Order, OrderStatus } from "@/types";
+import Button from "@/app/components/Button";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   created: "Creado",
@@ -39,8 +40,7 @@ export function OrderAccordion({ orders }: Props) {
             className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] overflow-hidden"
           >
             {/* Header row — click to toggle */}
-            <button
-              type="button"
+            <Button
               onClick={() => setOpenId(isOpen ? null : order.id)}
               className="flex w-full items-start justify-between gap-3 p-4 text-left"
               aria-expanded={isOpen}
@@ -71,7 +71,7 @@ export function OrderAccordion({ orders }: Props) {
               >
                 ▼
               </span>
-            </button>
+            </Button>
 
             {/* Expandable items list */}
             {isOpen && (

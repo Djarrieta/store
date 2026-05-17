@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Button from "@/app/components/Button";
 
 export default function LoginActions() {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,14 +33,9 @@ export default function LoginActions() {
 
   return (
     <div className="space-y-4">
-      <button
-        type="button"
-        onClick={loginWithGoogle}
-        disabled={isLoading}
-        className="w-full rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-semibold"
-      >
+      <Button variant="primary" size="lg" fullWidth onClick={loginWithGoogle} disabled={isLoading}>
         Continuar con Google
-      </button>
+      </Button>
 
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
     </div>

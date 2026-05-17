@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import type { ProductImage } from "@/types/product";
+import Button from "@/app/components/Button";
 
 interface ProductImageCarouselProps {
   images: ProductImage[];
@@ -45,26 +46,32 @@ export default function ProductImageCarousel({
         />
 
         {/* Prev / Next arrows */}
-        <button
+        <Button
+          variant="secondary"
+          size="lg"
+          shadow
           onClick={() => setCurrent((c) => (c - 1 + images.length) % images.length)}
           aria-label="Imagen anterior"
-          className="absolute left-2 top-1/2 -translate-y-1/2 rounded-lg border-2 border-black bg-white px-2 py-1 text-sm font-bold shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
+          className="absolute left-2 top-1/2 -translate-y-1/2 px-2 py-1"
         >
           ‹
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="secondary"
+          size="lg"
+          shadow
           onClick={() => setCurrent((c) => (c + 1) % images.length)}
           aria-label="Imagen siguiente"
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg border-2 border-black bg-white px-2 py-1 text-sm font-bold shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
+          className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1"
         >
           ›
-        </button>
+        </Button>
       </div>
 
       {/* Dot indicators */}
       <div className="mt-3 flex justify-center gap-2" role="tablist" aria-label="Seleccionar imagen">
         {images.map((img, i) => (
-          <button
+          <Button
             key={i}
             role="tab"
             aria-selected={i === current}
@@ -80,7 +87,7 @@ export default function ProductImageCarousel({
       {/* Thumbnail strip */}
       <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
         {images.map((img, i) => (
-          <button
+          <Button
             key={i}
             onClick={() => setCurrent(i)}
             aria-label={img.description ?? `Imagen ${i + 1}`}
@@ -97,7 +104,7 @@ export default function ProductImageCarousel({
               unoptimized
               className="object-cover"
             />
-          </button>
+          </Button>
         ))}
       </div>
     </div>

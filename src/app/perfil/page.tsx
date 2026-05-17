@@ -5,6 +5,7 @@ import type { Address, Order } from "@/types";
 import Link from "next/link";
 import { deleteAddress, setDefaultAddress } from "./actions";
 import { OrderAccordion } from "./OrderAccordion";
+import Button from "@/app/components/Button";
 
 export default async function PerfilPage() {
   const user = await requireAuth();
@@ -35,12 +36,9 @@ export default async function PerfilPage() {
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold">Mi perfil</h1>
         <form action={signOut}>
-          <button
-            type="submit"
-            className="rounded-lg border-2 border-black bg-white px-4 py-2 text-sm font-semibold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
-          >
+          <Button variant="secondary" size="lg" shadow type="submit">
             Cerrar sesión
-          </button>
+          </Button>
         </form>
       </div>
 
@@ -108,12 +106,16 @@ export default async function PerfilPage() {
                           await setDefaultAddress(addr.id);
                         }}
                       >
-                        <button
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          shadow
+                          fullWidth
                           type="submit"
-                          className="w-full rounded-md border-2 border-black bg-blue-50 px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] transition-all hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+                          className="bg-blue-50"
                         >
                           Usar principal
-                        </button>
+                        </Button>
                       </form>
                     )}
 
@@ -123,12 +125,16 @@ export default async function PerfilPage() {
                         await deleteAddress(addr.id);
                       }}
                     >
-                      <button
-                        type="submit"
-                        className="w-full rounded-md border-2 border-black bg-red-50 px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] transition-all hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
-                      >
-                        Eliminar
-                      </button>
+                    <Button
+                          variant="danger"
+                          size="sm"
+                          shadow
+                          fullWidth
+                          type="submit"
+                          className="bg-red-50"
+                        >
+                          Eliminar
+                        </Button>
                     </form>
                   </div>
                 </div>

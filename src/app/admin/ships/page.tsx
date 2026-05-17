@@ -5,6 +5,7 @@ import { formatCurrency } from "@/lib/format";
 import PageHeader from "@/app/components/PageHeader";
 import type { Ship, ShipsConfig } from "@/types";
 import { deleteShip, updateShipsConfig } from "./actions";
+import Button from "@/app/components/Button";
 
 export default async function AdminShipsPage() {
   await requireAdmin();
@@ -75,12 +76,9 @@ export default async function AdminShipsPage() {
                             await deleteShip(ship.id);
                           }}
                         >
-                          <button
-                            type="submit"
-                            className="rounded-md border-2 border-black bg-red-100 px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_#111] transition-all hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
-                          >
+                          <Button variant="danger" size="sm" shadow type="submit" className="bg-red-100">
                             Eliminar
-                          </button>
+                          </Button>
                         </form>
                       </div>
                     </td>
@@ -113,12 +111,9 @@ export default async function AdminShipsPage() {
                 className="w-64 rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
               />
             </label>
-            <button
-              type="submit"
-              className="rounded-xl border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
-            >
+            <Button variant="primary" size="lg" shadow type="submit">
               Guardar
-            </button>
+            </Button>
           </form>
           {config?.free_above_cop != null && (
             <p className="mt-3 text-sm font-semibold text-green-700">

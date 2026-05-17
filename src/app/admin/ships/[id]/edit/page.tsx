@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { Ship } from "@/types";
 import { updateShip } from "../../actions";
+import Button from "@/app/components/Button";
 
 export default async function EditShipPage({
   params,
@@ -85,12 +86,9 @@ export default async function EditShipPage({
           >
             Cancelar
           </Link>
-          <button
-            type="submit"
-            className="flex-1 rounded-xl border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
-          >
+          <Button variant="primary" size="xl" shadow type="submit" className="flex-1">
             Actualizar tarifa
-          </button>
+          </Button>
         </div>
       </form>
     </section>
