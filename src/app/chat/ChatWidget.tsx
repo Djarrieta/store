@@ -19,20 +19,20 @@ const STORAGE_KEY = "chat_messages";
 
 export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boolean }) {
   const { items: cartItems } = useCart();
-  const [messages, setMessages] = useState<Message[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? (JSON.parse(stored) as Message[]) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isPending, startTransition] = useTransition();
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const hasMigratedRef = useRef(false);
+
+  // Load persisted messages after hydration
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) setMessages(JSON.parse(stored) as Message[]);
+    } catch {}
+  }, []);
 
   // Migrate guest localStorage history to DB on login
   useEffect(() => {
