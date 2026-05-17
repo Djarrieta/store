@@ -48,21 +48,19 @@ export default function ProductImageCarousel({
         {/* Prev / Next arrows */}
         <Button
           variant="secondary"
-          size="lg"
-          shadow
+          size="none"
           onClick={() => setCurrent((c) => (c - 1 + images.length) % images.length)}
           aria-label="Imagen anterior"
-          className="absolute left-2 top-1/2 -translate-y-1/2 px-2 py-1"
+          className="absolute left-2 top-1/2 -translate-y-1/2 px-2 py-1 text-sm font-bold rounded-lg shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
         >
           ‹
         </Button>
         <Button
           variant="secondary"
-          size="lg"
-          shadow
+          size="none"
           onClick={() => setCurrent((c) => (c + 1) % images.length)}
           aria-label="Imagen siguiente"
-          className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1"
+          className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-sm font-bold rounded-lg shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
         >
           ›
         </Button>

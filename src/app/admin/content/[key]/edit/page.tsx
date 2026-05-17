@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Content } from "@/types";
 import { updateContent } from "@/app/admin/content/actions";
@@ -52,12 +53,12 @@ export default async function AdminEditContentPage({
           <Button variant="primary" size="xl" shadow type="submit">
             Guardar
           </Button>
-          <a
+          <Link
             href="/admin/content"
-            className="rounded-xl border-2 border-black bg-white px-5 py-2 text-sm font-bold shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
+            className="inline-flex items-center rounded-xl border-2 border-black bg-white px-6 py-3 font-bold shadow-[4px_4px_0_0_#111] transition-all hover:bg-[var(--bg)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
           >
             Cancelar
-          </a>
+          </Link>
         </div>
       </form>
     </section>

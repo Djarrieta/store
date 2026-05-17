@@ -91,6 +91,7 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
           </h2>
           <Button
             variant="secondary"
+            size="none"
             onClick={handleClose}
             className="px-3 py-1 text-sm font-bold rounded-lg"
           >
@@ -239,7 +240,7 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
                   shadow
                   type="submit"
                   disabled={isSaving}
-                  className="flex-1 rounded-xl"
+                  className="flex-1"
                 >
                   {isSaving ? "Guardando..." : "Guardar y usar"}
                 </Button>

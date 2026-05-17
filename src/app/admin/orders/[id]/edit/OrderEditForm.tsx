@@ -126,12 +126,11 @@ export default function OrderEditForm({ order }: Props) {
           {ALL_STATUSES.map((s) => (
             <Button
               key={s}
+              variant={status === s ? "primary" : "secondary"}
+              size="md"
+              shadow={status !== s}
               onClick={() => setStatus(s)}
-              className={`rounded-lg border-2 border-black px-3 py-1.5 text-sm font-semibold transition-all ${
-                status === s
-                  ? "bg-[var(--accent)] shadow-none translate-x-[2px] translate-y-[2px]"
-                  : "bg-[var(--background)] shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
-              }`}
+              className={status === s ? "translate-x-[2px] translate-y-[2px]" : ""}
             >
               {STATUS_LABELS[s]}
             </Button>
@@ -323,7 +322,6 @@ export default function OrderEditForm({ order }: Props) {
           shadow
           type="submit"
           disabled={isPending}
-          className="px-5 py-2.5"
         >
           {isPending ? "Guardando..." : "Guardar cambios"}
         </Button>
@@ -333,7 +331,6 @@ export default function OrderEditForm({ order }: Props) {
           shadow
           onClick={() => router.back()}
           disabled={isPending}
-          className="px-5 py-2.5"
         >
           Cancelar
         </Button>

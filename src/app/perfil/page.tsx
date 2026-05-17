@@ -112,7 +112,6 @@ export default async function PerfilPage() {
                           shadow
                           fullWidth
                           type="submit"
-                          className="bg-blue-50"
                         >
                           Usar principal
                         </Button>
@@ -131,7 +130,6 @@ export default async function PerfilPage() {
                           shadow
                           fullWidth
                           type="submit"
-                          className="bg-red-50"
                         >
                           Eliminar
                         </Button>

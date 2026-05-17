@@ -147,11 +147,10 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
         />
         <Button
           variant="primary"
-          size="md"
+          size="lg"
           shadow
           type="submit"
           disabled={isPending || !input.trim()}
-          className="px-5 font-bold"
         >
           Enviar
         </Button>

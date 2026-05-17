@@ -76,7 +76,7 @@ export default async function AdminShipsPage() {
                             await deleteShip(ship.id);
                           }}
                         >
-                          <Button variant="danger" size="sm" shadow type="submit" className="bg-red-100">
+                          <Button variant="danger" size="sm" shadow type="submit">
                             Eliminar
                           </Button>
                         </form>

@@ -77,12 +77,13 @@ export default function BuyNowButton({
     <>
       <Script src="https://checkout.wompi.co/widget.js" strategy="lazyOnload" />
       <Button
+        variant="primary"
+        size="xl"
+        shadow
+        fullWidth
         onClick={handleBuy}
         disabled={loading || disabled || !shippingAddress}
-        className={
-          className ??
-          "w-full rounded-xl border-2 border-black bg-black text-white px-6 py-3 font-bold shadow-[4px_4px_0_0_#555] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
-        }
+        className={className}
       >
         {loading ? "Procesando..." : (children ?? "Comprar ahora")}
       </Button>

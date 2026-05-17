@@ -56,6 +56,7 @@ export default function CartDrawer() {
           <h2 className="font-display text-xl font-bold">Carrito</h2>
           <Button
             variant="secondary"
+            size="none"
             onClick={closeCart}
             className="px-3 py-1 text-sm font-bold rounded-lg"
           >
@@ -229,7 +230,7 @@ export default function CartDrawer() {
               ) : (
                 <Link
                   href={loginUrl}
-                  className="block w-full rounded-xl border-2 border-black bg-black text-white px-6 py-3 font-bold shadow-[4px_4px_0_0_#555] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none text-center"
+                  className="block w-full rounded-xl border-2 border-black bg-[var(--accent)] px-6 py-3 text-center font-bold shadow-[4px_4px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
                 >
                   Inicia sesión para comprar
                 </Link>
