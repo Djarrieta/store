@@ -92,14 +92,30 @@ export function OrderAccordion({ orders }: Props) {
                     </li>
                   ))}
                 </ul>
+
+                {/* Totals */}
+                <div className="mt-3 space-y-1 border-t border-black/10 pt-3">
+                  {order.shipping_cost > 0 && (
+                    <div className="flex justify-between text-sm text-[var(--muted)]">
+                      <span>Subtotal productos</span>
+                      <span>{formatCurrency(order.total - order.shipping_cost)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm text-[var(--muted)]">
+                    <span>Envío</span>
+                    <span>
+                      {order.shipping_cost > 0 ? formatCurrency(order.shipping_cost) : "Gratis"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm font-bold">
+                    <span>Total</span>
+                    <span>{formatCurrency(order.total)}</span>
+                  </div>
+                </div>
+
                 {order.tracking_code && (
                   <p className="mt-3 text-xs text-[var(--muted)]">
                     <span className="font-semibold">Seguimiento:</span> {order.tracking_code}
-                  </p>
-                )}
-                {order.notes && (
-                  <p className="mt-1 text-xs text-[var(--muted)]">
-                    <span className="font-semibold">Notas:</span> {order.notes}
                   </p>
                 )}
               </div>

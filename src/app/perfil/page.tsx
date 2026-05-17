@@ -1,11 +1,9 @@
-import Link from "next/link";
+import { signOut } from "@/app/components/user-actions";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formatCurrency, formatDate } from "@/lib/format";
-import type { Address } from "@/types";
-import type { Order } from "@/types";
+import type { Address, Order } from "@/types";
+import Link from "next/link";
 import { deleteAddress, setDefaultAddress } from "./actions";
-import { signOut } from "@/app/components/user-actions";
 import { OrderAccordion } from "./OrderAccordion";
 
 export default async function PerfilPage() {

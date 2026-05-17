@@ -45,6 +45,7 @@ export async function fulfillOrder(id: string) {
 export interface UpdateOrderData {
   status?: OrderStatus;
   notes?: string | null;
+  tracking_code?: string | null;
   shipping_address?: ShippingAddressSnapshot | null;
   shipping_cost?: number;
   items?: OrderItem[];
@@ -58,6 +59,7 @@ export async function updateOrder(id: string, data: UpdateOrderData) {
   const patch: Record<string, unknown> = {};
   if (data.status !== undefined) patch.status = data.status;
   if (data.notes !== undefined) patch.notes = data.notes;
+  if (data.tracking_code !== undefined) patch.tracking_code = data.tracking_code;
   if (data.shipping_address !== undefined) patch.shipping_address = data.shipping_address;
   if (data.shipping_cost !== undefined) patch.shipping_cost = data.shipping_cost;
   if (data.items !== undefined) patch.items = data.items;

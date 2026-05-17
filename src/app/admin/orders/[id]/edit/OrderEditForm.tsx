@@ -40,6 +40,9 @@ export default function OrderEditForm({ order }: Props) {
   // Notes
   const [notes, setNotes] = useState(order.notes ?? "");
 
+  // Tracking code
+  const [trackingCode, setTrackingCode] = useState(order.tracking_code ?? "");
+
   // Shipping address
   const addr = order.shipping_address;
   const [recipientName, setRecipientName] = useState(addr?.recipient_name ?? "");
@@ -95,6 +98,7 @@ export default function OrderEditForm({ order }: Props) {
         await updateOrder(order.id, {
           status,
           notes: notes.trim() || null,
+          tracking_code: trackingCode.trim() || null,
           shipping_address: shippingAddress,
           shipping_cost: parsedShippingCost,
           items,
@@ -144,6 +148,18 @@ export default function OrderEditForm({ order }: Props) {
           rows={3}
           placeholder="Notas visibles solo para el equipo..."
           className="w-full rounded-lg border-2 border-black bg-[var(--background)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+        />
+      </section>
+
+      {/* Tracking code */}
+      <section className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-3">
+        <h2 className="font-bold text-base">Seguimiento de envío</h2>
+        <input
+          type="text"
+          value={trackingCode}
+          onChange={(e) => setTrackingCode(e.target.value)}
+          placeholder="Código de guía (ej: TCC-123456789)"
+          className="w-full rounded-lg border-2 border-black bg-[var(--background)] px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         />
       </section>
 
