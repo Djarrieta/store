@@ -40,22 +40,20 @@ export default async function NewAddressPage() {
         </FormField>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <label className="grid gap-1 text-sm font-medium">
-            Departamento
+          <FormField label="Departamento">
             <Input
               name="department"
               required
               placeholder="ej. Antioquia"
             />
-          </label>
-          <label className="grid gap-1 text-sm font-medium">
-            Ciudad
+          </FormField>
+          <FormField label="Ciudad">
             <Input
               name="city"
               required
               placeholder="ej. Medellín"
             />
-          </label>
+          </FormField>
         </div>
 
         <FormField label="Dirección" htmlFor="address_line">
@@ -67,17 +65,16 @@ export default async function NewAddressPage() {
           />
         </FormField>
 
-        <div className="grid gap-1 text-sm font-medium">
-          <label htmlFor="neighborhood">
-            Barrio{" "}
-            <span className="font-normal text-[var(--muted)]">(opcional)</span>
-          </label>
+        <FormField
+          label={<>Barrio <span className="font-normal text-[var(--muted)]">(opcional)</span></>}
+          htmlFor="neighborhood"
+        >
           <Input
             id="neighborhood"
             name="neighborhood"
             placeholder="ej. El Poblado"
           />
-        </div>
+        </FormField>
 
         <FormField label="Teléfono de contacto" htmlFor="phone">
           <Input

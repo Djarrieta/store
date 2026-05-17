@@ -27,7 +27,7 @@ export function FormCard({ children, className, ...props }: FormCardProps) {
 // ── FormField ─────────────────────────────────────────────────────────────────
 // Renders a labelled field slot. Pass the input/select/textarea as children.
 type FormFieldProps = {
-  label: string;
+  label: ReactNode;
   htmlFor?: string;
   children: ReactNode;
   className?: string;

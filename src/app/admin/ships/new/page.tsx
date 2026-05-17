@@ -13,22 +13,20 @@ export default async function NewShipPage() {
 
       <FormCard action={createShip} className="max-w-lg">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <label className="grid gap-1 text-sm font-medium">
-            Departamento
+          <FormField label="Departamento">
             <Input
               name="department"
               required
               placeholder="ej. Antioquia"
             />
-          </label>
-          <label className="grid gap-1 text-sm font-medium">
-            Ciudad
+          </FormField>
+          <FormField label="Ciudad">
             <Input
               name="city"
               required
               placeholder="ej. Medellín"
             />
-          </label>
+          </FormField>
         </div>
 
         <FormField label="Precio (COP)" htmlFor="price_cop">

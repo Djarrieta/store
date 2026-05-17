@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import {
   createItemForProduct,
-  updateItemFromProduct,
   deleteItemFromProduct,
+  updateItemFromProduct,
 } from "@/app/admin/items/actions";
 import Button from "@/app/components/Button";
+import { Form, FormField } from "@/app/components/FormCard";
+import Input from "@/app/components/Input";
+import { useState } from "react";
 
 interface CategoryValue {
   id: string;
@@ -108,31 +110,31 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
             {/* Expanded body */}
             {isOpen && (
               <div className="space-y-4 border-t-2 border-black bg-white p-4">
-                <form action={updateAction} className="space-y-3">
+                <Form action={updateAction} className="space-y-3">
                   <VariantCheckboxes dimensions={dimensions} selectedIds={selectedIds} />
 
-                  <label className="grid gap-1 text-sm font-medium">
-                    Stock
-                    <input
+                  <FormField label="Stock">
+                    <Input
                       name="stock"
                       type="number"
-                      min="0"
+                      min={0}
                       required
                       defaultValue={item.stock}
-                      className="w-32 rounded-md border-2 border-black px-3 py-2"
+                      fullWidth={false}
+                      className="w-32"
                     />
-                  </label>
+                  </FormField>
 
                   <Button variant="primary" size="md" shadow type="submit">
                     Guardar
                   </Button>
-                </form>
+                </Form>
 
-                <form action={deleteAction} className="border-t-2 border-dashed border-black pt-3">
+                <Form action={deleteAction} className="border-t-2 border-dashed border-black pt-3">
                 <Button variant="secondary" size="md" shadow type="submit">
                   Eliminar variante
                 </Button>
-                </form>
+                </Form>
               </div>
             )}
           </div>
@@ -148,7 +150,7 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
           + Agregar variante
         </Button>
       ) : (
-        <form
+        <Form
           action={createAction}
           className="space-y-4 rounded-xl border-2 border-black bg-white p-4 shadow-[2px_2px_0_0_#111]"
         >
@@ -156,17 +158,17 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
 
           <VariantCheckboxes dimensions={dimensions} selectedIds={new Set()} />
 
-          <label className="grid gap-1 text-sm font-medium">
-            Stock
-            <input
+          <FormField label="Stock">
+            <Input
               name="stock"
               type="number"
-              min="0"
+              min={0}
               required
               defaultValue={0}
-              className="w-32 rounded-md border-2 border-black px-3 py-2"
+              fullWidth={false}
+              className="w-32"
             />
-          </label>
+          </FormField>
 
           <div className="flex gap-2">
             <Button variant="primary" size="lg" shadow type="submit">
@@ -176,7 +178,7 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
               Cancelar
             </Button>
           </div>
-        </form>
+        </Form>
       )}
     </div>
   );

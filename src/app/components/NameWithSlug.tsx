@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toSlug } from "@/lib/format";
 import Input from "@/app/components/Input";
+import { FormField } from "@/app/components/FormCard";
 
 interface Props {
   defaultName?: string;
@@ -19,8 +20,7 @@ export default function NameWithSlug({
 
   return (
     <>
-      <label className="grid gap-1 text-sm font-medium">
-        Nombre
+      <FormField label="Nombre">
         <Input
           name="name"
           required
@@ -28,24 +28,27 @@ export default function NameWithSlug({
           placeholder={namePlaceholder}
           onChange={(e) => setSlug(toSlug(e.target.value))}
         />
-      </label>
+      </FormField>
 
-      <div className="grid gap-1 text-sm font-medium">
-        <span className="flex items-center gap-2">
-          Slug
-          <span className="rounded bg-black/5 px-1.5 py-0.5 text-xs font-normal text-black/40">
-            auto-generado
+      <FormField
+        label={
+          <span className="flex items-center gap-2">
+            Slug
+            <span className="rounded bg-black/5 px-1.5 py-0.5 text-xs font-normal text-black/40">
+              auto-generado
+            </span>
           </span>
-        </span>
-        <input
+        }
+      >
+        <Input
           readOnly
           tabIndex={-1}
           value={slug}
           placeholder="se genera desde el nombre…"
-          className="w-full cursor-default rounded-md border-2 border-dashed border-black/20 bg-gray-50 px-3 py-2 font-mono text-sm text-black/40 outline-none"
+          className="cursor-default rounded-md border-dashed border-black/20 bg-gray-50 font-mono text-black/40 outline-none"
         />
         <input type="hidden" name="slug" value={slug} />
-      </div>
+      </FormField>
     </>
   );
 }

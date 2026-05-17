@@ -5,7 +5,7 @@ import PageHeader from "@/app/components/PageHeader";
 import type { Ship, ShipsConfig } from "@/types";
 import { deleteShip, updateShipsConfig } from "./actions";
 import Button from "@/app/components/Button";
-import { Form } from "@/app/components/FormCard";
+import { Form, FormField } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
 
 export default async function AdminShipsPage() {
@@ -102,8 +102,7 @@ export default async function AdminShipsPage() {
             supere este monto, el envío será gratuito.
           </p>
           <Form action={updateShipsConfig} className="flex items-end gap-3">
-            <label className="grid gap-1 text-sm font-medium">
-              Envío gratis desde (COP)
+            <FormField label="Envío gratis desde (COP)">
               <Input
                 name="free_above_cop"
                 type="number"
@@ -114,7 +113,7 @@ export default async function AdminShipsPage() {
                 fullWidth={false}
                 className="w-64"
               />
-            </label>
+            </FormField>
             <Button variant="primary" size="lg" shadow type="submit">
               Guardar
             </Button>
