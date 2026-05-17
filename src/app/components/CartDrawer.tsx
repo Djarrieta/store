@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/cart";
 import { formatCurrency } from "@/lib/format";
@@ -228,12 +227,16 @@ export default function CartDrawer() {
                   {selectedAddress ? "Comprar ahora" : "Agrega una dirección para comprar"}
                 </BuyNowButton>
               ) : (
-                <Link
+                <Button
                   href={loginUrl}
-                  className="block w-full rounded-xl border-2 border-black bg-[var(--accent)] px-6 py-3 text-center font-bold shadow-[4px_4px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+                  variant="primary"
+                  size="xl"
+                  shadow
+                  fullWidth
+                  className="mb-2"
                 >
                   Inicia sesión para comprar
-                </Link>
+                </Button>
               )}
             </div>
           </>

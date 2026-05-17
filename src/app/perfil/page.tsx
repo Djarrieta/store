@@ -2,7 +2,6 @@ import { signOut } from "@/app/components/user-actions";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { Address, Order } from "@/types";
-import Link from "next/link";
 import { deleteAddress, setDefaultAddress } from "./actions";
 import { OrderAccordion } from "./OrderAccordion";
 import Button from "@/app/components/Button";
@@ -46,23 +45,17 @@ export default async function PerfilPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-xl font-bold">Direcciones de envío</h2>
-          <Link
-            href="/perfil/addresses/new"
-            className="rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
-          >
+          <Button href="/perfil/addresses/new" variant="primary" size="lg" shadow>
             + Nueva dirección
-          </Link>
+          </Button>
         </div>
 
         {allAddresses.length === 0 ? (
           <div className="rounded-xl border-2 border-dashed border-black bg-[var(--card)] p-8 text-center">
             <p className="text-[var(--muted)]">Aún no tienes direcciones guardadas.</p>
-            <Link
-              href="/perfil/addresses/new"
-              className="mt-3 inline-block rounded-lg border-2 border-black bg-[var(--accent)] px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
-            >
+            <Button href="/perfil/addresses/new" variant="primary" size="lg" shadow className="mt-3">
               Agregar mi primera dirección
-            </Link>
+            </Button>
           </div>
         ) : (
           <div className="space-y-3">
@@ -92,12 +85,14 @@ export default async function PerfilPage() {
                   </div>
 
                   <div className="flex shrink-0 flex-col gap-1.5">
-                    <Link
+                    <Button
                       href={`/perfil/addresses/${addr.id}/edit`}
-                      className="rounded-md border-2 border-black bg-white px-3 py-1 text-center text-xs font-semibold shadow-[2px_2px_0_0_#111] transition-all hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+                      variant="secondary"
+                      size="sm"
+                      shadow
                     >
                       Editar
-                    </Link>
+                    </Button>
 
                     {!addr.is_default && (
                       <form

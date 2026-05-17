@@ -37,7 +37,7 @@ export default async function NewCategoryPage() {
           </select>
         </label>
 
-        <Button variant="primary" size="lg" type="submit">
+        <Button variant="primary" size="lg" shadow type="submit">
           Crear categoría
         </Button>
       </form>

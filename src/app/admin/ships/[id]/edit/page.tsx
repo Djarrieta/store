@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -80,12 +79,9 @@ export default async function EditShipPage({
         </label>
 
         <div className="flex gap-3 pt-1">
-          <Link
-            href="/admin/ships"
-            className="inline-flex items-center rounded-xl border-2 border-black bg-white px-6 py-3 font-bold shadow-[4px_4px_0_0_#111] transition-all hover:bg-[var(--bg)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
-          >
+          <Button href="/admin/ships" variant="secondary" size="xl" shadow>
             Cancelar
-          </Link>
+          </Button>
           <Button variant="primary" size="xl" shadow type="submit" className="flex-1">
             Actualizar tarifa
           </Button>

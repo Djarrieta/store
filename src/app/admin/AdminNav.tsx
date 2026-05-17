@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Button from "@/app/components/Button";
 
 const SEGMENT_LABELS: Record<string, string> = {
   admin: "Admin",
@@ -38,13 +39,9 @@ export default function AdminNav() {
     return (
       <nav className="flex gap-2">
         {NAV_LINKS.map(({ href, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className="rounded-lg border-2 border-black bg-[var(--card)] px-3 py-1 text-sm font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-          >
+          <Button key={href} href={href} variant="secondary" size="md" shadow>
             {label}
-          </Link>
+          </Button>
         ))}
       </nav>
     );

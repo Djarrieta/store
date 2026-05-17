@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Content } from "@/types";
 import { deleteContent } from "./actions";
@@ -44,12 +43,14 @@ export default async function AdminContentPage() {
               </p>
             </div>
             <div className="ml-4 flex shrink-0 gap-2">
-              <Link
+              <Button
                 href={`/admin/content/${entry.key}/edit`}
-                className="rounded-lg border-2 border-black bg-white px-3 py-1 text-sm font-semibold shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+                variant="secondary"
+                size="sm"
+                shadow
               >
                 Editar
-              </Link>
+              </Button>
               <form
                 action={async () => {
                   "use server";

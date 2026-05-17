@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Button from "@/app/components/Button";
 
 interface PageHeaderProps {
   title: string;
@@ -22,12 +22,9 @@ export default function PageHeader({
       <div className="flex items-center justify-between rounded-2xl border-4 border-black bg-[var(--card)] p-5 shadow-[6px_6px_0_0_#111]">
         <h1 className="font-display text-3xl font-bold">{title}</h1>
         {createHref && createLabel ? (
-          <Link
-            href={createHref}
-            className="rounded-lg border-2 border-black bg-[var(--accent)] px-3 py-2 text-sm font-semibold"
-          >
+          <Button href={createHref} variant="primary" size="lg" shadow>
             {createLabel}
-          </Link>
+          </Button>
         ) : null}
       </div>
 
