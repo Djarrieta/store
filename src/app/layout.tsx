@@ -37,6 +37,16 @@ export default async function RootLayout({
   const user = await getUser();
   const adminStatus = await isAdmin(user?.id);
 
+  const supabasePublic = await createClient();
+  let freeShippingAbove: number | null = null;
+  {
+    const { data } = await supabasePublic
+      .from("ships_config")
+      .select("free_above_cop")
+      .single();
+    freeShippingAbove = (data?.free_above_cop as number | null) ?? null;
+  }
+
   let profile: Profile | null = null;
   if (user) {
     const supabase = await createClient();
@@ -51,7 +61,7 @@ export default async function RootLayout({
   return (
     <html lang="es" className={`${outfit.variable} ${inter.variable} antialiased`}>
       <body className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
-        <CartProvider isAuthenticated={Boolean(user)}>
+        <CartProvider isAuthenticated={Boolean(user)} freeShippingAbove={freeShippingAbove}>
           <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-6 sm:px-8">
             <header className="mb-8 rounded-2xl border-4 border-black bg-[var(--card)] p-4 shadow-[6px_6px_0_0_#111]">
               <div className="flex flex-wrap items-center justify-between gap-2">

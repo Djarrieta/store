@@ -133,6 +133,7 @@ type CartContextValue = {
   items: CartItem[];
   isOpen: boolean;
   isAuthenticated: boolean;
+  freeShippingAbove: number | null;
   totalItems: number;
   subtotalAmountInCents: number;
   totalAmountInCents: number;
@@ -152,7 +153,7 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-export function CartProvider({ children, isAuthenticated }: { children: ReactNode; isAuthenticated: boolean }) {
+export function CartProvider({ children, isAuthenticated, freeShippingAbove = null }: { children: ReactNode; isAuthenticated: boolean; freeShippingAbove?: number | null }) {
   const [state, dispatch] = useReducer(cartReducer, {
     items: [],
     isOpen: false,
@@ -277,6 +278,7 @@ export function CartProvider({ children, isAuthenticated }: { children: ReactNod
         items: state.items,
         isOpen: state.isOpen,
         isAuthenticated,
+        freeShippingAbove,
         totalItems,
         subtotalAmountInCents,
         totalAmountInCents,

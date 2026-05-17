@@ -1,10 +1,12 @@
+import { notFound } from "next/navigation";
+
 import Button from "@/app/components/Button";
 import { FormActions, FormCard } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { Ship } from "@/types";
-import { notFound } from "next/navigation";
+
 import { updateShip } from "../../actions";
 
 export default async function EditShipPage({

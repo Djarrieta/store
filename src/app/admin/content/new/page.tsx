@@ -1,7 +1,7 @@
 import { createContent } from "@/app/admin/content/actions";
 import Button from "@/app/components/Button";
-import Input, { Textarea, Checkbox } from "@/app/components/Input";
-import { FormCard, FormActions } from "@/app/components/FormCard";
+import { FormActions,FormCard } from "@/app/components/FormCard";
+import Input, { Checkbox,Textarea } from "@/app/components/Input";
 
 export default function AdminNewContentPage() {
   return (

@@ -15,6 +15,7 @@ export default function CartDrawer() {
     items,
     isOpen,
     isAuthenticated,
+    freeShippingAbove,
     closeCart,
     removeItem,
     setQuantity,
@@ -28,6 +29,16 @@ export default function CartDrawer() {
     clearCart,
     clearAddress,
   } = useCart();
+
+  const subtotalCOP = subtotalAmountInCents / 100;
+  const missingCOP =
+    freeShippingAbove != null && items.length > 0
+      ? Math.max(0, freeShippingAbove - subtotalCOP)
+      : null;
+  const progressPct =
+    freeShippingAbove != null && items.length > 0
+      ? Math.min(100, Math.round((subtotalCOP / freeShippingAbove) * 100))
+      : null;
 
   const pathname = usePathname();
   const loginUrl = `/login?next=${encodeURIComponent(pathname + "?openCart=1")}`;
@@ -66,8 +77,13 @@ export default function CartDrawer() {
 
         {/* Empty state */}
         {items.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center text-sm text-[var(--muted)]">
-            Tu carrito está vacío.
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+            <p className="text-sm text-[var(--muted)]">Tu carrito está vacío.</p>
+            {freeShippingAbove != null && (
+              <p className="rounded-xl border-2 border-dashed border-black bg-[var(--bg)] px-4 py-3 text-xs font-semibold">
+                Compra más de {formatCurrency(freeShippingAbove)} y el envío es gratis
+              </p>
+            )}
           </div>
         ) : (
           <>
@@ -124,6 +140,33 @@ export default function CartDrawer() {
                 </li>
               ))}
             </ul>
+
+            {/* Free-shipping progress */}
+            {freeShippingAbove != null && progressPct != null && (
+              <div className="border-t-2 border-black px-4 pt-3 pb-1">
+                {missingCOP === 0 ? (
+                  <p className="rounded-xl border-2 border-green-700 bg-green-50 px-3 py-2 text-center text-xs font-bold text-green-800">
+                    ¡Envío gratis en tu pedido!
+                  </p>
+                ) : (
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-semibold">
+                      Te faltan{" "}
+                      <span className="text-[var(--accent)]">
+                        {formatCurrency(missingCOP!)}
+                      </span>{" "}
+                      para envío gratis
+                    </p>
+                    <div className="h-2.5 w-full overflow-hidden rounded-full border-2 border-black bg-[var(--bg)]">
+                      <div
+                        className="h-full rounded-full bg-[var(--accent)] transition-all duration-300"
+                        style={{ width: `${progressPct}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Footer */}
             <div className="space-y-3 border-t-4 border-black p-4 pb-8">
