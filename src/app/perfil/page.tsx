@@ -3,27 +3,10 @@ import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { Address } from "@/types";
-import type { Order, OrderStatus } from "@/types";
+import type { Order } from "@/types";
 import { deleteAddress, setDefaultAddress } from "./actions";
 import { signOut } from "@/app/components/user-actions";
-
-const STATUS_LABEL: Record<OrderStatus, string> = {
-  created: "Creado",
-  pending_approval: "Pendiente de aprobación",
-  approved: "Aprobado",
-  rejected: "Rechazado",
-  fulfilled: "Entregado",
-  cancelled: "Cancelado",
-};
-
-const STATUS_COLOR: Record<OrderStatus, string> = {
-  created: "bg-gray-100",
-  pending_approval: "bg-yellow-100",
-  approved: "bg-blue-100",
-  rejected: "bg-red-100",
-  fulfilled: "bg-green-100",
-  cancelled: "bg-gray-100",
-};
+import { OrderAccordion } from "./OrderAccordion";
 
 export default async function PerfilPage() {
   const user = await requireAuth();
@@ -166,37 +149,7 @@ export default async function PerfilPage() {
             <p className="text-[var(--muted)]">Aún no tienes pedidos.</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {allOrders.map((order) => (
-              <div
-                key={order.id}
-                className="rounded-xl border-2 border-black bg-[var(--card)] p-4 shadow-[3px_3px_0_0_#111]"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 space-y-1">
-                    <p className="font-mono text-xs text-[var(--muted)]">{order.id}</p>
-                    <p className="text-sm text-[var(--muted)]">
-                      {formatDate(order.created_at)}
-                    </p>
-                    {order.shipping_address && (
-                      <p className="text-xs text-[var(--muted)]">
-                        {order.shipping_address.city},{" "}
-                        {order.shipping_address.department}
-                      </p>
-                    )}
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <p className="font-bold">{formatCurrency(order.total)}</p>
-                    <span
-                      className={`mt-1 inline-block rounded-full border border-black px-2 py-0.5 text-xs font-semibold ${STATUS_COLOR[order.status]}`}
-                    >
-                      {STATUS_LABEL[order.status]}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <OrderAccordion orders={allOrders} />
         )}
       </section>
     </main>

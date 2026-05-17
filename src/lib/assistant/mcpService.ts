@@ -57,11 +57,25 @@ const TOOLS = [
       parameters: {
         type: "object",
         properties: {
-          user_ref:  { type: "string",  description: "User UUID" },
-          user_name: { type: "string",  description: "User display name" },
-          items:     { type: "object",  description: "Order line items as JSON array" },
-          total:     { type: "number",  description: "Total order amount" },
-          notes:     { type: "string",  description: "Optional delivery or order notes" },
+          user_ref:  { type: "string", description: "User UUID" },
+          user_name: { type: "string", description: "User display name" },
+          items: {
+            type: "array",
+            description: "Order line items",
+            items: {
+              type: "object",
+              properties: {
+                product_id: { type: "string", description: "Item/product UUID" },
+                title:      { type: "string", description: "Product name" },
+                qty:        { type: "integer", description: "Quantity ordered" },
+                unit_price: { type: "number", description: "Unit price in COP" },
+                sku:        { type: "string", description: "SKU (optional)" },
+              },
+              required: ["product_id", "title", "qty", "unit_price"],
+            },
+          },
+          total: { type: "number", description: "Total order amount in COP" },
+          notes: { type: "string", description: "Optional delivery or order notes" },
         },
         required: ["user_ref", "user_name", "items", "total"],
       },
@@ -153,10 +167,19 @@ const HANDLERS: Record<string, Handler> = {
 
   bot_create_order: async (args) => {
     const sb = createServiceClient();
+    // Normalize items to the canonical OrderItem schema regardless of LLM field naming
+    const rawItems = (args.items as Array<Record<string, unknown>>) ?? [];
+    const normalizedItems = rawItems.map((item) => ({
+      product_id: item.product_id ?? item.id ?? null,
+      title: item.title ?? item.producto ?? item.name ?? null,
+      qty: Number(item.qty ?? item.cantidad ?? item.quantity ?? 1),
+      unit_price: Number(item.unit_price ?? item.precio_unitario ?? item.price ?? 0),
+      sku: item.sku ?? null,
+    }));
     const { data, error } = await sb.rpc("bot_create_order", {
       p_user_ref:  String(args.user_ref),
       p_user_name: String(args.user_name),
-      p_items:     args.items,
+      p_items:     normalizedItems,
       p_total:     Number(args.total),
       p_notes:     (args.notes as string | undefined) ?? null,
     });

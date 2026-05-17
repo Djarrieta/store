@@ -28,6 +28,11 @@
         "npx supabase db push": true,
         "npx supabase db query": true,
         "npx eslint": true,
-        "npx next": true
+        "npx next": true,
+        "/^npm -v; node -v$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "npx supabase": true
     }
 }
