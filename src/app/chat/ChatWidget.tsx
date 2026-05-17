@@ -144,9 +144,8 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
           onChange={(e) => setInput(e.target.value)}
           placeholder="Escribe tu pregunta…"
           disabled={isPending}
-          shadow
           fullWidth={false}
-          className="flex-1 bg-[var(--card)] font-medium"
+          className="flex-1"
         />
         <Button
           variant="primary"

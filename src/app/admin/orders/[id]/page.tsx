@@ -4,6 +4,7 @@ import type { Order, OrderItem, OrderStatus } from "@/types";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { approveOrder, rejectOrder, fulfillOrder, updateTrackingCode } from "../actions";
 import Button from "@/app/components/Button";
+import Input from "@/app/components/Input";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   created: "Creado (sin pagar)",
@@ -110,11 +111,12 @@ export default async function OrderDetailPage({
           }}
           className="flex gap-2 items-center"
         >
-          <input
+          <Input
             name="tracking_code"
             defaultValue={order.tracking_code ?? ""}
             placeholder="Código de guía (ej: TCC-123456789)"
-            className="flex-1 rounded-xl border-2 border-black p-2 text-sm shadow-[2px_2px_0_0_#111] focus:outline-none focus:ring-2 focus:ring-black font-mono"
+            fullWidth={false}
+            className="flex-1 font-mono"
           />
           <Button variant="primary" size="lg" shadow type="submit">
             Guardar

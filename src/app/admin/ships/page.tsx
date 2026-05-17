@@ -5,6 +5,7 @@ import PageHeader from "@/app/components/PageHeader";
 import type { Ship, ShipsConfig } from "@/types";
 import { deleteShip, updateShipsConfig } from "./actions";
 import Button from "@/app/components/Button";
+import Input from "@/app/components/Input";
 
 export default async function AdminShipsPage() {
   await requireAdmin();
@@ -102,14 +103,15 @@ export default async function AdminShipsPage() {
           <form action={updateShipsConfig} className="flex items-end gap-3">
             <label className="grid gap-1 text-sm font-medium">
               Envío gratis desde (COP)
-              <input
+              <Input
                 name="free_above_cop"
                 type="number"
                 min="0"
                 step="1000"
                 defaultValue={config?.free_above_cop ?? ""}
                 placeholder="ej. 150000 (dejar vacío para desactivar)"
-                className="w-64 rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                fullWidth={false}
+                className="w-64"
               />
             </label>
             <Button variant="primary" size="lg" shadow type="submit">

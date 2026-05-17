@@ -1,5 +1,6 @@
 import { createContent } from "@/app/admin/content/actions";
 import Button from "@/app/components/Button";
+import Input, { Textarea } from "@/app/components/Input";
 
 export default function AdminNewContentPage() {
   return (
@@ -10,22 +11,21 @@ export default function AdminNewContentPage() {
           <label htmlFor="key" className="block text-sm font-semibold">
             Clave
           </label>
-          <input
+          <Input
             id="key"
             name="key"
             required
-            className="w-full rounded-xl border-2 border-black p-3 text-sm shadow-[3px_3px_0_0_#111] focus:outline-none focus:ring-2 focus:ring-black font-mono"
+            className="font-mono"
           />
         </div>
         <div className="space-y-1">
           <label htmlFor="value" className="block text-sm font-semibold">
             Valor
           </label>
-          <textarea
+          <Textarea
             id="value"
             name="value"
             rows={8}
-            className="w-full rounded-xl border-2 border-black p-3 text-sm shadow-[3px_3px_0_0_#111] focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
         <label className="flex items-center gap-3 cursor-pointer select-none">

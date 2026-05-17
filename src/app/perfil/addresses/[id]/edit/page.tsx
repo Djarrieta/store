@@ -5,6 +5,7 @@ import type { Address } from "@/types";
 import { updateAddress } from "../../../actions";
 import Button from "@/app/components/Button";
 import Breadcrumb from "@/app/components/Breadcrumb";
+import Input from "@/app/components/Input";
 
 export default async function EditAddressPage({
   params,
@@ -49,63 +50,57 @@ export default async function EditAddressPage({
       >
         <label className="grid gap-1 text-sm font-medium">
           Nombre del destinatario
-          <input
+          <Input
             name="recipient_name"
             required
             defaultValue={address.recipient_name}
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 
         <div className="grid grid-cols-2 gap-4">
           <label className="grid gap-1 text-sm font-medium">
             Departamento
-            <input
+            <Input
               name="department"
               required
               defaultValue={address.department}
-              className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
             />
           </label>
           <label className="grid gap-1 text-sm font-medium">
             Ciudad
-            <input
+            <Input
               name="city"
               required
               defaultValue={address.city}
-              className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
             />
           </label>
         </div>
 
         <label className="grid gap-1 text-sm font-medium">
           Dirección
-          <input
+          <Input
             name="address_line"
             required
             defaultValue={address.address_line}
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 
         <label className="grid gap-1 text-sm font-medium">
           Barrio{" "}
           <span className="font-normal text-[var(--muted)]">(opcional)</span>
-          <input
+          <Input
             name="neighborhood"
             defaultValue={address.neighborhood ?? ""}
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 
         <label className="grid gap-1 text-sm font-medium">
           Teléfono de contacto
-          <input
+          <Input
             name="phone"
             required
             type="tel"
             defaultValue={address.phone}
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 
