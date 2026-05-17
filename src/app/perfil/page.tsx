@@ -12,22 +12,22 @@ export default async function PerfilPage() {
   const user = await requireAuth();
   const supabase = await createClient();
 
-  const [{ data: addresses }, { data: orders }] = await Promise.all([
+  const [{ data: rawAddresses }, { data: rawOrders }] = await Promise.all([
     supabase
       .from("addresses")
       .select("*")
       .eq("user_id", user.id)
       .order("is_default", { ascending: false })
-      .order("created_at", { ascending: false })
-      .returns<Address[]>(),
+      .order("created_at", { ascending: false }),
     supabase
       .from("orders")
       .select("*")
       .eq("user_ref", user.id)
       .order("created_at", { ascending: false })
-      .limit(20)
-      .returns<Order[]>(),
+      .limit(20),
   ]);
+  const addresses = rawAddresses as Address[] | null;
+  const orders = rawOrders as Order[] | null;
 
   const allAddresses = addresses ?? [];
   const allOrders = orders ?? [];

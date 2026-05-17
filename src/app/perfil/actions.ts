@@ -15,11 +15,10 @@ export async function getMyAddresses(): Promise<Address[]> {
     .select("*")
     .eq("user_id", user.id)
     .order("is_default", { ascending: false })
-    .order("created_at", { ascending: false })
-    .returns<Address[]>();
+    .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data as Address[] | null) ?? [];
 }
 
 export async function createAddress(formData: FormData): Promise<Address> {

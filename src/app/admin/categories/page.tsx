@@ -9,12 +9,12 @@ import { deleteCategory } from "./actions";
 export default async function AdminCategoriesPage() {
   const supabase = await createClient();
 
-  const { data: categories } = await supabase
+  const { data: rawCategories } = await supabase
     .from("categories")
     .select("*")
     .order("parent_id", { ascending: true, nullsFirst: true })
-    .order("name")
-    .returns<Category[]>();
+    .order("name");
+  const categories = rawCategories as Category[] | null;
 
   const all = categories ?? [];
   const topLevel = all.filter((c) => c.parent_id === null);

@@ -13,19 +13,19 @@ export default async function AdminShipsPage() {
   await requireAdmin();
   const supabase = await createClient();
 
-  const [{ data: ships }, { data: config }] = await Promise.all([
+  const [{ data: rawShips }, { data: config }] = await Promise.all([
     supabase
       .from("ships")
       .select("*")
       .order("department")
-      .order("city")
-      .returns<Ship[]>(),
+      .order("city"),
     supabase
       .from("ships_config")
       .select("*")
       .eq("singleton", true)
       .single<ShipsConfig>(),
   ]);
+  const ships = rawShips as Ship[] | null;
 
   const allShips = ships ?? [];
 

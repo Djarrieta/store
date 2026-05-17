@@ -12,21 +12,22 @@ interface ItemRow {
 export default async function ProductItemsSection({ productId }: { productId: string }) {
   const supabase = await createClient();
 
-  const [{ data: items }, { data: variantCategories }] = await Promise.all([
+  const [{ data: rawItems }, { data: rawCategories }] = await Promise.all([
     supabase
       .from("items")
       .select("id, stock, item_categories(category:category_id(id, name))")
       .eq("product_id", productId)
-      .order("created_at")
-      .returns<ItemRow[]>(),
+      .order("created_at"),
     supabase
       .from("categories")
       .select("*, parent:parent_id(id, name)")
       .not("parent_id", "is", null)
       .order("parent_id")
-      .order("name")
-      .returns<(Category & { parent: Pick<Category, "id" | "name"> | null })[]>(),
+      .order("name"),
   ]);
+
+  const items = rawItems as ItemRow[] | null;
+  const variantCategories = rawCategories as (Category & { parent: Pick<Category, "id" | "name"> | null })[] | null;
 
   // Group variant values by parent dimension
   const dimensionMap = new Map<string, { id: string; name: string; values: { id: string; name: string }[] }>();

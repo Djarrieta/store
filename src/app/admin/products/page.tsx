@@ -40,7 +40,8 @@ export default async function AdminProductsPage({
     query = query.contains("tags", activeTags);
   }
 
-  const { data: products, count } = await query.range(from, to).returns<ProductWithCategory[]>();
+  const { data: rawProducts, count } = await query.range(from, to);
+  const products = rawProducts as ProductWithCategory[] | null;
   const total = count ?? 0;
 
   return (

@@ -16,7 +16,7 @@ export default async function ProductDetailPage({
   const { id } = await params;
 
   const supabase = await createClient();
-  const [{ data: product }, { data: items }] = await Promise.all([
+  const [{ data: product }, { data: rawItems }] = await Promise.all([
     supabase
       .from("products")
       .select("*, category:category_id(*, parent:parent_id(*))")
@@ -25,9 +25,9 @@ export default async function ProductDetailPage({
     supabase
       .from("items")
       .select("id, stock, item_categories(category:category_id(id, name, parent_id, parent:parent_id(id, name)))")
-      .eq("product_id", id)
-      .returns<ItemWithCategories[]>(),
+      .eq("product_id", id),
   ]);
+  const items = rawItems as ItemWithCategories[] | null;
 
   if (!product) notFound();
 

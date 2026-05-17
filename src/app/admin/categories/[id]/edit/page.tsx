@@ -16,16 +16,16 @@ export default async function EditCategoryPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: category }, { data: topLevel }] = await Promise.all([
+  const [{ data: category }, { data: rawTopLevel }] = await Promise.all([
     supabase.from("categories").select("*").eq("id", id).single<Category>(),
     supabase
       .from("categories")
       .select("*")
       .is("parent_id", null)
       .neq("id", id)
-      .order("name")
-      .returns<Category[]>(),
+      .order("name"),
   ]);
+  const topLevel = rawTopLevel as Category[] | null;
 
   if (!category) notFound();
 

@@ -46,17 +46,18 @@ export default async function Home({
     query = query.contains("tags", activeTags);
   }
 
-  const { data: products, count } = await query.range(from, to).returns<ProductWithCategory[]>();
+  const { data: rawProducts, count } = await query.range(from, to);
+  const products = rawProducts as ProductWithCategory[] | null;
 
   // Load items with variant categories for all products on this page
   const productIds = (products ?? []).map((p) => p.id);
   const itemsByProduct = new Map<string, ItemWithCategories[]>();
   if (productIds.length > 0) {
-    const { data: allItems } = await supabase
+    const { data: rawAllItems } = await supabase
       .from("items")
       .select("id, product_id, stock, item_categories(category:category_id(id, name, parent_id, parent:parent_id(id, name)))")
-      .in("product_id", productIds)
-      .returns<ItemWithCategories[]>();
+      .in("product_id", productIds);
+    const allItems = rawAllItems as ItemWithCategories[] | null;
     for (const item of allItems ?? []) {
       if (!itemsByProduct.has(item.product_id)) itemsByProduct.set(item.product_id, []);
       itemsByProduct.get(item.product_id)!.push(item);

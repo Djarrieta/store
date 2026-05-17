@@ -8,12 +8,12 @@ import { createCategory } from "../actions";
 
 export default async function NewCategoryPage() {
   const supabase = await createClient();
-  const { data: topLevel } = await supabase
+  const { data: rawTopLevel } = await supabase
     .from("categories")
     .select("*")
     .is("parent_id", null)
-    .order("name")
-    .returns<Category[]>();
+    .order("name");
+  const topLevel = rawTopLevel as Category[] | null;
 
   return (
     <section className="space-y-4">

@@ -8,11 +8,11 @@ import { deleteContent } from "./actions";
 
 export default async function AdminContentPage() {
   const supabase = await createClient();
-  const { data: entries } = await supabase
+  const { data: rawEntries } = await supabase
     .from("content")
     .select("*")
-    .order("key")
-    .returns<Content[]>();
+    .order("key");
+  const entries = rawEntries as Content[] | null;
 
   return (
     <PageHeader

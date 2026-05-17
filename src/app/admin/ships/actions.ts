@@ -76,9 +76,8 @@ export async function getShips(): Promise<Ship[]> {
     .from("ships")
     .select("*")
     .order("department")
-    .order("city")
-    .returns<Ship[]>();
+    .order("city");
 
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data as Ship[] | null) ?? [];
 }

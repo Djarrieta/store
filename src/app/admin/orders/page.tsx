@@ -26,11 +26,11 @@ const STATUS_ORDER: OrderStatus[] = ["created", "pending_approval", "approved", 
 
 export default async function AdminOrdersPage() {
   const supabase = createServiceClient();
-  const { data: orders } = await supabase
+  const { data: rawOrders } = await supabase
     .from("orders")
     .select("*")
-    .order("created_at", { ascending: false })
-    .returns<Order[]>();
+    .order("created_at", { ascending: false });
+  const orders = rawOrders as Order[] | null;
 
   const all = orders ?? [];
 
