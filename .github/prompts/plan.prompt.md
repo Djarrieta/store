@@ -16,6 +16,7 @@ The plan should include:
 
 Rules:
 - DO NOT write any implementation code
-- DO NOT modify any existing files
+- DO NOT modify any existing files (except `plan.md`)
+- If `plan.md` already exists, delete its entire content and replace it with the new plan
 - ONLY produce the `plan.md` document
 - Follow the project conventions described in [AGENTS.md](../../AGENTS.md)
