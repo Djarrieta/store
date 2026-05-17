@@ -1,9 +1,9 @@
 "use server";
 
-import { requireAuth, getUser } from "@/lib/auth";
 import { buildPrompt } from "@/lib/assistant/buildPrompt";
-import { generateResponse } from "@/lib/assistant/mcpService";
 import { addMessage } from "@/lib/assistant/chatHistory";
+import { generateResponse } from "@/lib/assistant/mcpService";
+import { getUser,requireAuth } from "@/lib/auth";
 import type { CartItem } from "@/lib/cart";
 
 export async function sendMessage(message: string, cartItems: CartItem[] = []): Promise<string> {

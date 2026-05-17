@@ -1,11 +1,12 @@
+import Button from "@/app/components/Button";
+import { Form } from "@/app/components/FormCard";
 import { signOut } from "@/app/components/user-actions";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { Address, Order } from "@/types";
+
 import { deleteAddress, setDefaultAddress } from "./actions";
 import { OrderAccordion } from "./OrderAccordion";
-import Button from "@/app/components/Button";
-import { Form } from "@/app/components/FormCard";
 
 export default async function PerfilPage() {
   const user = await requireAuth();

@@ -1,9 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
-import type { Category } from "@/types";
-import { deleteCategory } from "./actions";
-import PageHeader from "@/app/components/PageHeader";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
+import PageHeader from "@/app/components/PageHeader";
+import { createClient } from "@/lib/supabase/server";
+import type { Category } from "@/types";
+
+import { deleteCategory } from "./actions";
 
 export default async function AdminCategoriesPage() {
   const supabase = await createClient();

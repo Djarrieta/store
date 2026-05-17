@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import Button from "@/app/components/Button";
 
 const SEGMENT_LABELS: Record<string, string> = {

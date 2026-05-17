@@ -1,11 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
-import type { ProductWithCategory } from "@/types";
-import { deleteProduct } from "./actions";
-import PageHeader from "@/app/components/PageHeader";
+import Button from "@/app/components/Button";
 import FilterableList from "@/app/components/FilterableList";
+import PageHeader from "@/app/components/PageHeader";
 import { PAGE_SIZE } from "@/lib/constants";
 import { formatCurrency } from "@/lib/format";
-import Button from "@/app/components/Button";
+import { createClient } from "@/lib/supabase/server";
+import type { ProductWithCategory } from "@/types";
+
+import { deleteProduct } from "./actions";
 
 export default async function AdminProductsPage({
   searchParams,

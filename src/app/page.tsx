@@ -1,9 +1,9 @@
+import FilterableList from "@/app/components/FilterableList";
+import PageHeader from "@/app/components/PageHeader";
+import ProductCard from "@/app/components/ProductCard";
+import { PAGE_SIZE } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import type { ItemWithCategories, ProductWithCategory } from "@/types";
-import ProductCard from "@/app/components/ProductCard";
-import PageHeader from "@/app/components/PageHeader";
-import FilterableList from "@/app/components/FilterableList";
-import { PAGE_SIZE } from "@/lib/constants";
 
 export default async function Home({
   searchParams,

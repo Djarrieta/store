@@ -1,9 +1,10 @@
+import type { CartItem } from "@/lib/cart";
+import { formatCurrency } from "@/lib/format";
 import { createServiceClient } from "@/lib/supabase/service";
-import { getHistory, type ChatMessage } from "./chatHistory";
+
+import { type ChatMessage,getHistory } from "./chatHistory";
 import { fetchStoreSnapshot } from "./contextTopics";
 import { ASSISTANT_PROMPT } from "./prompt";
-import { formatCurrency } from "@/lib/format";
-import type { CartItem } from "@/lib/cart";
 
 const MAX_CART_ITEMS = 50;
 

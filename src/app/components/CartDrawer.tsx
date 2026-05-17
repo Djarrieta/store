@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useCart } from "@/lib/cart";
-import { formatCurrency } from "@/lib/format";
-import BuyNowButton from "@/app/components/BuyNowButton";
+import { useState } from "react";
+
 import AddressModal from "@/app/components/AddressModal";
 import Button from "@/app/components/Button";
+import BuyNowButton from "@/app/components/BuyNowButton";
+import { useCart } from "@/lib/cart";
+import { formatCurrency } from "@/lib/format";
 
 export default function CartDrawer() {
   const {

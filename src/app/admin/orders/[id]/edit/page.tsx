@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
+
+import Breadcrumb from "@/app/components/Breadcrumb";
 import { createServiceClient } from "@/lib/supabase/service";
 import type { Order } from "@/types";
-import Breadcrumb from "@/app/components/Breadcrumb";
+
 import OrderEditForm from "./OrderEditForm";
 
 export default async function OrderEditPage({

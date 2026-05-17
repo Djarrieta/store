@@ -33,6 +33,20 @@
             "approve": true,
             "matchCommandLine": true
         },
-        "npx supabase": true
+        "npx supabase": true,
+        "npm run lint:fix": true,
+        "/^npm run lint:fix -- --format json$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^npm run lint:fix -- --format stylish$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^npm run lint:fix -- --max-warnings 0$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "npm run lint:check": true,
     }
 }

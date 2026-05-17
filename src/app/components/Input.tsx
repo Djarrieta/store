@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes } from "react";
+import { forwardRef, type InputHTMLAttributes, type SelectHTMLAttributes,type TextareaHTMLAttributes } from "react";
 
 // ── Shared base ───────────────────────────────────────────────────────────────
 const BASE =

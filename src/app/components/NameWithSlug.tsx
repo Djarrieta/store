@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { toSlug } from "@/lib/format";
-import Input from "@/app/components/Input";
+
 import { FormField } from "@/app/components/FormCard";
+import Input from "@/app/components/Input";
+import { toSlug } from "@/lib/format";
 
 interface Props {
   defaultName?: string;

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useState } from "react";
+
 import Button from "@/app/components/Button";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginActions() {
   const [isLoading, setIsLoading] = useState(false);

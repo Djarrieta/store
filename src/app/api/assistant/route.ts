@@ -1,6 +1,6 @@
 import { buildPrompt } from "@/lib/assistant/buildPrompt";
-import { generateResponse } from "@/lib/assistant/mcpService";
 import { addMessage } from "@/lib/assistant/chatHistory";
+import { generateResponse } from "@/lib/assistant/mcpService";
 
 export async function POST(req: Request): Promise<Response> {
   try {

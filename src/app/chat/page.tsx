@@ -1,4 +1,5 @@
 import { getUser } from "@/lib/auth";
+
 import ChatWidget from "./ChatWidget";
 
 export default async function ChatPage() {

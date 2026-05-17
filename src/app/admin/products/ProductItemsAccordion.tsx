@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   createItemForProduct,
   deleteItemFromProduct,
@@ -8,7 +10,6 @@ import {
 import Button from "@/app/components/Button";
 import { Form, FormField } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
-import { useState } from "react";
 
 interface CategoryValue {
   id: string;

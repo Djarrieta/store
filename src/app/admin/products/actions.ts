@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
+
 import { requireAdmin } from "@/lib/auth";
+import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
 import type { CreateProductInput, UpdateProductInput } from "@/types";
 
 function parseTags(raw: string | null) {

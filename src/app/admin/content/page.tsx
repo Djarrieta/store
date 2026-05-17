@@ -1,9 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
-import type { Content } from "@/types";
-import { deleteContent } from "./actions";
-import PageHeader from "@/app/components/PageHeader";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
+import PageHeader from "@/app/components/PageHeader";
+import { createClient } from "@/lib/supabase/server";
+import type { Content } from "@/types";
+
+import { deleteContent } from "./actions";
 
 export default async function AdminContentPage() {
   const supabase = await createClient();

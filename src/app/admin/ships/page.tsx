@@ -1,12 +1,13 @@
-import { requireAdmin } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
-import { formatCurrency } from "@/lib/format";
-import PageHeader from "@/app/components/PageHeader";
-import type { Ship, ShipsConfig } from "@/types";
-import { deleteShip, updateShipsConfig } from "./actions";
 import Button from "@/app/components/Button";
 import { Form, FormField } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
+import PageHeader from "@/app/components/PageHeader";
+import { requireAdmin } from "@/lib/auth";
+import { formatCurrency } from "@/lib/format";
+import { createClient } from "@/lib/supabase/server";
+import type { Ship, ShipsConfig } from "@/types";
+
+import { deleteShip, updateShipsConfig } from "./actions";
 
 export default async function AdminShipsPage() {
   await requireAdmin();

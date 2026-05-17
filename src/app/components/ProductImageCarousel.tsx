@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
-import type { ProductImage } from "@/types/product";
+import { useState } from "react";
+
 import Button from "@/app/components/Button";
+import type { ProductImage } from "@/types/product";
 
 interface ProductImageCarouselProps {
   images: ProductImage[];

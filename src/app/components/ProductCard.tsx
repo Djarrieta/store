@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ItemWithCategories, ProductWithCategory } from "@/types";
-import { formatCurrency } from "@/lib/format";
+
 import AddToCartButton from "@/app/components/AddToCartButton";
 import VariantSelector from "@/app/components/VariantSelector";
+import { formatCurrency } from "@/lib/format";
+import type { ItemWithCategories, ProductWithCategory } from "@/types";
 
 interface ProductCardProps {
   product: ProductWithCategory;

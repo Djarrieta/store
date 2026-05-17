@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
+
+import AddToCartButton from "@/app/components/AddToCartButton";
+import Breadcrumb from "@/app/components/Breadcrumb";
+import ProductImageCarousel from "@/app/components/ProductImageCarousel";
+import VariantSelector from "@/app/components/VariantSelector";
+import { formatCurrency } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { ItemWithCategories, ProductWithCategory } from "@/types";
-import { formatCurrency } from "@/lib/format";
-import Breadcrumb from "@/app/components/Breadcrumb";
-import AddToCartButton from "@/app/components/AddToCartButton";
-import VariantSelector from "@/app/components/VariantSelector";
-import ProductImageCarousel from "@/app/components/ProductImageCarousel";
 
 export default async function ProductDetailPage({
   params,

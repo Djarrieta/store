@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Script from "next/script";
-import { createOrderAndCheckout, markOrderPaid, cancelOrder } from "@/app/actions/orders";
+import { useState } from "react";
+
+import { cancelOrder,createOrderAndCheckout, markOrderPaid } from "@/app/actions/orders";
 import Button from "@/app/components/Button";
 import type { CartItem } from "@/lib/cart";
 import type { Address } from "@/types";

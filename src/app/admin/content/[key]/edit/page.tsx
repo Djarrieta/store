@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import type { Content } from "@/types";
+
 import { updateContent } from "@/app/admin/content/actions";
 import Button from "@/app/components/Button";
-import { Textarea, Checkbox } from "@/app/components/Input";
-import { FormCard, FormField, FormActions } from "@/app/components/FormCard";
+import { FormActions,FormCard, FormField } from "@/app/components/FormCard";
+import { Checkbox,Textarea } from "@/app/components/Input";
+import { createClient } from "@/lib/supabase/server";
+import type { Content } from "@/types";
 
 export default async function AdminEditContentPage({
   params,

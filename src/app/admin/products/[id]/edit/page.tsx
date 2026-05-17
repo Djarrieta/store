@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
+
 import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/types";
+
 import { updateProduct } from "../../actions";
 import ProductForm from "../../ProductForm";
 import ProductItemsSection from "../../ProductItemsSection";

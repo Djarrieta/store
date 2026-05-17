@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
-import { getMyAddresses, createAddress } from "@/app/perfil/actions";
-import type { Address } from "@/types";
+import { useEffect, useState, useTransition } from "react";
+
 import Button from "@/app/components/Button";
-import Input from "@/app/components/Input";
 import { Form } from "@/app/components/FormCard";
+import Input from "@/app/components/Input";
+import { createAddress,getMyAddresses } from "@/app/perfil/actions";
+import type { Address } from "@/types";
 
 interface AddressModalProps {
   isOpen: boolean;

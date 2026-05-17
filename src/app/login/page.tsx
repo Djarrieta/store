@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import LoginActions from "./LoginActions";
+
 import { getUser } from "@/lib/auth";
+
+import LoginActions from "./LoginActions";
 
 export default async function LoginPage() {
   const user = await getUser();

@@ -1,15 +1,17 @@
+import "./globals.css";
+
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
-import "./globals.css";
 import Link from "next/link";
-import { getUser, isAdmin } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
-import UserMenu from "@/app/components/UserMenu";
-import NavLinks from "@/app/components/NavLinks";
-import { CartProvider } from "@/lib/cart";
-import CartIcon from "@/app/components/CartIcon";
+
 import CartDrawer from "@/app/components/CartDrawer";
+import CartIcon from "@/app/components/CartIcon";
 import ChatFAB from "@/app/components/ChatFAB";
+import NavLinks from "@/app/components/NavLinks";
+import UserMenu from "@/app/components/UserMenu";
+import { getUser, isAdmin } from "@/lib/auth";
+import { CartProvider } from "@/lib/cart";
+import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types";
 
 const outfit = Outfit({

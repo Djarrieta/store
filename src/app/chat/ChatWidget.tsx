@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import ReactMarkdown from "react-markdown";
-import { sendMessage, migrateGuestChat } from "./actions";
-import { useCart } from "@/lib/cart";
+
 import Button from "@/app/components/Button";
-import Input from "@/app/components/Input";
 import { Form } from "@/app/components/FormCard";
+import Input from "@/app/components/Input";
+import { useCart } from "@/lib/cart";
+
+import { migrateGuestChat,sendMessage } from "./actions";
 
 interface Message {
   role: "user" | "assistant";

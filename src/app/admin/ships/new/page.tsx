@@ -1,8 +1,9 @@
-import { requireAdmin } from "@/lib/auth";
-import { createShip } from "../actions";
 import Button from "@/app/components/Button";
+import { FormActions,FormCard, FormField } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
-import { FormCard, FormField, FormActions } from "@/app/components/FormCard";
+import { requireAdmin } from "@/lib/auth";
+
+import { createShip } from "../actions";
 
 export default async function NewShipPage() {
   await requireAdmin();

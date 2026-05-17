@@ -1,7 +1,7 @@
 "use client";
 
-import { useCart } from "@/lib/cart";
 import Button from "@/app/components/Button";
+import { useCart } from "@/lib/cart";
 
 export default function CartIcon() {
   const { totalItems, openCart } = useCart();

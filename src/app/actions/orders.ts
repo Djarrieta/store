@@ -1,10 +1,10 @@
 "use server";
 
 import { requireAuth } from "@/lib/auth";
+import type { CartItem } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { generateWompiSignature } from "@/lib/wompi";
-import type { CartItem } from "@/lib/cart";
 import type { ShippingAddressSnapshot } from "@/types";
 
 export async function createOrderAndCheckout(

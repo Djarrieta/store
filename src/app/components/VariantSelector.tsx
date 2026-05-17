@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useCart } from "@/lib/cart";
+
 import Button from "@/app/components/Button";
 import { Select } from "@/app/components/Input";
+import { useCart } from "@/lib/cart";
 
 interface VariantCategory {
   id: string;

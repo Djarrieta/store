@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Category } from "@/types";
+
 import ProductItemsAccordion from "./ProductItemsAccordion";
 
 interface ItemRow {

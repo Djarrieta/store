@@ -1,6 +1,8 @@
-import { createServiceClient } from "@/lib/supabase/service";
-import { DeepSeekLLMProvider } from "./deepseekProvider";
 import { HumanMessage } from "@langchain/core/messages";
+
+import { createServiceClient } from "@/lib/supabase/service";
+
+import { DeepSeekLLMProvider } from "./deepseekProvider";
 
 const SUMMARY_THRESHOLD = 20;
 
