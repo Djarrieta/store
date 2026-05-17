@@ -5,6 +5,7 @@ import type { Address, Order } from "@/types";
 import { deleteAddress, setDefaultAddress } from "./actions";
 import { OrderAccordion } from "./OrderAccordion";
 import Button from "@/app/components/Button";
+import { Form } from "@/app/components/FormCard";
 
 export default async function PerfilPage() {
   const user = await requireAuth();
@@ -34,11 +35,11 @@ export default async function PerfilPage() {
     <main className="mx-auto max-w-2xl space-y-10 px-4 py-8">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold">Mi perfil</h1>
-        <form action={signOut}>
+        <Form action={signOut}>
           <Button variant="secondary" size="lg" shadow type="submit">
             Cerrar sesión
           </Button>
-        </form>
+        </Form>
       </div>
 
       {/* ── Addresses ── */}
@@ -95,7 +96,7 @@ export default async function PerfilPage() {
                     </Button>
 
                     {!addr.is_default && (
-                      <form
+                      <Form
                         action={async () => {
                           "use server";
                           await setDefaultAddress(addr.id);
@@ -110,10 +111,10 @@ export default async function PerfilPage() {
                         >
                           Usar principal
                         </Button>
-                      </form>
+                      </Form>
                     )}
 
-                    <form
+                    <Form
                       action={async () => {
                         "use server";
                         await deleteAddress(addr.id);
@@ -128,7 +129,7 @@ export default async function PerfilPage() {
                         >
                           Eliminar
                         </Button>
-                    </form>
+                    </Form>
                   </div>
                 </div>
               </div>

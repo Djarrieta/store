@@ -5,6 +5,7 @@ import { getMyAddresses, createAddress } from "@/app/perfil/actions";
 import type { Address } from "@/types";
 import Button from "@/app/components/Button";
 import Input from "@/app/components/Input";
+import { Form } from "@/app/components/FormCard";
 
 interface AddressModalProps {
   isOpen: boolean;
@@ -152,7 +153,7 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
           )}
 
           {mode === "form" && (
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <Form onSubmit={handleSubmit} className="space-y-3">
               {formError && (
                 <p className="rounded-lg border-2 border-red-400 bg-red-50 px-3 py-2 text-sm text-red-700">
                   {formError}
@@ -238,7 +239,7 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
                   {isSaving ? "Guardando..." : "Guardar y usar"}
                 </Button>
               </div>
-            </form>
+            </Form>
           )}
         </div>
       </div>

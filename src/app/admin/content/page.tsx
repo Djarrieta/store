@@ -3,6 +3,7 @@ import type { Content } from "@/types";
 import { deleteContent } from "./actions";
 import PageHeader from "@/app/components/PageHeader";
 import Button from "@/app/components/Button";
+import { Form } from "@/app/components/FormCard";
 
 export default async function AdminContentPage() {
   const supabase = await createClient();
@@ -51,7 +52,7 @@ export default async function AdminContentPage() {
               >
                 Editar
               </Button>
-              <form
+              <Form
                 action={async () => {
                   "use server";
                   await deleteContent(entry.key);
@@ -60,7 +61,7 @@ export default async function AdminContentPage() {
                 <Button variant="danger" size="sm" shadow type="submit">
                   Eliminar
                 </Button>
-              </form>
+              </Form>
             </div>
           </div>
         ))}

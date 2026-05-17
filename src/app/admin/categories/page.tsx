@@ -3,6 +3,7 @@ import type { Category } from "@/types";
 import { deleteCategory } from "./actions";
 import PageHeader from "@/app/components/PageHeader";
 import Button from "@/app/components/Button";
+import { Form } from "@/app/components/FormCard";
 
 export default async function AdminCategoriesPage() {
   const supabase = await createClient();
@@ -41,7 +42,7 @@ export default async function AdminCategoriesPage() {
                 <Button href={`/admin/categories/${parent.id}/edit`} variant="secondary" size="sm" shadow>
                   Editar
                 </Button>
-                <form
+                <Form
                   className="flex items-center"
                   action={async () => {
                     "use server";
@@ -51,7 +52,7 @@ export default async function AdminCategoriesPage() {
                   <Button variant="danger" size="sm" shadow type="submit">
                     Eliminar
                   </Button>
-                </form>
+                </Form>
               </div>
             </div>
 
@@ -67,7 +68,7 @@ export default async function AdminCategoriesPage() {
                       <Button href={`/admin/categories/${sub.id}/edit`} variant="secondary" size="sm" shadow>
                         Editar
                       </Button>
-                      <form
+                      <Form
                         className="flex items-center"
                         action={async () => {
                           "use server";
@@ -77,7 +78,7 @@ export default async function AdminCategoriesPage() {
                       <Button variant="danger" size="sm" shadow type="submit">
                           Eliminar
                         </Button>
-                      </form>
+                      </Form>
                     </div>
                   </li>
                 ))}

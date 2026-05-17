@@ -6,7 +6,7 @@ import { updateAddress } from "../../../actions";
 import Button from "@/app/components/Button";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import Input from "@/app/components/Input";
-import { FormField, FormActions } from "@/app/components/FormCard";
+import { Form, FormField, FormActions } from "@/app/components/FormCard";
 
 export default async function EditAddressPage({
   params,
@@ -45,7 +45,7 @@ export default async function EditAddressPage({
 
       <h1 className="font-display text-2xl font-bold">Editar dirección</h1>
 
-      <form
+      <Form
         action={updateAndRedirectWrapper}
         className="space-y-4 rounded-2xl border-2 border-black bg-[var(--card)] p-6 shadow-[4px_4px_0_0_#111]"
       >
@@ -122,7 +122,7 @@ export default async function EditAddressPage({
             Guardar cambios
           </Button>
         </FormActions>
-      </form>
+      </Form>
     </main>
   );
 }

@@ -58,3 +58,9 @@ export function FormActions({ children, className }: FormActionsProps) {
     </div>
   );
 }
+
+// ── Form ──────────────────────────────────────────────────────────────────────
+// A plain <form> wrapper for inline/utility forms (no card styles).
+export function Form({ children, ...props }: FormCardProps) {
+  return <form {...props}>{children}</form>;
+}

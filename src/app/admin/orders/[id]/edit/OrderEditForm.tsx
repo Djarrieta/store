@@ -8,6 +8,7 @@ import { updateOrder } from "../../actions";
 import { formatCurrency } from "@/lib/format";
 import Button from "@/app/components/Button";
 import Input, { Textarea } from "@/app/components/Input";
+import { Form } from "@/app/components/FormCard";
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   created: "Creado (sin pagar)",
@@ -113,7 +114,7 @@ export default function OrderEditForm({ order }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
+    <Form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
       {error && (
         <div className="rounded-lg border-2 border-red-600 bg-red-100 px-4 py-3 text-sm font-semibold text-red-800">
           {error}
@@ -331,7 +332,7 @@ export default function OrderEditForm({ order }: Props) {
           Cancelar
         </Button>
       </div>
-    </form>
+    </Form>
   );
 }
 

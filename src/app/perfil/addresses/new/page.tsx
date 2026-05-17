@@ -4,7 +4,7 @@ import { createAddress } from "../../actions";
 import Button from "@/app/components/Button";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import Input, { Checkbox } from "@/app/components/Input";
-import { FormField, FormActions } from "@/app/components/FormCard";
+import { Form, FormField, FormActions } from "@/app/components/FormCard";
 
 export default async function NewAddressPage() {
   await requireAuth();
@@ -26,7 +26,7 @@ export default async function NewAddressPage() {
 
       <h1 className="font-display text-2xl font-bold">Nueva dirección</h1>
 
-      <form
+      <Form
         action={createAndRedirect}
         className="space-y-4 rounded-2xl border-2 border-black bg-[var(--card)] p-6 shadow-[4px_4px_0_0_#111]"
       >
@@ -111,7 +111,7 @@ export default async function NewAddressPage() {
             Guardar dirección
           </Button>
         </FormActions>
-      </form>
+      </Form>
     </main>
   );
 }

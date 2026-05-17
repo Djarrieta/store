@@ -6,6 +6,7 @@ import { sendMessage, migrateGuestChat } from "./actions";
 import { useCart } from "@/lib/cart";
 import Button from "@/app/components/Button";
 import Input from "@/app/components/Input";
+import { Form } from "@/app/components/FormCard";
 
 interface Message {
   role: "user" | "assistant";
@@ -136,7 +137,7 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
+      <Form onSubmit={handleSubmit} className="mt-3 flex gap-2">
         <Input
           ref={inputRef}
           type="text"
@@ -156,7 +157,7 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
         >
           Enviar
         </Button>
-      </form>
+      </Form>
     </div>
   );
 }

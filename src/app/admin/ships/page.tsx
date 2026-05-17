@@ -5,6 +5,7 @@ import PageHeader from "@/app/components/PageHeader";
 import type { Ship, ShipsConfig } from "@/types";
 import { deleteShip, updateShipsConfig } from "./actions";
 import Button from "@/app/components/Button";
+import { Form } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
 
 export default async function AdminShipsPage() {
@@ -71,7 +72,7 @@ export default async function AdminShipsPage() {
                         >
                           Editar
                         </Button>
-                        <form
+                        <Form
                           className="flex items-center"
                           action={async () => {
                             "use server";
@@ -81,7 +82,7 @@ export default async function AdminShipsPage() {
                           <Button variant="danger" size="sm" shadow type="submit">
                             Eliminar
                           </Button>
-                        </form>
+                        </Form>
                       </div>
                     </td>
                   </tr>
@@ -100,7 +101,7 @@ export default async function AdminShipsPage() {
             Deja vacío para desactivar el envío gratis. Cuando el subtotal del pedido
             supere este monto, el envío será gratuito.
           </p>
-          <form action={updateShipsConfig} className="flex items-end gap-3">
+          <Form action={updateShipsConfig} className="flex items-end gap-3">
             <label className="grid gap-1 text-sm font-medium">
               Envío gratis desde (COP)
               <Input
@@ -117,7 +118,7 @@ export default async function AdminShipsPage() {
             <Button variant="primary" size="lg" shadow type="submit">
               Guardar
             </Button>
-          </form>
+          </Form>
           {config?.free_above_cop != null && (
             <p className="mt-3 text-sm font-semibold text-green-700">
               Envío gratis activo desde {formatCurrency(config.free_above_cop)}

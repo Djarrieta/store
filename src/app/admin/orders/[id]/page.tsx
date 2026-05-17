@@ -4,6 +4,7 @@ import type { Order, OrderItem, OrderStatus } from "@/types";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { approveOrder, rejectOrder, fulfillOrder, updateTrackingCode } from "../actions";
 import Button from "@/app/components/Button";
+import { Form } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
@@ -104,7 +105,7 @@ export default async function OrderDetailPage({
       {/* Tracking */}
       <div className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-3">
         <h2 className="font-bold">Seguimiento de envío</h2>
-        <form
+        <Form
           action={async (fd: FormData) => {
             "use server";
             await updateTrackingCode(order.id, fd);
@@ -121,7 +122,7 @@ export default async function OrderDetailPage({
           <Button variant="primary" size="lg" shadow type="submit">
             Guardar
           </Button>
-        </form>
+        </Form>
         {order.tracking_code && (
           <p className="text-xs text-[var(--muted)]">
             Código actual:{" "}
@@ -203,7 +204,7 @@ export default async function OrderDetailPage({
         </Button>
         {order.status === "pending_approval" && (
           <>
-            <form
+            <Form
               action={async () => {
                 "use server";
                 await approveOrder(order.id);
@@ -212,8 +213,8 @@ export default async function OrderDetailPage({
               <Button variant="success" size="lg" shadow type="submit">
                 Aprobar
               </Button>
-            </form>
-            <form
+            </Form>
+            <Form
               action={async () => {
                 "use server";
                 await rejectOrder(order.id);
@@ -222,11 +223,11 @@ export default async function OrderDetailPage({
               <Button variant="danger" size="lg" shadow type="submit">
                 Rechazar
               </Button>
-            </form>
+            </Form>
           </>
         )}
         {order.status === "approved" && (
-          <form
+          <Form
             action={async () => {
               "use server";
               await fulfillOrder(order.id);
@@ -235,7 +236,7 @@ export default async function OrderDetailPage({
             <Button variant="primary" size="lg" shadow type="submit">
               Marcar como entregado
             </Button>
-          </form>
+          </Form>
         )}
       </div>
     </div>

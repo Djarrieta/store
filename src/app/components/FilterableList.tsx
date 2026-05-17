@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Button from "@/app/components/Button";
 import Input from "@/app/components/Input";
+import { Form } from "@/app/components/FormCard";
 
 interface FilterableListProps {
   q?: string;
@@ -92,7 +93,7 @@ export default function FilterableList({
         </Button>
 
         {open && (
-          <form
+          <Form
             className="grid gap-2 border-t-2 border-black p-4 sm:grid-cols-3"
             method="get"
           >
@@ -119,7 +120,7 @@ export default function FilterableList({
                 </Button>
               )}
             </div>
-          </form>
+          </Form>
         )}
       </div>
 
