@@ -6,6 +6,7 @@ import { updateAddress } from "../../../actions";
 import Button from "@/app/components/Button";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import Input from "@/app/components/Input";
+import { FormField, FormActions } from "@/app/components/FormCard";
 
 export default async function EditAddressPage({
   params,
@@ -48,16 +49,16 @@ export default async function EditAddressPage({
         action={updateAndRedirectWrapper}
         className="space-y-4 rounded-2xl border-2 border-black bg-[var(--card)] p-6 shadow-[4px_4px_0_0_#111]"
       >
-        <label className="grid gap-1 text-sm font-medium">
-          Nombre del destinatario
+        <FormField label="Nombre del destinatario" htmlFor="recipient_name">
           <Input
+            id="recipient_name"
             name="recipient_name"
             required
             defaultValue={address.recipient_name}
           />
-        </label>
+        </FormField>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="grid gap-1 text-sm font-medium">
             Departamento
             <Input
@@ -76,35 +77,38 @@ export default async function EditAddressPage({
           </label>
         </div>
 
-        <label className="grid gap-1 text-sm font-medium">
-          Dirección
+        <FormField label="Dirección" htmlFor="address_line">
           <Input
+            id="address_line"
             name="address_line"
             required
             defaultValue={address.address_line}
           />
-        </label>
+        </FormField>
 
-        <label className="grid gap-1 text-sm font-medium">
-          Barrio{" "}
-          <span className="font-normal text-[var(--muted)]">(opcional)</span>
+        <div className="grid gap-1 text-sm font-medium">
+          <label htmlFor="neighborhood">
+            Barrio{" "}
+            <span className="font-normal text-[var(--muted)]">(opcional)</span>
+          </label>
           <Input
+            id="neighborhood"
             name="neighborhood"
             defaultValue={address.neighborhood ?? ""}
           />
-        </label>
+        </div>
 
-        <label className="grid gap-1 text-sm font-medium">
-          Teléfono de contacto
+        <FormField label="Teléfono de contacto" htmlFor="phone">
           <Input
+            id="phone"
             name="phone"
             required
             type="tel"
             defaultValue={address.phone}
           />
-        </label>
+        </FormField>
 
-        <div className="flex gap-3 pt-1">
+        <FormActions>
           <Button href="/perfil" variant="secondary" size="xl" shadow>
             Cancelar
           </Button>
@@ -117,7 +121,7 @@ export default async function EditAddressPage({
           >
             Guardar cambios
           </Button>
-        </div>
+        </FormActions>
       </form>
     </main>
   );

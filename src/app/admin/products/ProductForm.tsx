@@ -5,6 +5,7 @@ import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
 import type { Product, ProductImage } from "@/types";
 import Button from "@/app/components/Button";
 import Input, { Textarea } from "@/app/components/Input";
+import { FormCard, FormField, FormActions } from "@/app/components/FormCard";
 
 interface ProductFormProps {
   action: (formData: FormData) => Promise<void>;
@@ -29,33 +30,33 @@ export default function ProductForm({
   }, [imagesText]);
 
   return (
-    <form action={action} className="min-w-0 space-y-4 rounded-xl border-2 border-black bg-white p-5">
-      <label className="grid gap-1 text-sm font-medium">
-        Título
+    <FormCard action={action}>
+      <FormField label="Título" htmlFor="title">
         <Input
+          id="title"
           name="title"
           maxLength={MAX_TITLE_LENGTH}
           required
           placeholder="ej. Chaqueta de cuero vintage"
           defaultValue={defaultValues?.title ?? ""}
         />
-      </label>
+      </FormField>
 
-      <label className="grid gap-1 text-sm font-medium">
-        Descripción
+      <FormField label="Descripción" htmlFor="description">
         <Textarea
+          id="description"
           name="description"
           maxLength={MAX_DESCRIPTION_LENGTH}
           rows={5}
           placeholder="Describe el producto…"
           defaultValue={defaultValues?.description ?? ""}
         />
-      </label>
+      </FormField>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-1 text-sm font-medium">
-          Precio
+        <FormField label="Precio" htmlFor="price">
           <Input
+            id="price"
             name="price"
             type="number"
             min="0"
@@ -63,11 +64,11 @@ export default function ProductForm({
             required
             defaultValue={defaultValues?.price ?? 0}
           />
-        </label>
+        </FormField>
 
-        <label className="grid gap-1 text-sm font-medium">
-          Descuento (%)
+        <FormField label="Descuento (%)" htmlFor="discount">
           <Input
+            id="discount"
             name="discount"
             type="number"
             min="0"
@@ -75,33 +76,35 @@ export default function ProductForm({
             step="0.01"
             defaultValue={defaultValues?.discount ?? 0}
           />
-        </label>
+        </FormField>
       </div>
 
-      <label className="grid gap-1 text-sm font-medium">
-        Etiquetas
+      <FormField label="Etiquetas" htmlFor="tags">
         <Input
+          id="tags"
           name="tags"
           placeholder="ej. vintage, cuero, chaqueta"
           defaultValue={(defaultValues?.tags ?? []).join(", ")}
         />
-      </label>
+      </FormField>
 
-      <label className="grid gap-1 text-sm font-medium">
-        URLs de imágenes
+      <FormField label="URLs de imágenes" htmlFor="images_text">
         <Textarea
+          id="images_text"
           value={imagesText}
           onChange={(e) => setImagesText(e.target.value)}
           rows={3}
           placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"
         />
-      </label>
+      </FormField>
 
       <input type="hidden" name="images" value={serializedImages} />
 
-      <Button variant="primary" size="lg" type="submit">
-        {defaultValues?.id ? "Actualizar producto" : "Crear producto"}
-      </Button>
-    </form>
+      <FormActions>
+        <Button variant="primary" size="lg" type="submit">
+          {defaultValues?.id ? "Actualizar producto" : "Crear producto"}
+        </Button>
+      </FormActions>
+    </FormCard>
   );
 }

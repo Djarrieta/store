@@ -1,34 +1,28 @@
 import { createContent } from "@/app/admin/content/actions";
 import Button from "@/app/components/Button";
 import Input, { Textarea } from "@/app/components/Input";
+import { FormCard, FormField, FormActions } from "@/app/components/FormCard";
 
 export default function AdminNewContentPage() {
   return (
     <section className="space-y-4">
       <h1 className="font-display text-3xl font-bold">Nuevo contenido</h1>
-      <form action={createContent} className="space-y-4">
-        <div className="space-y-1">
-          <label htmlFor="key" className="block text-sm font-semibold">
-            Clave
-          </label>
+      <FormCard action={createContent}>
+        <FormField label="Clave" htmlFor="key">
           <Input
             id="key"
             name="key"
             required
-            className="font-mono"
           />
-        </div>
-        <div className="space-y-1">
-          <label htmlFor="value" className="block text-sm font-semibold">
-            Valor
-          </label>
+        </FormField>
+        <FormField label="Valor" htmlFor="value">
           <Textarea
             id="value"
             name="value"
             rows={8}
           />
-        </div>
-        <label className="flex items-center gap-3 cursor-pointer select-none">
+        </FormField>
+        <label className="flex cursor-pointer select-none items-center gap-3">
           <input
             type="checkbox"
             name="pinned"
@@ -36,15 +30,15 @@ export default function AdminNewContentPage() {
           />
           <span className="text-sm font-semibold">Inyectar siempre en el asistente</span>
         </label>
-        <div className="flex gap-3">
+        <FormActions>
           <Button variant="primary" size="xl" shadow type="submit">
             Crear
           </Button>
           <Button href="/admin/content" variant="secondary" size="xl" shadow>
             Cancelar
           </Button>
-        </div>
-      </form>
+        </FormActions>
+      </FormCard>
     </section>
   );
 }

@@ -4,6 +4,8 @@ import type { Category } from "@/types";
 import { updateCategory } from "../../actions";
 import NameWithSlug from "@/app/components/NameWithSlug";
 import Button from "@/app/components/Button";
+import { Select } from "@/app/components/Input";
+import { FormCard, FormField, FormActions } from "@/app/components/FormCard";
 
 export default async function EditCategoryPage({
   params,
@@ -31,32 +33,26 @@ export default async function EditCategoryPage({
   return (
     <section className="space-y-4">
       <h1 className="font-display text-3xl font-bold">Editar categoría</h1>
-      <form
-        action={updateWithId}
-        className="min-w-0 space-y-4 rounded-xl border-2 border-black bg-white p-5"
-      >
+      <FormCard action={updateWithId}>
         <NameWithSlug defaultName={category.name} defaultSlug={category.slug} />
 
-        <label className="grid gap-1 text-sm font-medium">
-          Categoría padre
-          <select
-            name="parent_id"
-            defaultValue={category.parent_id ?? ""}
-            className="w-full rounded-md border-2 border-black px-3 py-2 bg-white"
-          >
+        <FormField label="Categoría padre" htmlFor="parent_id">
+          <Select id="parent_id" name="parent_id" defaultValue={category.parent_id ?? ""}>
             <option value="">— Nivel superior —</option>
             {(topLevel ?? []).map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </FormField>
 
-        <Button variant="primary" size="lg" type="submit">
-          Actualizar categoría
-        </Button>
-      </form>
+        <FormActions>
+          <Button variant="primary" size="lg" type="submit">
+            Actualizar categoría
+          </Button>
+        </FormActions>
+      </FormCard>
     </section>
   );
 }

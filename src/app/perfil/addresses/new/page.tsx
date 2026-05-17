@@ -4,6 +4,7 @@ import { createAddress } from "../../actions";
 import Button from "@/app/components/Button";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import Input from "@/app/components/Input";
+import { FormField, FormActions } from "@/app/components/FormCard";
 
 export default async function NewAddressPage() {
   await requireAuth();
@@ -29,16 +30,16 @@ export default async function NewAddressPage() {
         action={createAndRedirect}
         className="space-y-4 rounded-2xl border-2 border-black bg-[var(--card)] p-6 shadow-[4px_4px_0_0_#111]"
       >
-        <label className="grid gap-1 text-sm font-medium">
-          Nombre del destinatario
+        <FormField label="Nombre del destinatario" htmlFor="recipient_name">
           <Input
+            id="recipient_name"
             name="recipient_name"
             required
             placeholder="ej. María García"
           />
-        </label>
+        </FormField>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="grid gap-1 text-sm font-medium">
             Departamento
             <Input
@@ -57,35 +58,38 @@ export default async function NewAddressPage() {
           </label>
         </div>
 
-        <label className="grid gap-1 text-sm font-medium">
-          Dirección
+        <FormField label="Dirección" htmlFor="address_line">
           <Input
+            id="address_line"
             name="address_line"
             required
             placeholder="ej. Cra 7 # 45-20 Apto 301"
           />
-        </label>
+        </FormField>
 
-        <label className="grid gap-1 text-sm font-medium">
-          Barrio{" "}
-          <span className="font-normal text-[var(--muted)]">(opcional)</span>
+        <div className="grid gap-1 text-sm font-medium">
+          <label htmlFor="neighborhood">
+            Barrio{" "}
+            <span className="font-normal text-[var(--muted)]">(opcional)</span>
+          </label>
           <Input
+            id="neighborhood"
             name="neighborhood"
             placeholder="ej. El Poblado"
           />
-        </label>
+        </div>
 
-        <label className="grid gap-1 text-sm font-medium">
-          Teléfono de contacto
+        <FormField label="Teléfono de contacto" htmlFor="phone">
           <Input
+            id="phone"
             name="phone"
             required
             type="tel"
             placeholder="ej. 300 123 4567"
           />
-        </label>
+        </FormField>
 
-        <label className="flex items-center gap-2 text-sm font-medium">
+        <label className="flex cursor-pointer select-none items-center gap-2 text-sm font-medium">
           <input
             type="checkbox"
             name="is_default"
@@ -95,7 +99,7 @@ export default async function NewAddressPage() {
           Usar como dirección principal
         </label>
 
-        <div className="flex gap-3 pt-1">
+        <FormActions>
           <Button href="/perfil" variant="secondary" size="xl" shadow>
             Cancelar
           </Button>
@@ -108,7 +112,7 @@ export default async function NewAddressPage() {
           >
             Guardar dirección
           </Button>
-        </div>
+        </FormActions>
       </form>
     </main>
   );
