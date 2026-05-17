@@ -2,7 +2,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createShip } from "../actions";
 import Button from "@/app/components/Button";
 import Input from "@/app/components/Input";
-import { FormCard, FormField, FormActions } from "@/app/components/FormCard";
+import { FormCard, FormActions } from "@/app/components/FormCard";
 
 export default async function NewShipPage() {
   await requireAdmin();
@@ -13,44 +13,28 @@ export default async function NewShipPage() {
 
       <FormCard action={createShip} className="max-w-lg">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="Departamento">
-            <Input
-              name="department"
-              required
-              placeholder="ej. Antioquia"
-            />
-          </FormField>
-          <FormField label="Ciudad">
-            <Input
-              name="city"
-              required
-              placeholder="ej. Medellín"
-            />
-          </FormField>
+          <Input label="Departamento" name="department" required placeholder="ej. Antioquia" />
+          <Input label="Ciudad" name="city" required placeholder="ej. Medellín" />
         </div>
 
-        <FormField label="Precio (COP)" htmlFor="price_cop">
-          <Input
-            id="price_cop"
-            name="price_cop"
-            required
-            type="number"
-            min="0"
-            step="1000"
-            placeholder="ej. 15000"
-          />
-        </FormField>
+        <Input
+          label="Precio (COP)"
+          name="price_cop"
+          required
+          type="number"
+          min="0"
+          step="1000"
+          placeholder="ej. 15000"
+        />
 
-        <FormField label="Días estimados de entrega" htmlFor="estimated_days">
-          <Input
-            id="estimated_days"
-            name="estimated_days"
-            required
-            type="number"
-            min="1"
-            placeholder="ej. 3"
-          />
-        </FormField>
+        <Input
+          label="Días estimados de entrega"
+          name="estimated_days"
+          required
+          type="number"
+          min="1"
+          placeholder="ej. 3"
+        />
 
         <FormActions>
           <Button href="/admin/ships" variant="secondary" size="xl" shadow>

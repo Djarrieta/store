@@ -5,7 +5,7 @@ import type { Ship } from "@/types";
 import { updateShip } from "../../actions";
 import Button from "@/app/components/Button";
 import Input from "@/app/components/Input";
-import { FormCard, FormField, FormActions } from "@/app/components/FormCard";
+import { FormCard, FormActions } from "@/app/components/FormCard";
 
 export default async function EditShipPage({
   params,
@@ -32,44 +32,28 @@ export default async function EditShipPage({
 
       <FormCard action={updateWithId} className="max-w-lg">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="Departamento">
-            <Input
-              name="department"
-              required
-              defaultValue={ship.department}
-            />
-          </FormField>
-          <FormField label="Ciudad">
-            <Input
-              name="city"
-              required
-              defaultValue={ship.city}
-            />
-          </FormField>
+          <Input label="Departamento" name="department" required defaultValue={ship.department} />
+          <Input label="Ciudad" name="city" required defaultValue={ship.city} />
         </div>
 
-        <FormField label="Precio (COP)" htmlFor="price_cop">
-          <Input
-            id="price_cop"
-            name="price_cop"
-            required
-            type="number"
-            min="0"
-            step="1000"
-            defaultValue={ship.price_cop}
-          />
-        </FormField>
+        <Input
+          label="Precio (COP)"
+          name="price_cop"
+          required
+          type="number"
+          min="0"
+          step="1000"
+          defaultValue={ship.price_cop}
+        />
 
-        <FormField label="Días estimados de entrega" htmlFor="estimated_days">
-          <Input
-            id="estimated_days"
-            name="estimated_days"
-            required
-            type="number"
-            min="1"
-            defaultValue={ship.estimated_days}
-          />
-        </FormField>
+        <Input
+          label="Días estimados de entrega"
+          name="estimated_days"
+          required
+          type="number"
+          min="1"
+          defaultValue={ship.estimated_days}
+        />
 
         <FormActions>
           <Button href="/admin/ships" variant="secondary" size="xl" shadow>

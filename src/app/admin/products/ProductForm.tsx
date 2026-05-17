@@ -5,7 +5,7 @@ import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
 import type { Product, ProductImage } from "@/types";
 import Button from "@/app/components/Button";
 import Input, { Textarea } from "@/app/components/Input";
-import { FormCard, FormField, FormActions } from "@/app/components/FormCard";
+import { FormCard, FormActions } from "@/app/components/FormCard";
 
 interface ProductFormProps {
   action: (formData: FormData) => Promise<void>;
@@ -31,72 +31,59 @@ export default function ProductForm({
 
   return (
     <FormCard action={action}>
-      <FormField label="Título" htmlFor="title">
-        <Input
-          id="title"
-          name="title"
-          maxLength={MAX_TITLE_LENGTH}
-          required
-          placeholder="ej. Chaqueta de cuero vintage"
-          defaultValue={defaultValues?.title ?? ""}
-        />
-      </FormField>
+      <Input
+        label="Título"
+        name="title"
+        maxLength={MAX_TITLE_LENGTH}
+        required
+        placeholder="ej. Chaqueta de cuero vintage"
+        defaultValue={defaultValues?.title ?? ""}
+      />
 
-      <FormField label="Descripción" htmlFor="description">
-        <Textarea
-          id="description"
-          name="description"
-          maxLength={MAX_DESCRIPTION_LENGTH}
-          rows={5}
-          placeholder="Describe el producto…"
-          defaultValue={defaultValues?.description ?? ""}
-        />
-      </FormField>
+      <Textarea
+        label="Descripción"
+        name="description"
+        maxLength={MAX_DESCRIPTION_LENGTH}
+        rows={5}
+        placeholder="Describe el producto…"
+        defaultValue={defaultValues?.description ?? ""}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField label="Precio" htmlFor="price">
-          <Input
-            id="price"
-            name="price"
-            type="number"
-            min="0"
-            step="0.01"
-            required
-            defaultValue={defaultValues?.price ?? 0}
-          />
-        </FormField>
-
-        <FormField label="Descuento (%)" htmlFor="discount">
-          <Input
-            id="discount"
-            name="discount"
-            type="number"
-            min="0"
-            max="100"
-            step="0.01"
-            defaultValue={defaultValues?.discount ?? 0}
-          />
-        </FormField>
+        <Input
+          label="Precio"
+          name="price"
+          type="number"
+          min="0"
+          step="0.01"
+          required
+          defaultValue={defaultValues?.price ?? 0}
+        />
+        <Input
+          label="Descuento (%)"
+          name="discount"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          defaultValue={defaultValues?.discount ?? 0}
+        />
       </div>
 
-      <FormField label="Etiquetas" htmlFor="tags">
-        <Input
-          id="tags"
-          name="tags"
-          placeholder="ej. vintage, cuero, chaqueta"
-          defaultValue={(defaultValues?.tags ?? []).join(", ")}
-        />
-      </FormField>
+      <Input
+        label="Etiquetas"
+        name="tags"
+        placeholder="ej. vintage, cuero, chaqueta"
+        defaultValue={(defaultValues?.tags ?? []).join(", ")}
+      />
 
-      <FormField label="URLs de imágenes" htmlFor="images_text">
-        <Textarea
-          id="images_text"
-          value={imagesText}
-          onChange={(e) => setImagesText(e.target.value)}
-          rows={3}
-          placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"
-        />
-      </FormField>
+      <Textarea
+        label="URLs de imágenes"
+        value={imagesText}
+        onChange={(e) => setImagesText(e.target.value)}
+        rows={3}
+        placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"
+      />
 
       <input type="hidden" name="images" value={serializedImages} />
 

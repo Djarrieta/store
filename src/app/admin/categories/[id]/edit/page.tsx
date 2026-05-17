@@ -5,7 +5,7 @@ import { updateCategory } from "../../actions";
 import NameWithSlug from "@/app/components/NameWithSlug";
 import Button from "@/app/components/Button";
 import { Select } from "@/app/components/Input";
-import { FormCard, FormField, FormActions } from "@/app/components/FormCard";
+import { FormCard, FormActions } from "@/app/components/FormCard";
 
 export default async function EditCategoryPage({
   params,
@@ -36,16 +36,18 @@ export default async function EditCategoryPage({
       <FormCard action={updateWithId}>
         <NameWithSlug defaultName={category.name} defaultSlug={category.slug} />
 
-        <FormField label="Categoría padre" htmlFor="parent_id">
-          <Select id="parent_id" name="parent_id" defaultValue={category.parent_id ?? ""}>
-            <option value="">— Nivel superior —</option>
-            {(topLevel ?? []).map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </Select>
-        </FormField>
+        <Select
+          label="Categoría padre"
+          name="parent_id"
+          defaultValue={category.parent_id ?? ""}
+        >
+          <option value="">— Nivel superior —</option>
+          {(topLevel ?? []).map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </Select>
 
         <FormActions>
           <Button variant="primary" size="lg" type="submit">

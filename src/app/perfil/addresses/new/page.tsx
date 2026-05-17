@@ -4,7 +4,7 @@ import { createAddress } from "../../actions";
 import Button from "@/app/components/Button";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import Input, { Checkbox } from "@/app/components/Input";
-import { Form, FormField, FormActions } from "@/app/components/FormCard";
+import { Form, FormActions } from "@/app/components/FormCard";
 
 export default async function NewAddressPage() {
   await requireAuth();
@@ -30,61 +30,38 @@ export default async function NewAddressPage() {
         action={createAndRedirect}
         className="space-y-4 rounded-2xl border-2 border-black bg-[var(--card)] p-6 shadow-[4px_4px_0_0_#111]"
       >
-        <FormField label="Nombre del destinatario" htmlFor="recipient_name">
-          <Input
-            id="recipient_name"
-            name="recipient_name"
-            required
-            placeholder="ej. María García"
-          />
-        </FormField>
+        <Input
+          label="Nombre del destinatario"
+          name="recipient_name"
+          required
+          placeholder="ej. María García"
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="Departamento">
-            <Input
-              name="department"
-              required
-              placeholder="ej. Antioquia"
-            />
-          </FormField>
-          <FormField label="Ciudad">
-            <Input
-              name="city"
-              required
-              placeholder="ej. Medellín"
-            />
-          </FormField>
+          <Input label="Departamento" name="department" required placeholder="ej. Antioquia" />
+          <Input label="Ciudad" name="city" required placeholder="ej. Medellín" />
         </div>
 
-        <FormField label="Dirección" htmlFor="address_line">
-          <Input
-            id="address_line"
-            name="address_line"
-            required
-            placeholder="ej. Cra 7 # 45-20 Apto 301"
-          />
-        </FormField>
+        <Input
+          label="Dirección"
+          name="address_line"
+          required
+          placeholder="ej. Cra 7 # 45-20 Apto 301"
+        />
 
-        <FormField
+        <Input
           label={<>Barrio <span className="font-normal text-[var(--muted)]">(opcional)</span></>}
-          htmlFor="neighborhood"
-        >
-          <Input
-            id="neighborhood"
-            name="neighborhood"
-            placeholder="ej. El Poblado"
-          />
-        </FormField>
+          name="neighborhood"
+          placeholder="ej. El Poblado"
+        />
 
-        <FormField label="Teléfono de contacto" htmlFor="phone">
-          <Input
-            id="phone"
-            name="phone"
-            required
-            type="tel"
-            placeholder="ej. 300 123 4567"
-          />
-        </FormField>
+        <Input
+          label="Teléfono de contacto"
+          name="phone"
+          required
+          type="tel"
+          placeholder="ej. 300 123 4567"
+        />
 
         <label className="flex cursor-pointer select-none items-center gap-2 text-sm font-medium">
           <Checkbox

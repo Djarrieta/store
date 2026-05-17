@@ -6,7 +6,7 @@ import {
   updateItemFromProduct,
 } from "@/app/admin/items/actions";
 import Button from "@/app/components/Button";
-import { Form, FormField } from "@/app/components/FormCard";
+import { Form } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
 import { useState } from "react";
 
@@ -113,8 +113,8 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
                 <Form action={updateAction} className="space-y-3">
                   <VariantCheckboxes dimensions={dimensions} selectedIds={selectedIds} />
 
-                  <FormField label="Stock">
-                    <Input
+                  <Input
+                      label="Stock"
                       name="stock"
                       type="number"
                       min={0}
@@ -123,7 +123,6 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
                       fullWidth={false}
                       className="w-32"
                     />
-                  </FormField>
 
                   <Button variant="primary" size="md" shadow type="submit">
                     Guardar
@@ -158,17 +157,16 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
 
           <VariantCheckboxes dimensions={dimensions} selectedIds={new Set()} />
 
-          <FormField label="Stock">
-            <Input
-              name="stock"
-              type="number"
-              min={0}
-              required
-              defaultValue={0}
-              fullWidth={false}
-              className="w-32"
-            />
-          </FormField>
+          <Input
+            label="Stock"
+            name="stock"
+            type="number"
+            min={0}
+            required
+            defaultValue={0}
+            fullWidth={false}
+            className="w-32"
+          />
 
           <div className="flex gap-2">
             <Button variant="primary" size="lg" shadow type="submit">

@@ -24,26 +24,6 @@ export function FormCard({ children, className, ...props }: FormCardProps) {
   );
 }
 
-// ── FormField ─────────────────────────────────────────────────────────────────
-// Renders a labelled field slot. Pass the input/select/textarea as children.
-type FormFieldProps = {
-  label: ReactNode;
-  htmlFor?: string;
-  children: ReactNode;
-  className?: string;
-};
-
-export function FormField({ label, htmlFor, children, className }: FormFieldProps) {
-  return (
-    <div className={clsx("grid gap-1", className)}>
-      <label htmlFor={htmlFor} className="text-sm font-semibold">
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-}
-
 // ── FormActions ───────────────────────────────────────────────────────────────
 // A wrapping row for form action buttons. Wraps to a new line on small screens.
 type FormActionsProps = {
