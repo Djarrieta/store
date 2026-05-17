@@ -48,5 +48,6 @@
             "matchCommandLine": true
         },
         "npm run lint:check": true,
+        "tsc": true
     }
 }

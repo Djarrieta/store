@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
-import Input, { Textarea } from "@/app/components/Input";
+import Input, { Textarea, LabeledField } from "@/app/components/Input";
 import { formatCurrency } from "@/lib/format";
 import type { Order, OrderItem, OrderStatus } from "@/types";
 import type { ShippingAddressSnapshot } from "@/types";
@@ -169,51 +169,51 @@ export default function OrderEditForm({ order }: Props) {
       <section className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-4">
         <h2 className="font-bold text-base">Dirección de entrega</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Destinatario" required>
+          <LabeledField label="Destinatario" required>
             <Input
               type="text"
               value={recipientName}
               onChange={(e) => setRecipientName(e.target.value)}
             />
-          </Field>
-          <Field label="Teléfono" required>
+          </LabeledField>
+          <LabeledField label="Teléfono" required>
             <Input
               type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
-          </Field>
-          <Field label="Dirección" required className="sm:col-span-2">
+          </LabeledField>
+          <LabeledField label="Dirección" required className="sm:col-span-2">
             <Input
               type="text"
               value={addressLine}
               onChange={(e) => setAddressLine(e.target.value)}
             />
-          </Field>
-          <Field label="Barrio / Zona">
+          </LabeledField>
+          <LabeledField label="Barrio / Zona">
             <Input
               type="text"
               value={neighborhood}
               onChange={(e) => setNeighborhood(e.target.value)}
             />
-          </Field>
-          <Field label="Ciudad" required>
+          </LabeledField>
+          <LabeledField label="Ciudad" required>
             <Input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
             />
-          </Field>
-          <Field label="Departamento" required>
+          </LabeledField>
+          <LabeledField label="Departamento" required>
             <Input
               type="text"
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
             />
-          </Field>
+          </LabeledField>
         </div>
         <div className="pt-3 border-t border-black/10">
-          <Field label="Costo de envío (COP)">
+          <LabeledField label="Costo de envío (COP)">
             <Input
               type="number"
               min={0}
@@ -223,7 +223,7 @@ export default function OrderEditForm({ order }: Props) {
               fullWidth={false}
               className="w-48"
             />
-          </Field>
+          </LabeledField>
         </div>
       </section>
 
@@ -338,26 +338,4 @@ export default function OrderEditForm({ order }: Props) {
   );
 }
 
-// ── helpers ──────────────────────────────────────────────────────────────────
 
-function Field({
-  label,
-  required,
-  className,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className={`block space-y-1 ${className ?? ""}`}>
-      <span className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-        {label}
-        {required && <span className="text-red-600 ml-0.5">*</span>}
-      </span>
-      {children}
-    </label>
-  );
-}

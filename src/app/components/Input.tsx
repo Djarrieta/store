@@ -88,3 +88,23 @@ export function Checkbox({ className, ...props }: CheckboxProps) {
     />
   );
 }
+
+// ── Field ─────────────────────────────────────────────────────────────────────
+type LabeledFieldProps = {
+  label: ReactNode;
+  required?: boolean;
+  className?: string;
+  children: ReactNode;
+};
+
+export function LabeledField({ label, required, className, children }: LabeledFieldProps) {
+  return (
+    <label className={clsx("grid gap-1", className)}>
+      <span className="text-sm font-semibold">
+        {label}
+        {required && <span className="ml-0.5 text-red-500">*</span>}
+      </span>
+      {children}
+    </label>
+  );
+}
