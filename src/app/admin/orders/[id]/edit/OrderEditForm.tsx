@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
-import Input, { Textarea, LabeledField } from "@/app/components/Input";
+import Input, { LabeledField,Textarea } from "@/app/components/Input";
 import { formatCurrency } from "@/lib/format";
 import type { Order, OrderItem, OrderStatus } from "@/types";
 import type { ShippingAddressSnapshot } from "@/types";

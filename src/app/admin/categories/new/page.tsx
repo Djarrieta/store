@@ -1,9 +1,10 @@
 import Button from "@/app/components/Button";
+import { FormActions, FormCard } from "@/app/components/FormCard";
 import { Select } from "@/app/components/Input";
 import NameWithSlug from "@/app/components/NameWithSlug";
 import { createClient } from "@/lib/supabase/server";
 import type { Category } from "@/types";
-import { FormActions, FormCard } from "@/app/components/FormCard";
+
 import { createCategory } from "../actions";
 
 export default async function NewCategoryPage() {

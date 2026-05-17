@@ -1,11 +1,12 @@
 "use client";
 
+import { useMemo, useState } from "react";
+
 import Button from "@/app/components/Button";
 import { FormActions, FormCard } from "@/app/components/FormCard";
 import Input, { Textarea } from "@/app/components/Input";
 import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
 import type { Product, ProductImage } from "@/types";
-import { useMemo, useState } from "react";
 
 interface ProductFormProps {
   action: (formData: FormData) => Promise<void>;
