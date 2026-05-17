@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -p 5000",
     "lint": "eslint",
-    "lint:check": "eslint --max-warnings 0",
+    "lint:check": "eslint --max-warnings 0 --format stylish",
     "typecheck": "tsc --noEmit",
     "db:link": "npx supabase login && npx supabase link",
     "db:reset": "node supabase/reset.js"

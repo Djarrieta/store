@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Ship } from "@/types";
 import { updateShip } from "../../actions";
 import Button from "@/app/components/Button";
+import Input from "@/app/components/Input";
 
 export default async function EditShipPage({
   params,
@@ -35,46 +36,42 @@ export default async function EditShipPage({
         <div className="grid grid-cols-2 gap-4">
           <label className="grid gap-1 text-sm font-medium">
             Departamento
-            <input
+            <Input
               name="department"
               required
               defaultValue={ship.department}
-              className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
             />
           </label>
           <label className="grid gap-1 text-sm font-medium">
             Ciudad
-            <input
+            <Input
               name="city"
               required
               defaultValue={ship.city}
-              className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
             />
           </label>
         </div>
 
         <label className="grid gap-1 text-sm font-medium">
           Precio (COP)
-          <input
+          <Input
             name="price_cop"
             required
             type="number"
             min="0"
             step="1000"
             defaultValue={ship.price_cop}
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 
         <label className="grid gap-1 text-sm font-medium">
           Días estimados de entrega
-          <input
+          <Input
             name="estimated_days"
             required
             type="number"
             min="1"
             defaultValue={ship.estimated_days}
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 

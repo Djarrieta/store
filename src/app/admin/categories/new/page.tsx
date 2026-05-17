@@ -1,8 +1,9 @@
+import Button from "@/app/components/Button";
+import { Select } from "@/app/components/Input";
+import NameWithSlug from "@/app/components/NameWithSlug";
 import { createClient } from "@/lib/supabase/server";
 import type { Category } from "@/types";
 import { createCategory } from "../actions";
-import NameWithSlug from "@/app/components/NameWithSlug";
-import Button from "@/app/components/Button";
 
 export default async function NewCategoryPage() {
   const supabase = await createClient();
@@ -24,17 +25,14 @@ export default async function NewCategoryPage() {
 
         <label className="grid gap-1 text-sm font-medium">
           Categoría padre (dejar en blanco para nivel superior)
-          <select
-            name="parent_id"
-            className="w-full rounded-md border-2 border-black px-3 py-2 bg-white"
-          >
+          <Select name="parent_id">
             <option value="">— Nivel superior —</option>
             {(topLevel ?? []).map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
 
         <Button variant="primary" size="lg" shadow type="submit">

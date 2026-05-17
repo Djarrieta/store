@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth";
 import { createAddress } from "../../actions";
 import Button from "@/app/components/Button";
 import Breadcrumb from "@/app/components/Breadcrumb";
+import Input from "@/app/components/Input";
 
 export default async function NewAddressPage() {
   await requireAuth();
@@ -30,63 +31,57 @@ export default async function NewAddressPage() {
       >
         <label className="grid gap-1 text-sm font-medium">
           Nombre del destinatario
-          <input
+          <Input
             name="recipient_name"
             required
             placeholder="ej. María García"
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 
         <div className="grid grid-cols-2 gap-4">
           <label className="grid gap-1 text-sm font-medium">
             Departamento
-            <input
+            <Input
               name="department"
               required
               placeholder="ej. Antioquia"
-              className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
             />
           </label>
           <label className="grid gap-1 text-sm font-medium">
             Ciudad
-            <input
+            <Input
               name="city"
               required
               placeholder="ej. Medellín"
-              className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
             />
           </label>
         </div>
 
         <label className="grid gap-1 text-sm font-medium">
           Dirección
-          <input
+          <Input
             name="address_line"
             required
             placeholder="ej. Cra 7 # 45-20 Apto 301"
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 
         <label className="grid gap-1 text-sm font-medium">
           Barrio{" "}
           <span className="font-normal text-[var(--muted)]">(opcional)</span>
-          <input
+          <Input
             name="neighborhood"
             placeholder="ej. El Poblado"
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 
         <label className="grid gap-1 text-sm font-medium">
           Teléfono de contacto
-          <input
+          <Input
             name="phone"
             required
             type="tel"
             placeholder="ej. 300 123 4567"
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 

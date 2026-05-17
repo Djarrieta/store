@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
 import Button from "@/app/components/Button";
+import { Select } from "@/app/components/Input";
 
 interface VariantCategory {
   id: string;
@@ -89,10 +90,10 @@ export default function VariantSelector({
       {dimensions.map((dim) => (
         <label key={dim.id} className="grid gap-1">
           <span className="text-sm font-semibold">{dim.name}</span>
-          <select
+          <Select
+            shadow
             value={selected[dim.id] ?? ""}
             onChange={(e) => setSelected((prev) => ({ ...prev, [dim.id]: e.target.value }))}
-            className="w-full rounded-md border-2 border-black bg-white px-3 py-2 text-sm shadow-[2px_2px_0_0_#111] focus:outline-none"
           >
             <option value="">— Selecciona —</option>
             {dim.values.map((val) => (
@@ -100,7 +101,7 @@ export default function VariantSelector({
                 {val.name}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       ))}
 

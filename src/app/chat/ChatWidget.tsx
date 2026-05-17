@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { sendMessage, migrateGuestChat } from "./actions";
 import { useCart } from "@/lib/cart";
 import Button from "@/app/components/Button";
+import Input from "@/app/components/Input";
 
 interface Message {
   role: "user" | "assistant";
@@ -136,14 +137,16 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
 
       {/* Input */}
       <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
-        <input
+        <Input
           ref={inputRef}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Escribe tu pregunta…"
           disabled={isPending}
-          className="flex-1 rounded-lg border-2 border-black bg-[var(--card)] px-4 py-2 text-sm font-medium shadow-[2px_2px_0_0_#111] placeholder:text-[var(--muted)] focus:outline-none focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px] transition-all disabled:opacity-50"
+          shadow
+          fullWidth={false}
+          className="flex-1 bg-[var(--card)] font-medium"
         />
         <Button
           variant="primary"

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toSlug } from "@/lib/format";
+import Input from "@/app/components/Input";
 
 interface Props {
   defaultName?: string;
@@ -20,12 +21,11 @@ export default function NameWithSlug({
     <>
       <label className="grid gap-1 text-sm font-medium">
         Nombre
-        <input
+        <Input
           name="name"
           required
           defaultValue={defaultName}
           placeholder={namePlaceholder}
-          className="w-full rounded-md border-2 border-black px-3 py-2"
           onChange={(e) => setSlug(toSlug(e.target.value))}
         />
       </label>

@@ -7,6 +7,7 @@ import type { ShippingAddressSnapshot } from "@/types";
 import { updateOrder } from "../../actions";
 import { formatCurrency } from "@/lib/format";
 import Button from "@/app/components/Button";
+import Input, { Textarea } from "@/app/components/Input";
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   created: "Creado (sin pagar)",
@@ -141,24 +142,23 @@ export default function OrderEditForm({ order }: Props) {
       {/* Notes */}
       <section className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-3">
         <h2 className="font-bold text-base">Notas internas</h2>
-        <textarea
+        <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
           placeholder="Notas visibles solo para el equipo..."
-          className="w-full rounded-lg border-2 border-black bg-[var(--background)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         />
       </section>
 
       {/* Tracking code */}
       <section className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-3">
         <h2 className="font-bold text-base">Seguimiento de envío</h2>
-        <input
+        <Input
           type="text"
           value={trackingCode}
           onChange={(e) => setTrackingCode(e.target.value)}
           placeholder="Código de guía (ej: TCC-123456789)"
-          className="w-full rounded-lg border-2 border-black bg-[var(--background)] px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+          className="font-mono"
         />
       </section>
 
@@ -167,63 +167,58 @@ export default function OrderEditForm({ order }: Props) {
         <h2 className="font-bold text-base">Dirección de entrega</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Destinatario" required>
-            <input
+            <Input
               type="text"
               value={recipientName}
               onChange={(e) => setRecipientName(e.target.value)}
-              className={inputClass}
             />
           </Field>
           <Field label="Teléfono" required>
-            <input
+            <Input
               type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className={inputClass}
             />
           </Field>
           <Field label="Dirección" required className="sm:col-span-2">
-            <input
+            <Input
               type="text"
               value={addressLine}
               onChange={(e) => setAddressLine(e.target.value)}
-              className={inputClass}
             />
           </Field>
           <Field label="Barrio / Zona">
-            <input
+            <Input
               type="text"
               value={neighborhood}
               onChange={(e) => setNeighborhood(e.target.value)}
-              className={inputClass}
             />
           </Field>
           <Field label="Ciudad" required>
-            <input
+            <Input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className={inputClass}
             />
           </Field>
           <Field label="Departamento" required>
-            <input
+            <Input
               type="text"
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className={inputClass}
             />
           </Field>
         </div>
         <div className="pt-3 border-t border-black/10">
           <Field label="Costo de envío (COP)">
-            <input
+            <Input
               type="number"
               min={0}
               step={1000}
               value={shippingCost}
               onChange={(e) => setShippingCost(e.target.value)}
-              className={`${inputClass} w-48`}
+              fullWidth={false}
+              className="w-48"
             />
           </Field>
         </div>
@@ -340,9 +335,6 @@ export default function OrderEditForm({ order }: Props) {
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
-
-const inputClass =
-  "w-full rounded-lg border-2 border-black bg-[var(--background)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]";
 
 function Field({
   label,

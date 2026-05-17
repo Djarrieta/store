@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { createShip } from "../actions";
 import Button from "@/app/components/Button";
+import Input from "@/app/components/Input";
 
 export default async function NewShipPage() {
   await requireAdmin();
@@ -16,46 +17,42 @@ export default async function NewShipPage() {
         <div className="grid grid-cols-2 gap-4">
           <label className="grid gap-1 text-sm font-medium">
             Departamento
-            <input
+            <Input
               name="department"
               required
               placeholder="ej. Antioquia"
-              className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
             />
           </label>
           <label className="grid gap-1 text-sm font-medium">
             Ciudad
-            <input
+            <Input
               name="city"
               required
               placeholder="ej. Medellín"
-              className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
             />
           </label>
         </div>
 
         <label className="grid gap-1 text-sm font-medium">
           Precio (COP)
-          <input
+          <Input
             name="price_cop"
             required
             type="number"
             min="0"
             step="1000"
             placeholder="ej. 15000"
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 
         <label className="grid gap-1 text-sm font-medium">
           Días estimados de entrega
-          <input
+          <Input
             name="estimated_days"
             required
             type="number"
             min="1"
             placeholder="ej. 3"
-            className="w-full rounded-md border-2 border-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </label>
 

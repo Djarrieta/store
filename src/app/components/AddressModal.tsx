@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition } from "react";
 import { getMyAddresses, createAddress } from "@/app/perfil/actions";
 import type { Address } from "@/types";
 import Button from "@/app/components/Button";
+import Input from "@/app/components/Input";
 
 interface AddressModalProps {
   isOpen: boolean;
@@ -11,8 +12,6 @@ interface AddressModalProps {
   onSelect: (address: Address) => void;
 }
 
-const FIELD_CLASS =
-  "w-full rounded-md border-2 border-black bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black";
 const LABEL_CLASS = "grid gap-1 text-sm font-medium";
 
 export default function AddressModal({ isOpen, onClose, onSelect }: AddressModalProps) {
@@ -162,62 +161,56 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
 
               <label className={LABEL_CLASS}>
                 Nombre del destinatario
-                <input
+                <Input
                   name="recipient_name"
                   required
                   placeholder="ej. María García"
-                  className={FIELD_CLASS}
                 />
               </label>
 
               <div className="grid grid-cols-2 gap-3">
                 <label className={LABEL_CLASS}>
                   Departamento
-                  <input
+                  <Input
                     name="department"
                     required
                     placeholder="ej. Antioquia"
-                    className={FIELD_CLASS}
                   />
                 </label>
                 <label className={LABEL_CLASS}>
                   Ciudad
-                  <input
+                  <Input
                     name="city"
                     required
                     placeholder="ej. Medellín"
-                    className={FIELD_CLASS}
                   />
                 </label>
               </div>
 
               <label className={LABEL_CLASS}>
                 Dirección
-                <input
+                <Input
                   name="address_line"
                   required
                   placeholder="ej. Cra 7 # 45-20 Apto 301"
-                  className={FIELD_CLASS}
                 />
               </label>
 
               <label className={LABEL_CLASS}>
                 Barrio <span className="font-normal text-[var(--muted)]">(opcional)</span>
-                <input
+                <Input
                   name="neighborhood"
                   placeholder="ej. El Poblado"
-                  className={FIELD_CLASS}
                 />
               </label>
 
               <label className={LABEL_CLASS}>
                 Teléfono de contacto
-                <input
+                <Input
                   name="phone"
                   required
                   type="tel"
                   placeholder="ej. 300 123 4567"
-                  className={FIELD_CLASS}
                 />
               </label>
 

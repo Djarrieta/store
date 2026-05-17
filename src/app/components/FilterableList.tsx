@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Button from "@/app/components/Button";
+import Input from "@/app/components/Input";
 
 interface FilterableListProps {
   q?: string;
@@ -95,19 +96,18 @@ export default function FilterableList({
             className="grid gap-2 border-t-2 border-black p-4 sm:grid-cols-3"
             method="get"
           >
-            <input
+            <Input
               type="text"
               name="q"
               defaultValue={q ?? ""}
               placeholder="Buscar"
-              className="rounded-md border-2 border-black px-3 py-2 text-sm sm:col-span-2"
+              className="sm:col-span-2"
             />
-            <input
+            <Input
               type="text"
               name="tags"
               defaultValue={tags ?? ""}
               placeholder="tag1,tag2"
-              className="rounded-md border-2 border-black px-3 py-2 text-sm"
             />
             <div className="flex gap-2 sm:col-span-3">
               <Button variant="primary" size="md" type="submit" className="flex-1">
