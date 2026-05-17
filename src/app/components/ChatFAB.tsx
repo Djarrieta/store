@@ -8,7 +8,8 @@ export default function ChatFAB() {
   const show =
     pathname === "/" ||
     pathname === "/about" ||
-    pathname.startsWith("/products/");
+    pathname.startsWith("/products/") ||
+    pathname.startsWith("/perfil");
   if (!show) return null;
 
   return (

@@ -8,10 +8,15 @@ import { ASSISTANT_PROMPT } from "./prompt";
 
 const MAX_CART_ITEMS = 50;
 
+export type GuestMessage = { role: "user" | "assistant"; text: string };
+
+const MAX_GUEST_HISTORY = 20;
+
 export async function buildPrompt(
   userMessage: string,
   userRef: string | null,
   cartItems: CartItem[] = [],
+  guestHistory: GuestMessage[] = [],
 ): Promise<string> {
   const supabase = createServiceClient();
 
@@ -81,7 +86,9 @@ export async function buildPrompt(
       : "Sin información fija de la tienda.";
 
   // Build conversation history block
-  const conversationHistory = isGuest ? "Sin historial previo." : buildHistoryBlock(history as import("./chatHistory").ChatMessage[]);
+  const conversationHistory = isGuest
+    ? buildGuestHistoryBlock(guestHistory.slice(-MAX_GUEST_HISTORY))
+    : buildHistoryBlock(history as import("./chatHistory").ChatMessage[]);
 
   const guestInstructions = isGuest
     ? `> **USUARIO NO AUTENTICADO**: Puedes responder preguntas sobre productos, categorías, envíos y políticas. Si el usuario quiere comprar, hacer un pedido, ver sus pedidos o necesita datos de su cuenta, indícale que debe iniciar sesión y muéstrale el enlace: [Iniciar sesión](/login). No uses las herramientas \`bot_create_order\`, \`bot_get_my_orders\`, ni \`bot_get_order_status\`.`
@@ -139,3 +146,9 @@ function buildHistoryBlock(history: ChatMessage[]): string {
     .join("\n");
 }
 
+function buildGuestHistoryBlock(history: GuestMessage[]): string {
+  if (history.length === 0) return "Sin historial previo.";
+  return history
+    .map((h) => `${h.role === "user" ? "Usuario" : "Asistente"}: ${h.text}`)
+    .join("\n");
+}

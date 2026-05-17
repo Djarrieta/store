@@ -72,7 +72,7 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
 
     startTransition(async () => {
       try {
-        const response = await sendMessage(text, cartItems);
+        const response = await sendMessage(text, cartItems, messages);
         setMessages((prev) => [...prev, { role: "assistant", text: response }]);
       } catch {
         setMessages((prev) => [
