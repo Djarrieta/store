@@ -1,10 +1,9 @@
 import Button from "@/app/components/Button";
-import { FormActions,FormCard, FormField } from "@/app/components/FormCard";
 import { Select } from "@/app/components/Input";
 import NameWithSlug from "@/app/components/NameWithSlug";
 import { createClient } from "@/lib/supabase/server";
 import type { Category } from "@/types";
-
+import { FormActions, FormCard } from "@/app/components/FormCard";
 import { createCategory } from "../actions";
 
 export default async function NewCategoryPage() {
@@ -22,16 +21,17 @@ export default async function NewCategoryPage() {
       <FormCard action={createCategory}>
         <NameWithSlug namePlaceholder="ej. Cámaras" />
 
-        <FormField label="Categoría padre (dejar en blanco para nivel superior)" htmlFor="parent_id">
-          <Select id="parent_id" name="parent_id">
-            <option value="">— Nivel superior —</option>
-            {(topLevel ?? []).map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </Select>
-        </FormField>
+        <Select
+          label="Categoría padre (dejar en blanco para nivel superior)"
+          name="parent_id"
+        >
+          <option value="">— Nivel superior —</option>
+          {(topLevel ?? []).map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </Select>
 
         <FormActions>
           <Button variant="primary" size="lg" shadow type="submit">

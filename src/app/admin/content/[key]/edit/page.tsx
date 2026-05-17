@@ -1,11 +1,10 @@
-import { notFound } from "next/navigation";
-
 import { updateContent } from "@/app/admin/content/actions";
 import Button from "@/app/components/Button";
-import { FormActions,FormCard, FormField } from "@/app/components/FormCard";
-import { Checkbox,Textarea } from "@/app/components/Input";
+import { FormActions, FormCard } from "@/app/components/FormCard";
+import { Checkbox, Textarea } from "@/app/components/Input";
 import { createClient } from "@/lib/supabase/server";
 import type { Content } from "@/types";
+import { notFound } from "next/navigation";
 
 export default async function AdminEditContentPage({
   params,
@@ -30,14 +29,7 @@ export default async function AdminEditContentPage({
       <h1 className="font-display text-3xl font-bold">Editar contenido</h1>
       <p className="font-mono text-sm text-[var(--muted)]">key: {entry.key}</p>
       <FormCard action={updateWithKey}>
-        <FormField label="Valor" htmlFor="value">
-          <Textarea
-            id="value"
-            name="value"
-            defaultValue={entry.value}
-            rows={8}
-          />
-        </FormField>
+        <Textarea label="Valor" name="value" defaultValue={entry.value} rows={8} />
         <label className="flex cursor-pointer select-none items-center gap-3">
           <Checkbox
             name="pinned"

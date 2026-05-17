@@ -1,13 +1,11 @@
 import { notFound, redirect } from "next/navigation";
-
 import Breadcrumb from "@/app/components/Breadcrumb";
 import Button from "@/app/components/Button";
-import { Form, FormActions,FormField } from "@/app/components/FormCard";
+import { Form, FormActions } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { Address } from "@/types";
-
 import { updateAddress } from "../../../actions";
 
 export default async function EditAddressPage({
@@ -51,61 +49,38 @@ export default async function EditAddressPage({
         action={updateAndRedirectWrapper}
         className="space-y-4 rounded-2xl border-2 border-black bg-[var(--card)] p-6 shadow-[4px_4px_0_0_#111]"
       >
-        <FormField label="Nombre del destinatario" htmlFor="recipient_name">
-          <Input
-            id="recipient_name"
-            name="recipient_name"
-            required
-            defaultValue={address.recipient_name}
-          />
-        </FormField>
+        <Input
+          label="Nombre del destinatario"
+          name="recipient_name"
+          required
+          defaultValue={address.recipient_name}
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="Departamento">
-            <Input
-              name="department"
-              required
-              defaultValue={address.department}
-            />
-          </FormField>
-          <FormField label="Ciudad">
-            <Input
-              name="city"
-              required
-              defaultValue={address.city}
-            />
-          </FormField>
+          <Input label="Departamento" name="department" required defaultValue={address.department} />
+          <Input label="Ciudad" name="city" required defaultValue={address.city} />
         </div>
 
-        <FormField label="Dirección" htmlFor="address_line">
-          <Input
-            id="address_line"
-            name="address_line"
-            required
-            defaultValue={address.address_line}
-          />
-        </FormField>
+        <Input
+          label="Dirección"
+          name="address_line"
+          required
+          defaultValue={address.address_line}
+        />
 
-        <FormField
+        <Input
           label={<>Barrio <span className="font-normal text-[var(--muted)]">(opcional)</span></>}
-          htmlFor="neighborhood"
-        >
-          <Input
-            id="neighborhood"
-            name="neighborhood"
-            defaultValue={address.neighborhood ?? ""}
-          />
-        </FormField>
+          name="neighborhood"
+          defaultValue={address.neighborhood ?? ""}
+        />
 
-        <FormField label="Teléfono de contacto" htmlFor="phone">
-          <Input
-            id="phone"
-            name="phone"
-            required
-            type="tel"
-            defaultValue={address.phone}
-          />
-        </FormField>
+        <Input
+          label="Teléfono de contacto"
+          name="phone"
+          required
+          type="tel"
+          defaultValue={address.phone}
+        />
 
         <FormActions>
           <Button href="/perfil" variant="secondary" size="xl" shadow>

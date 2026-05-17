@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { forwardRef, type InputHTMLAttributes, type SelectHTMLAttributes,type TextareaHTMLAttributes } from "react";
+import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes, type ReactNode } from "react";
 
 // ── Shared base ───────────────────────────────────────────────────────────────
 const BASE =
@@ -7,21 +7,33 @@ const BASE =
 const SHADOW =
   "shadow-[2px_2px_0_0_#111] focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px] transition-all";
 
+// ── Field label wrapper ───────────────────────────────────────────────────────
+function FieldWrap({ label, children }: { label: ReactNode; children: ReactNode }) {
+  return (
+    <label className="grid gap-1">
+      <span className="text-sm font-semibold">{label}</span>
+      {children}
+    </label>
+  );
+}
+
 // ── Input ─────────────────────────────────────────────────────────────────────
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   shadow?: boolean;
   fullWidth?: boolean;
+  label?: ReactNode;
 };
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  function Input({ shadow = false, fullWidth = true, className, ...props }, ref) {
-    return (
+  function Input({ shadow = false, fullWidth = true, label, className, ...props }, ref) {
+    const el = (
       <input
         ref={ref}
         className={clsx(BASE, fullWidth && "w-full", shadow && SHADOW, className)}
         {...props}
       />
     );
+    return label ? <FieldWrap label={label}>{el}</FieldWrap> : el;
   },
 );
 
@@ -31,26 +43,29 @@ export default Input;
 type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
   shadow?: boolean;
   fullWidth?: boolean;
+  label?: ReactNode;
 };
 
-export function Textarea({ shadow = false, fullWidth = true, className, ...props }: TextareaProps) {
-  return (
+export function Textarea({ shadow = false, fullWidth = true, label, className, ...props }: TextareaProps) {
+  const el = (
     <textarea
       className={clsx(BASE, "resize-y", fullWidth && "w-full", shadow && SHADOW, className)}
       {...props}
     />
   );
+  return label ? <FieldWrap label={label}>{el}</FieldWrap> : el;
 }
 
 // ── Select ────────────────────────────────────────────────────────────────────
 type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
   shadow?: boolean;
   fullWidth?: boolean;
+  label?: ReactNode;
   children: React.ReactNode;
 };
 
-export function Select({ shadow = false, fullWidth = true, className, children, ...props }: SelectProps) {
-  return (
+export function Select({ shadow = false, fullWidth = true, label, className, children, ...props }: SelectProps) {
+  const el = (
     <select
       className={clsx(BASE, "bg-white", fullWidth && "w-full", shadow && SHADOW, className)}
       {...props}
@@ -58,6 +73,7 @@ export function Select({ shadow = false, fullWidth = true, className, children, 
       {children}
     </select>
   );
+  return label ? <FieldWrap label={label}>{el}</FieldWrap> : el;
 }
 
 // ── Checkbox ──────────────────────────────────────────────────────────────────

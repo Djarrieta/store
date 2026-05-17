@@ -1,5 +1,5 @@
 import Button from "@/app/components/Button";
-import { Form, FormField } from "@/app/components/FormCard";
+import { Form } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
 import PageHeader from "@/app/components/PageHeader";
 import { requireAdmin } from "@/lib/auth";
@@ -103,18 +103,17 @@ export default async function AdminShipsPage() {
             supere este monto, el envío será gratuito.
           </p>
           <Form action={updateShipsConfig} className="flex items-end gap-3">
-            <FormField label="Envío gratis desde (COP)">
-              <Input
-                name="free_above_cop"
-                type="number"
-                min="0"
-                step="1000"
-                defaultValue={config?.free_above_cop ?? ""}
-                placeholder="ej. 150000 (dejar vacío para desactivar)"
-                fullWidth={false}
-                className="w-64"
-              />
-            </FormField>
+            <Input
+              label="Envío gratis desde (COP)"
+              name="free_above_cop"
+              type="number"
+              min="0"
+              step="1000"
+              defaultValue={config?.free_above_cop ?? ""}
+              placeholder="ej. 150000 (dejar vacío para desactivar)"
+              fullWidth={false}
+              className="w-64"
+            />
             <Button variant="primary" size="lg" shadow type="submit">
               Guardar
             </Button>
