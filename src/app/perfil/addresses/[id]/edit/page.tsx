@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { Address } from "@/types";
 import { updateAddress } from "../../../actions";
 import Button from "@/app/components/Button";
+import Breadcrumb from "@/app/components/Breadcrumb";
 
 export default async function EditAddressPage({
   params,
@@ -34,14 +34,12 @@ export default async function EditAddressPage({
 
   return (
     <main className="mx-auto max-w-lg space-y-6 px-4 py-8">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/perfil"
-          className="text-sm text-[var(--muted)] underline underline-offset-2 hover:text-[var(--fg)]"
-        >
-          ← Mi perfil
-        </Link>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: "Mi perfil", href: "/perfil" },
+          { label: "Editar dirección" },
+        ]}
+      />
 
       <h1 className="font-display text-2xl font-bold">Editar dirección</h1>
 

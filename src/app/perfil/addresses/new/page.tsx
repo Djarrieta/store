@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { createAddress } from "../../actions";
 import Button from "@/app/components/Button";
+import Breadcrumb from "@/app/components/Breadcrumb";
 
 export default async function NewAddressPage() {
   await requireAuth();
@@ -15,14 +15,12 @@ export default async function NewAddressPage() {
 
   return (
     <main className="mx-auto max-w-lg space-y-6 px-4 py-8">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/perfil"
-          className="text-sm text-[var(--muted)] underline underline-offset-2 hover:text-[var(--fg)]"
-        >
-          ← Mi perfil
-        </Link>
-      </div>
+      <Breadcrumb
+        items={[
+          { label: "Mi perfil", href: "/perfil" },
+          { label: "Nueva dirección" },
+        ]}
+      />
 
       <h1 className="font-display text-2xl font-bold">Nueva dirección</h1>
 
