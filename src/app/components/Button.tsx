@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { useRef, useState, type AnchorHTMLAttributes, type ButtonHTMLAttributes } from "react";
+import { useFormStatus } from "react-dom";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success";
 /** Use "none" to skip automatic padding/rounding/font — supply those via className instead */
@@ -27,6 +28,9 @@ type AsButton = SharedProps &
      * Pass a string to customise the confirmation label.
      */
     confirm?: boolean | string;
+    /** Show a loading spinner and disable the button. For submit buttons this is
+     *  also triggered automatically while the parent form's server action is pending. */
+    loading?: boolean;
   };
 
 type AsLink = SharedProps &
@@ -73,6 +77,7 @@ const shadowClasses: Record<Exclude<ButtonSize, "none">, string> = {
 export default function Button(props: ButtonProps) {
   const [confirming, setConfirming] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { pending } = useFormStatus();
 
   const variant = props.variant ?? "secondary";
   const size = props.size ?? "md";
@@ -99,8 +104,9 @@ export default function Button(props: ButtonProps) {
   }
 
   const { disabled, type = "button", ...buttonRest } = omitShared(props as AsButton) as ButtonHTMLAttributes<HTMLButtonElement>;
-  const { confirm: confirmProp, onClick, ...safeButtonRest } = buttonRest as AsButton;
+  const { confirm: confirmProp, loading: loadingProp, onClick, ...safeButtonRest } = buttonRest as AsButton;
   const confirmLabel = typeof confirmProp === "string" ? confirmProp : "¿Seguro?";
+  const isLoading = loadingProp || (type === "submit" && pending);
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
     if (!confirmProp) {
@@ -122,12 +128,25 @@ export default function Button(props: ButtonProps) {
   return (
     <button
       type={type}
-      disabled={disabled}
-      className={clsx(classes, disabled && "opacity-40 pointer-events-none")}
+      disabled={disabled || isLoading}
+      className={clsx(classes, (disabled || isLoading) && "opacity-40 pointer-events-none")}
       onClick={handleClick}
       {...safeButtonRest}
     >
-      {confirming ? confirmLabel : children}
+      {isLoading ? (
+        <span className="flex items-center justify-center gap-1.5">
+          <svg
+            className="animate-spin h-3 w-3 shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          {children}
+        </span>
+      ) : confirming ? confirmLabel : children}
     </button>
   );
 }
