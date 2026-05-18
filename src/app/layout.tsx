@@ -65,13 +65,11 @@ export default async function RootLayout({
           <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-6 sm:px-8">
             <header className="mb-8 rounded-2xl border-4 border-black bg-[var(--card)] p-4 shadow-[6px_6px_0_0_#111]">
               <div className="flex flex-wrap items-center justify-between gap-2">
+                <Link href="/" className="font-display text-2xl font-bold uppercase tracking-tight">
+                  Tienda
+                </Link>
                 <div className="flex items-center gap-2">
-                  <Link href="/" className="font-display text-2xl font-bold uppercase tracking-tight">
-                    Tienda
-                  </Link>
                   <NavLinks isAuthenticated={Boolean(user)} isAdmin={adminStatus} />
-                </div>
-                <div className="flex items-center gap-2">
                   <CartIcon />
                   <UserMenu user={user} avatarUrl={profile?.avatar_url ?? null} />
                 </div>

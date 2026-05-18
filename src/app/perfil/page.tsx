@@ -53,9 +53,9 @@ export default async function PerfilPage() {
         </div>
 
         {allAddresses.length === 0 ? (
-          <div className="rounded-xl border-2 border-dashed border-black bg-[var(--card)] p-8 text-center">
+          <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-dashed border-black bg-[var(--card)] p-8 text-center">
             <p className="text-[var(--muted)]">Aún no tienes direcciones guardadas.</p>
-            <Button href="/perfil/addresses/new" variant="primary" size="lg" shadow className="mt-3">
+            <Button href="/perfil/addresses/new" variant="primary" size="lg" shadow>
               Agregar mi primera dirección
             </Button>
           </div>

@@ -68,6 +68,7 @@ export default async function NewAddressPage() {
           <Checkbox
             name="is_default"
             value="true"
+            defaultChecked
           />
           Usar como dirección principal
         </label>
