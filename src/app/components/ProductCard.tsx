@@ -81,9 +81,9 @@ export default function ProductCard({ product, items = [], priority = false }: P
 
         {!hasStock ? (
           <div className="mt-1 flex items-center justify-between gap-2">
-            <span className="rounded-full border-2 border-black bg-[var(--muted)] px-3 py-1 text-xs font-bold text-white">
+            <Badge variant="secondary" size="sm" className="rounded-full">
               Sin stock
-            </span>
+            </Badge>
             <Link
               href={`/products/${product.id}`}
               className="text-xs font-semibold underline underline-offset-2 text-[var(--muted)] hover:text-black"
