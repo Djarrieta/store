@@ -14,6 +14,7 @@ export interface Product {
   images: ProductImage[];
   category_id: string | null;
   tags: string[];
+  ocultar: boolean;
   created_at: string;
   updated_at: string;
 }

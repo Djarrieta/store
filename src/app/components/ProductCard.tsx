@@ -30,6 +30,7 @@ export default function ProductCard({ product, items = [], priority = false }: P
 
   const hasVariants = items.some((i) => i.item_categories.length > 0);
   const singleItem = !hasVariants && items.length === 1 ? items[0] : null;
+  const hasStock = items.some((i) => i.stock > 0);
 
   return (
     <article className="overflow-hidden rounded-xl border-2 border-black bg-white shadow-[4px_4px_0_0_#111]">
@@ -77,13 +78,18 @@ export default function ProductCard({ product, items = [], priority = false }: P
           ))}
         </div>
 
-        {items.length === 0 ? (
-          <Link
-            href={`/products/${product.id}`}
-            className="mt-1 block w-full rounded-xl border-2 border-black bg-[var(--accent)] px-4 py-2 text-center text-sm font-bold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
-          >
-            Ver producto
-          </Link>
+        {!hasStock ? (
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <span className="rounded-full border-2 border-black bg-[var(--muted)] px-3 py-1 text-xs font-bold text-white">
+              Sin stock
+            </span>
+            <Link
+              href={`/products/${product.id}`}
+              className="text-xs font-semibold underline underline-offset-2 text-[var(--muted)] hover:text-black"
+            >
+              Ver detalle
+            </Link>
+          </div>
         ) : hasVariants ? (
           <VariantSelector
             items={items}

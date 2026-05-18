@@ -38,6 +38,7 @@ function parseInput(formData: FormData): CreateProductInput {
     images: parseImages(formData.get("images") as string | null),
     tags: parseTags(formData.get("tags") as string | null),
     category_id: category_id || null,
+    ocultar: formData.get("ocultar") === "on",
   };
 }
 

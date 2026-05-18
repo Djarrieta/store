@@ -9,6 +9,7 @@ CREATE TABLE public.products (
   images      jsonb NOT NULL DEFAULT '[]'::jsonb,
   category_id uuid REFERENCES public.categories(id) ON DELETE SET NULL,
   tags        text[] NOT NULL DEFAULT '{}',
+  ocultar     boolean NOT NULL DEFAULT false,
   created_at  timestamptz NOT NULL DEFAULT now(),
   updated_at  timestamptz NOT NULL DEFAULT now()
 );

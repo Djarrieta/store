@@ -88,6 +88,17 @@ export default function ProductForm({
 
       <input type="hidden" name="images" value={serializedImages} />
 
+      <label className="flex items-center gap-3 rounded-xl border-2 border-black bg-[var(--card)] px-4 py-3 shadow-[2px_2px_0_0_#111] cursor-pointer">
+        <Input
+          type="checkbox"
+          name="ocultar"
+          defaultChecked={defaultValues?.ocultar ?? false}
+          fullWidth={false}
+          className="h-4 w-4 accent-[var(--accent)]"
+        />
+        <span className="text-sm font-semibold">Ocultar producto (no visible al público)</span>
+      </label>
+
       <FormActions>
         <Button variant="primary" size="lg" type="submit">
           {defaultValues?.id ? "Actualizar producto" : "Crear producto"}

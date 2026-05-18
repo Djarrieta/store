@@ -30,6 +30,7 @@ export default async function Home({
   let query = supabase
     .from("products")
     .select("*, category:category_id(*, parent:parent_id(*))", { count: "exact" })
+    .eq("ocultar", false)
     .order("created_at", { ascending: false });
 
   if (q?.trim()) {

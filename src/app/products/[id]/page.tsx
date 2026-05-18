@@ -21,6 +21,7 @@ export default async function ProductDetailPage({
       .from("products")
       .select("*, category:category_id(*, parent:parent_id(*))")
       .eq("id", id)
+      .eq("ocultar", false)
       .single<ProductWithCategory>(),
     supabase
       .from("items")
@@ -48,7 +49,7 @@ export default async function ProductDetailPage({
   const itemList = items ?? [];
   const hasVariants = itemList.some((i) => i.item_categories.length > 0);
   const singleItem = !hasVariants && itemList.length === 1 ? itemList[0] : null;
-  const isPurchasable = itemList.length > 0;
+  const isPurchasable = itemList.some((i) => i.stock > 0);
 
   return (
     <article className="space-y-4">

@@ -66,7 +66,14 @@ export default async function AdminProductsPage({
               className="flex items-center justify-between rounded-xl border-2 border-black bg-[var(--card)] p-4 shadow-[3px_3px_0_0_#111]"
             >
               <div className="min-w-0">
-                <p className="truncate font-semibold">{product.title}</p>
+                <div className="flex items-center gap-2">
+                  <p className="truncate font-semibold">{product.title}</p>
+                  {product.ocultar && (
+                    <span className="shrink-0 rounded-full border border-black bg-yellow-200 px-2 py-0.5 text-xs font-semibold">
+                      Oculto
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-[var(--muted)]">
                   {formatCurrency(Number(product.price))}
                   {product.discount > 0 && (
