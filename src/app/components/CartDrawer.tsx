@@ -278,6 +278,7 @@ export default function CartDrawer() {
                   shadow
                   fullWidth
                   className="mb-2"
+                  onClick={closeCart}
                 >
                   Inicia sesión para comprar
                 </Button>
