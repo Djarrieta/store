@@ -28,13 +28,6 @@ button {
   cursor: pointer;
 }
 
-/* Prevent iOS Safari auto-zoom on focus — triggered when font-size < 16px */
-input,
-textarea,
-select {
-  font-size: 1rem;
-}
-
 .font-display {
   font-family: var(--font-display), sans-serif;
 }
