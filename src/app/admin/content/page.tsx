@@ -1,3 +1,4 @@
+import Badge from "@/app/components/Badge";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
 import PageHeader from "@/app/components/PageHeader";
@@ -31,13 +32,13 @@ export default async function AdminContentPage() {
               <div className="flex items-center gap-2">
                 <p className="truncate font-semibold font-mono">{entry.key}</p>
                 {entry.pinned ? (
-                  <span className="shrink-0 rounded-full border-2 border-black bg-[var(--accent)] px-2 py-0.5 text-xs font-bold shadow-[1px_1px_0_0_#111]">
+                  <Badge variant="primary" size="sm" shadow className="shrink-0">
                     Siempre
-                  </span>
+                  </Badge>
                 ) : (
-                  <span className="shrink-0 rounded-full border-2 border-black bg-white px-2 py-0.5 text-xs font-semibold text-[var(--muted)]">
+                  <Badge variant="secondary" size="sm" className="shrink-0 text-[var(--muted)]">
                     Bajo demanda
-                  </span>
+                  </Badge>
                 )}
               </div>
               <p className="mt-1 max-w-xl truncate text-xs text-[var(--muted)]">

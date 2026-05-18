@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import Badge, { type BadgeVariant } from "@/app/components/Badge";
 import Button from "@/app/components/Button";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { Order, OrderStatus } from "@/types";
@@ -15,13 +16,13 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   cancelled: "Cancelado",
 };
 
-const STATUS_COLOR: Record<OrderStatus, string> = {
-  created: "bg-gray-100",
-  pending_approval: "bg-yellow-100",
-  approved: "bg-blue-100",
-  rejected: "bg-red-100",
-  fulfilled: "bg-green-100",
-  cancelled: "bg-gray-100",
+const STATUS_BADGE_VARIANT: Record<OrderStatus, BadgeVariant> = {
+  created: "secondary",
+  pending_approval: "warning",
+  approved: "success",
+  rejected: "danger",
+  fulfilled: "muted",
+  cancelled: "muted",
 };
 
 interface Props {
@@ -58,11 +59,9 @@ export function OrderAccordion({ orders }: Props) {
 
               <div className="shrink-0 text-right">
                 <p className="font-bold">{formatCurrency(order.total)}</p>
-                <span
-                  className={`mt-1 inline-block rounded-full border border-black px-2 py-0.5 text-xs font-semibold ${STATUS_COLOR[order.status]}`}
-                >
+                <Badge variant={STATUS_BADGE_VARIANT[order.status]} size="sm" className="mt-1">
                   {STATUS_LABEL[order.status]}
-                </span>
+                </Badge>
               </div>
 
               {/* Chevron */}

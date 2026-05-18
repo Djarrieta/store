@@ -1,3 +1,4 @@
+import Badge, { type BadgeVariant } from "@/app/components/Badge";
 import Button from "@/app/components/Button";
 import PageHeader from "@/app/components/PageHeader";
 import { formatCurrency, formatDate } from "@/lib/format";
@@ -13,13 +14,13 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   cancelled: "Cancelado",
 };
 
-const STATUS_COLOR: Record<OrderStatus, string> = {
-  created: "bg-blue-100 text-blue-800",
-  pending_approval: "bg-[var(--accent)] text-black",
-  approved: "bg-green-200 text-green-900",
-  rejected: "bg-red-200 text-red-900",
-  fulfilled: "bg-gray-200 text-gray-700",
-  cancelled: "bg-gray-100 text-gray-500",
+const STATUS_BADGE_VARIANT: Record<OrderStatus, BadgeVariant> = {
+  created: "secondary",
+  pending_approval: "warning",
+  approved: "success",
+  rejected: "danger",
+  fulfilled: "muted",
+  cancelled: "muted",
 };
 
 const STATUS_ORDER: OrderStatus[] = ["created", "pending_approval", "approved", "fulfilled", "rejected", "cancelled"];
@@ -68,11 +69,9 @@ export default async function AdminOrdersPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span
-                        className={`rounded-full border border-black px-2 py-0.5 text-xs font-semibold ${STATUS_COLOR[order.status]}`}
-                      >
+                      <Badge variant={STATUS_BADGE_VARIANT[order.status]} size="sm">
                         {STATUS_LABEL[order.status]}
-                      </span>
+                      </Badge>
                       <Button
                         href={`/admin/orders/${order.id}`}
                         variant="secondary"

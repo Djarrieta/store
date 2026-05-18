@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import AddToCartButton from "@/app/components/AddToCartButton";
+import Badge from "@/app/components/Badge";
 import VariantSelector from "@/app/components/VariantSelector";
 import { formatCurrency } from "@/lib/format";
 import type { ItemWithCategories, ProductWithCategory } from "@/types";
@@ -71,9 +72,9 @@ export default function ProductCard({ product, items = [], priority = false }: P
         )}
         <div className="flex flex-wrap gap-1">
           {product.tags.map((tag) => (
-            <span key={tag} className="rounded-full border border-black px-2 py-0.5 text-xs">
+            <Badge key={tag} variant="secondary" size="sm" className="rounded-full">
               {tag}
-            </span>
+            </Badge>
           ))}
         </div>
 

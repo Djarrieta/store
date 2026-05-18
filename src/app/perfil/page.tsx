@@ -1,3 +1,4 @@
+import Badge from "@/app/components/Badge";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
 import SignOutButton from "@/app/components/SignOutButton";
@@ -67,9 +68,9 @@ export default async function PerfilPage() {
                     <div className="flex items-center gap-2">
                       <p className="font-semibold">{addr.recipient_name}</p>
                       {addr.is_default && (
-                        <span className="rounded-full border-2 border-black bg-green-200 px-2 py-0.5 text-xs font-bold">
+                        <Badge variant="success" size="sm">
                           Principal
-                        </span>
+                        </Badge>
                       )}
                     </div>
                     <p className="mt-1 text-sm text-[var(--muted)]">

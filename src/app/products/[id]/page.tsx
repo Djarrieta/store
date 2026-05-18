@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import AddToCartButton from "@/app/components/AddToCartButton";
+import Badge from "@/app/components/Badge";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import ProductImageCarousel from "@/app/components/ProductImageCarousel";
 import VariantSelector from "@/app/components/VariantSelector";
@@ -93,12 +94,9 @@ export default async function ProductDetailPage({
         {product.tags.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             {product.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border-2 border-black px-3 py-0.5 text-xs font-medium"
-              >
+              <Badge key={tag} variant="secondary" size="sm" className="rounded-full">
                 {tag}
-              </span>
+              </Badge>
             ))}
           </div>
         )}
