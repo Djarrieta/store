@@ -47,8 +47,14 @@ const TOOLS = [
     type: "function" as const,
     function: {
       name: "query_content",
-      description: "Returns store content entries (store info, policies, etc.).",
-      parameters: { type: "object", properties: {}, required: [] },
+      description: "Fetches the value of a specific store content entry by key. Use the available keys listed in the prompt to choose the right one.",
+      parameters: {
+        type: "object",
+        properties: {
+          key: { type: "string", description: "The content key to fetch (e.g. 'logistics_payment', 'logistics_shipping')." },
+        },
+        required: ["key"],
+      },
     },
   },
   {
@@ -160,11 +166,15 @@ const HANDLERS: Record<string, Handler> = {
     return JSON.stringify({ free_above_cop: config?.free_above_cop ?? null, rates: rates ?? [] });
   },
 
-  query_content: async () => {
+  query_content: async (args) => {
     const sb = createServiceClient();
-    const { data, error } = await sb.from("content").select("key, value").order("key");
+    const { data, error } = await sb
+      .from("content")
+      .select("key, value")
+      .eq("key", String(args.key))
+      .single();
     if (error) throw new Error(error.message);
-    return JSON.stringify(data ?? []);
+    return JSON.stringify(data ?? {});
   },
 
   bot_create_order: async (args) => {

@@ -22,9 +22,10 @@ export async function buildPrompt(
 
   const isGuest = userRef === null;
 
-  const [{ data: pinnedContent }, profileResult, addressesResult, history, contextTopics] =
+  const [{ data: pinnedContent }, { data: onDemandKeys }, profileResult, addressesResult, history, contextTopics] =
     await Promise.all([
       supabase.from("content").select("key, value").eq("pinned", true),
+      supabase.from("content").select("key").eq("pinned", false).order("key"),
       isGuest
         ? Promise.resolve({ data: null })
         : supabase.from("profiles").select("display_name").eq("id", userRef!).single(),
@@ -85,6 +86,12 @@ export async function buildPrompt(
           .join("\n")
       : "Sin información fija de la tienda.";
 
+  // On-demand content keys available via query_content
+  const availableContentKeys =
+    onDemandKeys && onDemandKeys.length > 0
+      ? onDemandKeys.map((c) => c.key).join(", ")
+      : "";
+
   // Build conversation history block
   const conversationHistory = isGuest
     ? buildGuestHistoryBlock(guestHistory.slice(-MAX_GUEST_HISTORY))
@@ -118,6 +125,7 @@ export async function buildPrompt(
     .replace("{{assistantBehavior}}", assistantBehavior)
     .replace("{{assistantInstructions}}", assistantInstructions)
     .replace("{{pinnedContent}}", pinnedContext)
+    .replace("{{availableContentKeys}}", availableContentKeys)
     .replace("{{contextTopics}}", contextTopics)
     .replace("{{conversationHistory}}", conversationHistory)
     .replace("{{cartSummary}}", cartSummary)

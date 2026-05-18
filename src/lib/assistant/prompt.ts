@@ -22,7 +22,8 @@ Tienes acceso a las siguientes herramientas. Úsalas SOLO cuando el mensaje del 
 - query_shipping_rates — Tarifas de envío por departamento y ciudad, tiempo estimado de entrega y umbral de envío gratis.
   → Úsala si el usuario pregunta cuánto cuesta el envío a su ciudad o si aplica envío gratis.
 
-- query_content — Información operativa de la tienda: opciones de envío, transportistas, puntos de recogida, métodos de pago (contraentrega, Nequi, transferencias, etc.), políticas.
+- query_content — Obtiene el valor de una entrada de contenido específica de la tienda por su clave.
+  → Keys disponibles: {{availableContentKeys}}
   → Úsala si el usuario pregunta sobre envíos, pagos, políticas u operativa de la tienda.
 
 - query_products — Catálogo completo de productos con precios, descuentos y stock.
