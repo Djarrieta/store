@@ -5,6 +5,7 @@ import Button from "@/app/components/Button";
 import { Form, FormActions } from "@/app/components/FormCard";
 import Input, { Checkbox } from "@/app/components/Input";
 import { requireAuth } from "@/lib/auth";
+
 import { createAddress } from "../../actions";
 
 export default async function NewAddressPage() {
@@ -29,7 +30,7 @@ export default async function NewAddressPage() {
 
       <Form
         action={createAndRedirect}
-        className="space-y-4 rounded-2xl border-2 border-black bg-[var(--card)] p-6 shadow-[4px_4px_0_0_#111]"
+        className="space-y-4 rounded-2xl border-2 border-[var(--border)] bg-[var(--card)] p-6 shadow-[4px_4px_0_0_var(--shadow)]"
       >
         <Input
           label="Nombre del destinatario"

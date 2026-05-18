@@ -12,7 +12,7 @@ export default async function AboutPage() {
 
   return (
     <section className="space-y-6">
-      <div className="rounded-2xl border-4 border-black bg-[var(--card)] p-6 shadow-[6px_6px_0_0_#111]">
+      <div className="rounded-2xl border-4 border-[var(--border)] bg-[var(--card)] p-6 shadow-[6px_6px_0_0_var(--shadow)]">
         <h1 className="font-display text-4xl font-bold tracking-tight">Nosotros</h1>
         {paragraphs.map((text, i) => (
           <p key={i} className="mt-2 max-w-2xl text-sm text-[var(--muted)]">

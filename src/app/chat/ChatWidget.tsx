@@ -6,8 +6,8 @@ import ReactMarkdown from "react-markdown";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
-import { CHAT_STORAGE_KEY } from "@/lib/constants";
 import { useCart } from "@/lib/cart";
+import { CHAT_STORAGE_KEY } from "@/lib/constants";
 
 import { migrateGuestChat,sendMessage } from "./actions";
 
@@ -27,10 +27,11 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
   const inputRef = useRef<HTMLInputElement>(null);
   const hasMigratedRef = useRef(false);
 
-  // Load persisted messages after hydration
+  // Load persisted messages after hydration — must use effect to avoid SSR hydration mismatch
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (stored) setMessages(JSON.parse(stored) as Message[]);
     } catch {}
   }, []);
@@ -87,7 +88,7 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
   return (
     <div className="flex flex-col h-[70vh] max-w-2xl mx-auto">
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto space-y-3 p-4 rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111]">
+      <div className="flex-1 overflow-y-auto space-y-3 p-4 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)]">
         {messages.length === 0 && (
           <p className="text-center text-sm text-[var(--muted)] mt-8">
             Hola 👋 Pregúntame sobre productos, precios o realiza un pedido.
@@ -104,10 +105,10 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[80%] rounded-xl border-2 border-black px-4 py-2 text-sm shadow-[2px_2px_0_0_#111] ${
+              className={`max-w-[80%] rounded-xl border-2 border-[var(--border)] px-4 py-2 text-sm shadow-[2px_2px_0_0_var(--shadow)] ${
                 msg.role === "user"
                   ? "bg-[var(--accent)] font-medium"
-                  : "bg-white"
+                  : "bg-[var(--surface)]"
               }`}
             >
               {msg.role === "assistant" ? (
@@ -122,7 +123,7 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
                     a: ({ href, children }) => (
                       <a
                         href={href}
-                        className="inline-flex items-center gap-1 font-semibold underline underline-offset-2 text-[var(--accent-foreground,#000)] bg-[var(--accent)] border border-black rounded px-1.5 py-0.5 hover:brightness-95 transition-[filter]"
+                        className="inline-flex items-center gap-1 font-semibold underline underline-offset-2 text-[var(--accent-foreground)] bg-[var(--accent)] border border-[var(--border)] rounded px-1.5 py-0.5 hover:brightness-95 transition-[filter]"
                       >
                         {children}
                       </a>
@@ -139,7 +140,7 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
         ))}
         {isPending && (
           <div className="flex justify-start">
-            <div className="rounded-xl border-2 border-black bg-white px-4 py-2 text-sm shadow-[2px_2px_0_0_#111] text-[var(--muted)]">
+            <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm shadow-[2px_2px_0_0_var(--shadow)] text-[var(--muted)]">
               Escribiendo…
             </div>
           </div>

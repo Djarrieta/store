@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { useRef, useState, type AnchorHTMLAttributes, type ButtonHTMLAttributes } from "react";
+import { type AnchorHTMLAttributes, type ButtonHTMLAttributes,useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success";
@@ -51,11 +51,11 @@ function omitShared<T extends ButtonProps>(props: T): Omit<T, keyof SharedProps>
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-[var(--accent)] border-2 border-black",
-  secondary: "bg-white border-2 border-black hover:bg-[var(--bg)]",
+  primary: "bg-[var(--accent)] border-2 border-[var(--border)] text-[var(--accent-foreground)]",
+  secondary: "bg-[var(--surface)] border-2 border-[var(--border)] hover:bg-[var(--bg)]",
   ghost: "text-[var(--muted)] underline hover:text-[var(--fg)]",
-  danger: "bg-red-300 border-2 border-black",
-  success: "bg-green-300 border-2 border-black",
+  danger: "bg-[var(--danger)] border-2 border-[var(--border)]",
+  success: "bg-[var(--success)] border-2 border-[var(--border)]",
 };
 
 const sizeClasses: Record<Exclude<ButtonSize, "none">, string> = {
@@ -67,11 +67,11 @@ const sizeClasses: Record<Exclude<ButtonSize, "none">, string> = {
 };
 
 const shadowClasses: Record<Exclude<ButtonSize, "none">, string> = {
-  sm: "shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
-  md: "shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
-  lg: "shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all",
-  xl: "shadow-[4px_4px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
-  icon: "shadow-[2px_2px_0_0_#111] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
+  sm: "shadow-[2px_2px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
+  md: "shadow-[2px_2px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
+  lg: "shadow-[3px_3px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all",
+  xl: "shadow-[4px_4px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
+  icon: "shadow-[2px_2px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
 };
 
 export default function Button(props: ButtonProps) {

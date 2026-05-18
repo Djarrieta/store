@@ -28,7 +28,7 @@ export default function ProductImageCarousel({
         height={600}
         unoptimized
         priority
-        className="mb-5 h-64 w-full rounded-xl border-2 border-black object-cover"
+        className="mb-5 h-64 w-full rounded-xl border-2 border-[var(--border)] object-cover"
       />
     );
   }
@@ -36,7 +36,7 @@ export default function ProductImageCarousel({
   return (
     <div className="mb-5 select-none">
       {/* Main image */}
-      <div className="relative h-64 w-full overflow-hidden rounded-xl border-2 border-black">
+      <div className="relative h-64 w-full overflow-hidden rounded-xl border-2 border-[var(--border)]">
         <Image
           src={images[current].url}
           alt={images[current].description ?? `${title} — imagen ${current + 1}`}
@@ -52,7 +52,7 @@ export default function ProductImageCarousel({
           size="none"
           onClick={() => setCurrent((c) => (c - 1 + images.length) % images.length)}
           aria-label="Imagen anterior"
-          className="absolute left-2 top-1/2 -translate-y-1/2 px-2 py-1 text-sm font-bold rounded-lg shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
+          className="absolute left-2 top-1/2 -translate-y-1/2 px-2 py-1 text-sm font-bold rounded-lg shadow-[3px_3px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
         >
           ‹
         </Button>
@@ -61,7 +61,7 @@ export default function ProductImageCarousel({
           size="none"
           onClick={() => setCurrent((c) => (c + 1) % images.length)}
           aria-label="Imagen siguiente"
-          className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-sm font-bold rounded-lg shadow-[3px_3px_0_0_#111] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
+          className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-sm font-bold rounded-lg shadow-[3px_3px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
         >
           ›
         </Button>
@@ -76,8 +76,8 @@ export default function ProductImageCarousel({
             aria-selected={i === current}
             aria-label={img.description ?? `Imagen ${i + 1}`}
             onClick={() => setCurrent(i)}
-            className={`h-2.5 w-2.5 rounded-full border-2 border-black transition-colors ${
-              i === current ? "bg-black" : "bg-white"
+            className={`h-2.5 w-2.5 rounded-full border-2 border-[var(--border)] transition-colors ${
+              i === current ? "bg-[var(--border)]" : "bg-[var(--surface)]"
             }`}
           />
         ))}
@@ -92,8 +92,8 @@ export default function ProductImageCarousel({
             aria-label={img.description ?? `Imagen ${i + 1}`}
             className={`relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
               i === current
-                ? "border-black shadow-[2px_2px_0_0_#111]"
-                : "border-gray-300 opacity-60 hover:opacity-100"
+                ? "border-[var(--border)] shadow-[2px_2px_0_0_var(--shadow)]"
+                : "border-[var(--border)]/30 opacity-60 hover:opacity-100"
             }`}
           >
             <Image

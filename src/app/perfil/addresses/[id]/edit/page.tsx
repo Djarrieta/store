@@ -49,7 +49,7 @@ export default async function EditAddressPage({
 
       <Form
         action={updateAndRedirectWrapper}
-        className="space-y-4 rounded-2xl border-2 border-black bg-[var(--card)] p-6 shadow-[4px_4px_0_0_#111]"
+        className="space-y-4 rounded-2xl border-2 border-[var(--border)] bg-[var(--card)] p-6 shadow-[4px_4px_0_0_var(--shadow)]"
       >
         <Input
           label="Nombre del destinatario"

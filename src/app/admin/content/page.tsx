@@ -26,7 +26,7 @@ export default async function AdminContentPage() {
         {(entries ?? []).map((entry) => (
           <div
             key={entry.key}
-            className="flex items-center justify-between rounded-xl border-2 border-black bg-[var(--card)] p-4 shadow-[3px_3px_0_0_#111]"
+            className="flex items-center justify-between rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-4 shadow-[3px_3px_0_0_var(--shadow)]"
           >
             <div className="min-w-0">
               <div className="flex items-center gap-2">

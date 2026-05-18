@@ -39,15 +39,15 @@ export default async function AdminShipsPage() {
       <div className="space-y-8">
         {/* Ships table */}
         {allShips.length === 0 ? (
-          <div className="rounded-xl border-2 border-dashed border-black bg-[var(--card)] p-8 text-center">
+          <div className="rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--card)] p-8 text-center">
             <p className="text-[var(--muted)]">
               Aún no hay tarifas de envío configuradas.
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111]">
+          <div className="overflow-x-auto rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)]">
             <table className="w-full min-w-[500px] text-sm">
-              <thead className="border-b-2 border-black bg-[var(--accent)]">
+              <thead className="border-b-2 border-[var(--border)] bg-[var(--accent)]">
                 <tr>
                   <th className="p-3 text-left font-bold">Departamento</th>
                   <th className="p-3 text-left font-bold">Ciudad</th>
@@ -58,7 +58,7 @@ export default async function AdminShipsPage() {
               </thead>
               <tbody>
                 {allShips.map((ship) => (
-                  <tr key={ship.id} className="border-b border-black/10 last:border-0">
+                  <tr key={ship.id} className="border-b border-[var(--border)]/10 last:border-0">
                     <td className="p-3 font-medium">{ship.department}</td>
                     <td className="p-3">{ship.city}</td>
                     <td className="p-3 text-right">{formatCurrency(ship.price_cop)}</td>
@@ -94,7 +94,7 @@ export default async function AdminShipsPage() {
         )}
 
         {/* Shipping config */}
-        <section className="rounded-xl border-2 border-black bg-[var(--card)] p-5 shadow-[3px_3px_0_0_#111]">
+        <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-5 shadow-[3px_3px_0_0_var(--shadow)]">
           <h2 className="mb-4 font-display text-lg font-bold">
             Configuración de envío gratis
           </h2>
@@ -119,7 +119,7 @@ export default async function AdminShipsPage() {
             </Button>
           </Form>
           {config?.free_above_cop != null && (
-            <p className="mt-3 text-sm font-semibold text-green-700">
+            <p className="mt-3 text-sm font-semibold text-[var(--ok-text)]">
               Envío gratis activo desde {formatCurrency(config.free_above_cop)}
             </p>
           )}

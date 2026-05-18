@@ -13,12 +13,12 @@ export type BadgeProps = {
 };
 
 const variantClasses: Record<BadgeVariant, string> = {
-  primary: "bg-[var(--accent)] border-2 border-black text-black",
-  secondary: "bg-white border-2 border-black text-black",
-  danger: "bg-red-300 border-2 border-black text-black",
-  success: "bg-green-300 border-2 border-black text-black",
-  warning: "bg-yellow-300 border-2 border-black text-black",
-  muted: "bg-[var(--bg)] border-2 border-black text-[var(--muted)]",
+  primary: "bg-[var(--accent)] border-2 border-[var(--border)] text-[var(--fg)]",
+  secondary: "bg-[var(--surface)] border-2 border-[var(--border)] text-[var(--fg)]",
+  danger: "bg-[var(--danger)] border-2 border-[var(--border)] text-[var(--fg)]",
+  success: "bg-[var(--success)] border-2 border-[var(--border)] text-[var(--fg)]",
+  warning: "bg-[var(--warning)] border-2 border-[var(--border)] text-[var(--fg)]",
+  muted: "bg-[var(--bg)] border-2 border-[var(--border)] text-[var(--muted)]",
 };
 
 const sizeClasses: Record<BadgeSize, string> = {
@@ -28,9 +28,9 @@ const sizeClasses: Record<BadgeSize, string> = {
 };
 
 const shadowClasses: Record<BadgeSize, string> = {
-  sm: "shadow-[2px_2px_0_0_#111]",
-  md: "shadow-[2px_2px_0_0_#111]",
-  lg: "shadow-[3px_3px_0_0_#111]",
+  sm: "shadow-[2px_2px_0_0_var(--shadow)]",
+  md: "shadow-[2px_2px_0_0_var(--shadow)]",
+  lg: "shadow-[3px_3px_0_0_var(--shadow)]",
 };
 
 export default function Badge({

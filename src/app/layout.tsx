@@ -59,11 +59,11 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="es" className={`${outfit.variable} ${inter.variable} antialiased`}>
+    <html lang="es" data-theme={process.env.THEME ?? "ten-lemmon"} className={`${outfit.variable} ${inter.variable} antialiased`}>
       <body className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
         <CartProvider isAuthenticated={Boolean(user)} freeShippingAbove={freeShippingAbove}>
           <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-6 sm:px-8">
-            <header className="mb-8 rounded-2xl border-4 border-black bg-[var(--card)] p-4 shadow-[6px_6px_0_0_#111]">
+            <header className="mb-8 rounded-2xl border-4 border-[var(--border)] bg-[var(--card)] p-4 shadow-[6px_6px_0_0_var(--shadow)]">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <Link href="/" className="font-display text-2xl font-bold uppercase tracking-tight">
                   Tienda

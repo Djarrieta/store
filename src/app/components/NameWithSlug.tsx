@@ -33,7 +33,7 @@ export default function NameWithSlug({
       <label className="grid gap-1">
         <span className="flex items-center gap-2 text-sm font-semibold">
           Slug
-          <span className="rounded bg-black/5 px-1.5 py-0.5 text-xs font-normal text-black/40">
+          <span className="rounded bg-[var(--fg)]/5 px-1.5 py-0.5 text-xs font-normal text-[var(--fg)]/40">
             auto-generado
           </span>
         </span>
@@ -42,7 +42,7 @@ export default function NameWithSlug({
           tabIndex={-1}
           value={slug}
           placeholder="se genera desde el nombre…"
-          className="cursor-default rounded-md border-dashed border-black/20 bg-gray-50 font-mono text-black/40 outline-none"
+          className="cursor-default rounded-md border-dashed border-[var(--border)]/20 bg-[var(--bg)] font-mono text-[var(--fg)]/40 outline-none"
         />
         <input type="hidden" name="slug" value={slug} />
       </label>

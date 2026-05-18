@@ -34,7 +34,7 @@ export default function ProductCard({ product, items = [], priority = false }: P
   const hasStock = items.some((i) => i.stock > 0);
 
   return (
-    <article className="overflow-hidden rounded-xl border-2 border-black bg-white shadow-[4px_4px_0_0_#111]">
+    <article className="overflow-hidden rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] shadow-[4px_4px_0_0_var(--shadow)]">
       <Link href={`/products/${product.id}`} className="block">
         {image ? (
           <Image
@@ -86,7 +86,7 @@ export default function ProductCard({ product, items = [], priority = false }: P
             </Badge>
             <Link
               href={`/products/${product.id}`}
-              className="text-xs font-semibold underline underline-offset-2 text-[var(--muted)] hover:text-black"
+              className="text-xs font-semibold underline underline-offset-2 text-[var(--muted)] hover:text-[var(--fg)]"
             >
               Ver detalle
             </Link>
@@ -107,7 +107,7 @@ export default function ProductCard({ product, items = [], priority = false }: P
         ) : (
           <Link
             href={`/products/${product.id}`}
-            className="mt-1 block w-full rounded-xl border-2 border-black bg-[var(--accent)] px-4 py-2 text-center text-sm font-bold shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+            className="mt-1 block w-full rounded-xl border-2 border-[var(--border)] bg-[var(--accent)] px-4 py-2 text-center text-sm font-bold shadow-[3px_3px_0_0_var(--shadow)] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
           >
             Ver producto
           </Link>

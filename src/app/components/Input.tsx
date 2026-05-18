@@ -3,9 +3,9 @@ import { forwardRef, type InputHTMLAttributes, type ReactNode,type SelectHTMLAtt
 
 // ── Shared base ───────────────────────────────────────────────────────────────
 const BASE =
-  "rounded-md border-2 border-black px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:opacity-50 placeholder:text-[var(--muted)]";
+  "rounded-md border-2 border-[var(--border)] px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:opacity-50 placeholder:text-[var(--muted)]";
 const SHADOW =
-  "shadow-[2px_2px_0_0_#111] focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px] transition-all";
+  "shadow-[2px_2px_0_0_var(--shadow)] focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px] transition-all";
 
 // ── Field label wrapper ───────────────────────────────────────────────────────
 function FieldWrap({ label, children }: { label: ReactNode; children: ReactNode }) {
@@ -67,7 +67,7 @@ type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
 export function Select({ shadow = false, fullWidth = true, label, className, children, ...props }: SelectProps) {
   const el = (
     <select
-      className={clsx(BASE, "bg-white", fullWidth && "w-full", shadow && SHADOW, className)}
+      className={clsx(BASE, "bg-[var(--surface)]", fullWidth && "w-full", shadow && SHADOW, className)}
       {...props}
     >
       {children}
@@ -83,7 +83,7 @@ export function Checkbox({ className, ...props }: CheckboxProps) {
   return (
     <input
       type="checkbox"
-      className={clsx("h-4 w-4 cursor-pointer rounded border-2 border-black accent-[var(--accent)]", className)}
+      className={clsx("h-4 w-4 cursor-pointer rounded border-2 border-[var(--border)] accent-[var(--accent)]", className)}
       {...props}
     />
   );
@@ -102,7 +102,7 @@ export function LabeledField({ label, required, className, children }: LabeledFi
     <label className={clsx("grid gap-1", className)}>
       <span className="text-sm font-semibold">
         {label}
-        {required && <span className="ml-0.5 text-red-500">*</span>}
+        {required && <span className="ml-0.5 text-[var(--error-text)]">*</span>}
       </span>
       {children}
     </label>

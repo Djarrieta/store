@@ -60,7 +60,7 @@ export default async function ProductDetailPage({
           { label: product.title },
         ]}
       />
-      <div className="rounded-2xl border-4 border-black bg-white p-5 shadow-[6px_6px_0_0_#111]">
+      <div className="rounded-2xl border-4 border-[var(--border)] bg-[var(--surface)] p-5 shadow-[6px_6px_0_0_var(--shadow)]">
         <ProductImageCarousel images={product.images} title={product.title} />
 
         <h1 className="font-display text-3xl font-bold">{product.title}</h1>
@@ -77,7 +77,7 @@ export default async function ProductDetailPage({
                 <span className="ml-2 text-[var(--muted)] line-through">
                   {formatCurrency(product.price)}
                 </span>
-                <span className="ml-2 text-green-700 font-semibold">
+                <span className="ml-2 text-[var(--ok-text)] font-semibold">
                   −{product.discount}%
                 </span>
               </>
@@ -103,7 +103,7 @@ export default async function ProductDetailPage({
         )}
 
         {!isPurchasable ? (
-          <p className="mt-4 text-sm font-semibold text-red-600">Sin stock</p>
+          <p className="mt-4 text-sm font-semibold text-[var(--error-text)]">Sin stock</p>
         ) : hasVariants ? (
           <VariantSelector
             items={itemList}

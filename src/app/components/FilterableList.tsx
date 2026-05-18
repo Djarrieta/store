@@ -60,7 +60,7 @@ export default function FilterableList({
   return (
     <div className="space-y-4">
       {/* Filter toggle bar */}
-      <div className="rounded-xl border-2 border-black bg-white">
+      <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--surface)]">
         <Button
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
@@ -68,7 +68,7 @@ export default function FilterableList({
         >
           <span className="flex items-center gap-2">
             <span
-              className={`flex items-center justify-center rounded-md border-2 border-black p-1 transition-colors ${hasFilters ? "bg-[var(--accent)]" : "bg-transparent"}`}
+              className={`flex items-center justify-center rounded-md border-2 border-[var(--border)] p-1 transition-colors ${hasFilters ? "bg-[var(--accent)]" : "bg-transparent"}`}
             >
               <FunnelIcon active={hasFilters} />
             </span>
@@ -96,7 +96,7 @@ export default function FilterableList({
 
         {open && (
           <Form
-            className="grid gap-2 border-t-2 border-black p-4 sm:grid-cols-3"
+            className="grid gap-2 border-t-2 border-[var(--border)] p-4 sm:grid-cols-3"
             method="get"
           >
             <Input
@@ -129,7 +129,7 @@ export default function FilterableList({
       {children}
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between rounded-xl border-2 border-black bg-white p-3 text-sm">
+        <div className="flex items-center justify-between rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] p-3 text-sm">
           <span>
             Página {page} de {totalPages}
           </span>

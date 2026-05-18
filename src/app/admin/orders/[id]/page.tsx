@@ -41,7 +41,7 @@ export default async function OrderDetailPage({
         <p className="text-xs text-[var(--muted)] font-mono mt-1">{order.id}</p>
       </div>
 
-      <div className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-3">
+      <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-3">
         <div className="flex justify-between text-sm">
           <span className="text-[var(--muted)]">Cliente</span>
           <span className="font-semibold">{order.user_name ?? order.user_ref}</span>
@@ -59,7 +59,7 @@ export default async function OrderDetailPage({
           <span>{formatDate(order.created_at)}</span>
         </div>
         {order.notes && (
-          <div className="pt-2 border-t border-black/10">
+          <div className="pt-2 border-t border-[var(--border)]/10">
             <p className="text-xs text-[var(--muted)] mb-1">Notas</p>
             <p className="text-sm">{order.notes}</p>
           </div>
@@ -68,7 +68,7 @@ export default async function OrderDetailPage({
 
       {/* Shipping */}
       {order.shipping_address && (
-        <div className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-3">
+        <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-3">
           <h2 className="font-bold">Dirección de envío</h2>
           <div className="flex justify-between text-sm">
             <span className="text-[var(--muted)]">Destinatario</span>
@@ -93,7 +93,7 @@ export default async function OrderDetailPage({
             <span className="text-[var(--muted)]">Teléfono</span>
             <span>{order.shipping_address.phone}</span>
           </div>
-          <div className="flex justify-between text-sm border-t border-black/10 pt-2">
+          <div className="flex justify-between text-sm border-t border-[var(--border)]/10 pt-2">
             <span className="text-[var(--muted)]">Costo de envío</span>
             <span className="font-semibold">
               {order.shipping_cost > 0
@@ -105,7 +105,7 @@ export default async function OrderDetailPage({
       )}
 
       {/* Tracking */}
-      <div className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-3">
+      <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-3">
         <h2 className="font-bold">Seguimiento de envío</h2>
         <Form
           action={async (fd: FormData) => {
@@ -128,15 +128,15 @@ export default async function OrderDetailPage({
         {order.tracking_code && (
           <p className="text-xs text-[var(--muted)]">
             Código actual:{" "}
-            <span className="font-mono font-semibold text-black">{order.tracking_code}</span>
+            <span className="font-mono font-semibold text-[var(--fg)]">{order.tracking_code}</span>
           </p>
         )}
       </div>
 
       {/* Line items */}
-      <div className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] overflow-hidden">
+      <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="border-b-2 border-black bg-[var(--accent)]">
+          <thead className="border-b-2 border-[var(--border)] bg-[var(--accent)]">
             <tr>
               <th className="p-3 text-left font-bold">Producto</th>
               <th className="p-3 text-right font-bold">Cant.</th>
@@ -146,7 +146,7 @@ export default async function OrderDetailPage({
           </thead>
           <tbody>
             {order.items.map((item: OrderItem, i: number) => (
-              <tr key={i} className="border-b border-black/10 last:border-0">
+              <tr key={i} className="border-b border-[var(--border)]/10 last:border-0">
                 <td className="p-3">
                   <p className="font-medium">{item.title}</p>
                   {item.sku && (
@@ -161,7 +161,7 @@ export default async function OrderDetailPage({
               </tr>
             ))}
           </tbody>
-          <tfoot className="border-t-2 border-black">
+          <tfoot className="border-t-2 border-[var(--border)]">
             {order.shipping_cost > 0 && (
               <tr>
                 <td colSpan={3} className="p-3 text-right text-sm text-[var(--muted)]">

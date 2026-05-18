@@ -118,13 +118,13 @@ export default function OrderEditForm({ order }: Props) {
   return (
     <Form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
       {error && (
-        <div className="rounded-lg border-2 border-red-600 bg-red-100 px-4 py-3 text-sm font-semibold text-red-800">
+        <div className="rounded-lg border-2 border-[var(--error-border)] bg-[var(--error-bg)] px-4 py-3 text-sm font-semibold text-[var(--error-text)]">
           {error}
         </div>
       )}
 
       {/* Status */}
-      <section className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-4">
+      <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-4">
         <h2 className="font-bold text-base">Estado del pedido</h2>
         <div className="flex flex-wrap gap-2">
           {ALL_STATUSES.map((s) => (
@@ -143,7 +143,7 @@ export default function OrderEditForm({ order }: Props) {
       </section>
 
       {/* Notes */}
-      <section className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-3">
+      <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-3">
         <h2 className="font-bold text-base">Notas internas</h2>
         <Textarea
           value={notes}
@@ -154,7 +154,7 @@ export default function OrderEditForm({ order }: Props) {
       </section>
 
       {/* Tracking code */}
-      <section className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-3">
+      <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-3">
         <h2 className="font-bold text-base">Seguimiento de envío</h2>
         <Input
           type="text"
@@ -166,7 +166,7 @@ export default function OrderEditForm({ order }: Props) {
       </section>
 
       {/* Shipping address */}
-      <section className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] p-5 space-y-4">
+      <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-4">
         <h2 className="font-bold text-base">Dirección de entrega</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <LabeledField label="Destinatario" required>
@@ -212,7 +212,7 @@ export default function OrderEditForm({ order }: Props) {
             />
           </LabeledField>
         </div>
-        <div className="pt-3 border-t border-black/10">
+        <div className="pt-3 border-t border-[var(--border)]/10">
           <LabeledField label="Costo de envío (COP)">
             <Input
               type="number"
@@ -228,12 +228,12 @@ export default function OrderEditForm({ order }: Props) {
       </section>
 
       {/* Items */}
-      <section className="rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111] overflow-hidden">
-        <div className="p-5 border-b-2 border-black">
+      <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] overflow-hidden">
+        <div className="p-5 border-b-2 border-[var(--border)]">
           <h2 className="font-bold text-base">Ítems del pedido</h2>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-[var(--accent)] border-b-2 border-black">
+          <thead className="bg-[var(--accent)] border-b-2 border-[var(--border)]">
             <tr>
               <th className="p-3 text-left font-bold">Producto</th>
               <th className="p-3 text-right font-bold">P. Unit.</th>
@@ -244,7 +244,7 @@ export default function OrderEditForm({ order }: Props) {
           </thead>
           <tbody>
             {items.map((item, i) => (
-              <tr key={i} className="border-b border-black/10 last:border-0">
+              <tr key={i} className="border-b border-[var(--border)]/10 last:border-0">
                 <td className="p-3">
                   <p className="font-medium">{item.title}</p>
                   {item.sku && (
@@ -272,7 +272,7 @@ export default function OrderEditForm({ order }: Props) {
                     onClick={() => removeItem(i)}
                     disabled={items.length === 1}
                     aria-label="Eliminar ítem"
-                    className="text-red-600 hover:text-red-800 disabled:opacity-30 disabled:cursor-not-allowed text-lg leading-none font-bold"
+                    className="text-[var(--error-text)] hover:text-[var(--error-text)] disabled:opacity-30 disabled:cursor-not-allowed text-lg leading-none font-bold"
                   >
                     ×
                   </Button>
@@ -280,7 +280,7 @@ export default function OrderEditForm({ order }: Props) {
               </tr>
             ))}
           </tbody>
-          <tfoot className="border-t-2 border-black">
+          <tfoot className="border-t-2 border-[var(--border)]">
             {parsedShippingCost > 0 && (
               <>
                 <tr>

@@ -107,7 +107,7 @@ export default function VariantSelector({
       ))}
 
       {allSelected && (
-        <p className={`text-xs font-semibold ${inStock ? "text-green-700" : "text-red-600"}`}>
+        <p className={`text-xs font-semibold ${inStock ? "text-[var(--ok-text)]" : "text-[var(--error-text)]"}`}>
           {inStock ? "Disponible" : "Sin stock"}
         </p>
       )}

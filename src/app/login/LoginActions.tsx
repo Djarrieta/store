@@ -38,7 +38,7 @@ export default function LoginActions() {
         Continuar con Google
       </Button>
 
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      {error ? <p className="text-sm text-[var(--error-text)]">{error}</p> : null}
     </div>
   );
 }

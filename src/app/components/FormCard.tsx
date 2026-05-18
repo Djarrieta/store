@@ -13,8 +13,8 @@ export function FormCard({ children, className, ...props }: FormCardProps) {
   return (
     <form
       className={clsx(
-        "min-w-0 space-y-5 rounded-xl border-2 border-black bg-white",
-        "p-4 shadow-[3px_3px_0_0_#111] sm:p-6",
+        "min-w-0 space-y-5 rounded-xl border-2 border-[var(--border)] bg-[var(--surface)]",
+        "p-4 shadow-[3px_3px_0_0_var(--shadow)] sm:p-6",
         className,
       )}
       {...props}

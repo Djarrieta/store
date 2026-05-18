@@ -88,7 +88,7 @@ export default function ProductForm({
 
       <input type="hidden" name="images" value={serializedImages} />
 
-      <label className="flex items-center gap-3 rounded-xl border-2 border-black bg-[var(--card)] px-4 py-3 shadow-[2px_2px_0_0_#111] cursor-pointer">
+      <label className="flex items-center gap-3 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[2px_2px_0_0_var(--shadow)] cursor-pointer">
         <Input
           type="checkbox"
           name="ocultar"

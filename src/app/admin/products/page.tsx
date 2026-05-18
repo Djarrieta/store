@@ -63,13 +63,13 @@ export default async function AdminProductsPage({
           {(products ?? []).map((product) => (
             <div
               key={product.id}
-              className="flex items-center justify-between rounded-xl border-2 border-black bg-[var(--card)] p-4 shadow-[3px_3px_0_0_#111]"
+              className="flex items-center justify-between rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-4 shadow-[3px_3px_0_0_var(--shadow)]"
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="truncate font-semibold">{product.title}</p>
                   {product.ocultar && (
-                    <span className="shrink-0 rounded-full border border-black bg-yellow-200 px-2 py-0.5 text-xs font-semibold">
+                    <span className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--warning)] px-2 py-0.5 text-xs font-semibold">
                       Oculto
                     </span>
                   )}
@@ -77,7 +77,7 @@ export default async function AdminProductsPage({
                 <p className="text-xs text-[var(--muted)]">
                   {formatCurrency(Number(product.price))}
                   {product.discount > 0 && (
-                    <span className="ml-1 text-green-700">−{product.discount}%</span>
+                    <span className="ml-1 text-[var(--ok-text)]">−{product.discount}%</span>
                   )}
                   {product.category && (
                     <> &middot; {product.category.parent?.name ?? ""}{product.category.parent ? " / " : ""}{product.category.name}</>

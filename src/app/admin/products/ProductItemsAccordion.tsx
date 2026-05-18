@@ -92,7 +92,7 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
         const deleteAction = deleteItemFromProduct.bind(null, productId, item.id);
 
         return (
-          <div key={item.id} className="overflow-hidden rounded-xl border-2 border-black shadow-[2px_2px_0_0_#111]">
+          <div key={item.id} className="overflow-hidden rounded-xl border-2 border-[var(--border)] shadow-[2px_2px_0_0_var(--shadow)]">
             {/* Header row */}
             <Button
               onClick={() => setOpenItemId(isOpen ? null : item.id)}
@@ -100,14 +100,14 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
             >
               <span className="text-sm font-semibold">{label}</span>
               <span className="flex items-center gap-3 text-xs text-[var(--muted)]">
-                Stock: <strong className="text-black">{item.stock}</strong>
+                Stock: <strong className="text-[var(--fg)]">{item.stock}</strong>
                 <span className="text-base leading-none">{isOpen ? "▲" : "▼"}</span>
               </span>
             </Button>
 
             {/* Expanded body */}
             {isOpen && (
-              <div className="space-y-4 border-t-2 border-black bg-white p-4">
+              <div className="space-y-4 border-t-2 border-[var(--border)] bg-[var(--surface)] p-4">
                 <Form action={updateAction} className="space-y-3">
                   <VariantSelects dimensions={dimensions} selectedIds={selectedIds} />
 
@@ -127,7 +127,7 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
                   </Button>
                 </Form>
 
-                <Form action={deleteAction} className="border-t-2 border-dashed border-black pt-3">
+                <Form action={deleteAction} className="border-t-2 border-dashed border-[var(--border)] pt-3">
                 <Button variant="secondary" size="md" shadow type="submit" confirm>
                   Eliminar variante
                 </Button>
@@ -142,14 +142,14 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
       {!showAddForm ? (
         <Button
           onClick={() => setShowAddForm(true)}
-          className="mt-1 rounded-xl border-2 border-dashed border-black bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[var(--bg)]"
+          className="mt-1 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold transition hover:bg-[var(--bg)]"
         >
           + Agregar variante
         </Button>
       ) : (
         <Form
           action={createAction}
-          className="space-y-4 rounded-xl border-2 border-black bg-white p-4 shadow-[2px_2px_0_0_#111]"
+          className="space-y-4 rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] p-4 shadow-[2px_2px_0_0_var(--shadow)]"
         >
           <p className="font-semibold text-sm">Nueva variante</p>
 

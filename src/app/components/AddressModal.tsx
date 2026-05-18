@@ -72,7 +72,7 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-60 bg-black/50"
+        className="fixed inset-0 z-60 bg-[var(--fg)]/50"
         onClick={handleClose}
         aria-hidden="true"
       />
@@ -82,10 +82,10 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
         role="dialog"
         aria-modal="true"
         aria-label="Dirección de envío"
-        className="fixed inset-x-4 top-1/2 z-70 max-h-[85dvh] w-full max-w-md -translate-y-1/2 overflow-y-auto rounded-2xl border-4 border-black bg-[var(--card)] shadow-[8px_8px_0_0_#111] sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2"
+        className="fixed inset-x-4 top-1/2 z-70 max-h-[85dvh] w-full max-w-md -translate-y-1/2 overflow-y-auto rounded-2xl border-4 border-[var(--border)] bg-[var(--card)] shadow-[8px_8px_0_0_var(--shadow)] sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b-4 border-black p-4">
+        <div className="flex items-center justify-between border-b-4 border-[var(--border)] p-4">
           <h2 className="font-display text-lg font-bold">
             {mode === "list" ? "Dirección de envío" : "Nueva dirección"}
           </h2>
@@ -109,7 +109,7 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
               )}
 
               {loadError && (
-                <p className="py-4 text-center text-sm text-red-600">{loadError}</p>
+                <p className="py-4 text-center text-sm text-[var(--error-text)]">{loadError}</p>
               )}
 
               {!isLoadingList && !loadError && addresses !== null && (
@@ -118,7 +118,7 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
                     <Button
                       key={addr.id}
                       onClick={() => handleSelect(addr)}
-                      className="w-full rounded-xl border-2 border-black bg-white p-4 text-left shadow-[3px_3px_0_0_#111] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+                      className="w-full rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] p-4 text-left shadow-[3px_3px_0_0_var(--shadow)] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
@@ -143,7 +143,7 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
 
                   <Button
                     onClick={() => setMode("form")}
-                    className="mt-1 w-full rounded-xl border-2 border-dashed border-black bg-[var(--bg)] py-3 text-sm font-semibold hover:bg-[var(--card)]"
+                    className="mt-1 w-full rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--bg)] py-3 text-sm font-semibold hover:bg-[var(--card)]"
                   >
                     + Agregar nueva dirección
                   </Button>
@@ -155,7 +155,7 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
           {mode === "form" && (
             <Form onSubmit={handleSubmit} className="space-y-3">
               {formError && (
-                <p className="rounded-lg border-2 border-red-400 bg-red-50 px-3 py-2 text-sm text-red-700">
+                <p className="rounded-lg border-2 border-[var(--error-border)] bg-[var(--error-bg)] px-3 py-2 text-sm text-[var(--error-text)]">
                   {formError}
                 </p>
               )}
