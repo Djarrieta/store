@@ -5,3 +5,7 @@ VALUES
   ('Cundinamarca', 'Bogotá',    10000,  3),
   ('Valle del Cauca', 'Cali',  12000,  4)
 ON CONFLICT (department, city) DO NOTHING;
+
+INSERT INTO public.ships_config (singleton, free_above_cop)
+VALUES (true, 150000)
+ON CONFLICT (singleton) DO UPDATE SET free_above_cop = EXCLUDED.free_above_cop;

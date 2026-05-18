@@ -12,7 +12,7 @@ export async function createItem(formData: FormData) {
 
   const product_id = (formData.get("product_id") as string).trim();
   const stock = Math.max(0, parseInt((formData.get("stock") as string) ?? "0", 10) || 0);
-  const categoryIds = formData.getAll("category_ids") as string[];
+  const categoryIds = (formData.getAll("category_ids") as string[]).filter(Boolean);
 
   const { data: item, error } = await supabase
     .from("items")
@@ -37,7 +37,7 @@ export async function createItemForProduct(productId: string, formData: FormData
   const supabase = await createClient();
 
   const stock = Math.max(0, parseInt((formData.get("stock") as string) ?? "0", 10) || 0);
-  const categoryIds = formData.getAll("category_ids") as string[];
+  const categoryIds = (formData.getAll("category_ids") as string[]).filter(Boolean);
 
   const { data: item, error } = await supabase
     .from("items")
@@ -62,7 +62,7 @@ export async function updateItem(id: string, formData: FormData) {
   const supabase = await createClient();
 
   const stock = Math.max(0, parseInt((formData.get("stock") as string) ?? "0", 10) || 0);
-  const categoryIds = formData.getAll("category_ids") as string[];
+  const categoryIds = (formData.getAll("category_ids") as string[]).filter(Boolean);
 
   const { data: item, error } = await supabase
     .from("items")
@@ -105,7 +105,7 @@ export async function updateItemFromProduct(productId: string, itemId: string, f
   const supabase = await createClient();
 
   const stock = Math.max(0, parseInt((formData.get("stock") as string) ?? "0", 10) || 0);
-  const categoryIds = formData.getAll("category_ids") as string[];
+  const categoryIds = (formData.getAll("category_ids") as string[]).filter(Boolean);
 
   const { error } = await supabase.from("items").update({ stock }).eq("id", itemId);
   if (error) throw new Error(error.message);

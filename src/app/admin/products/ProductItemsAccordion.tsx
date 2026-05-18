@@ -9,7 +9,7 @@ import {
 } from "@/app/admin/items/actions";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
-import Input from "@/app/components/Input";
+import Input, { Select } from "@/app/components/Input";
 
 interface CategoryValue {
   id: string;
@@ -34,7 +34,7 @@ interface Props {
   dimensions: Dimension[];
 }
 
-function VariantCheckboxes({
+function VariantSelects({
   dimensions,
   selectedIds,
 }: {
@@ -43,28 +43,25 @@ function VariantCheckboxes({
 }) {
   if (dimensions.length === 0) return null;
   return (
-    <div className="space-y-3">
-      {dimensions.map((dim) => (
-        <fieldset key={dim.id}>
-          <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-            {dim.name}
-          </legend>
-          <div className="flex flex-wrap gap-3">
+    <div className="grid gap-3 sm:grid-cols-2">
+      {dimensions.map((dim) => {
+        const selected = dim.values.find((v) => selectedIds.has(v.id));
+        return (
+          <Select
+            key={dim.id}
+            name="category_ids"
+            label={dim.name}
+            defaultValue={selected?.id ?? ""}
+          >
+            <option value="">— Ninguno —</option>
             {dim.values.map((val) => (
-              <label key={val.id} className="flex cursor-pointer items-center gap-1.5 text-sm">
-                <input
-                  type="checkbox"
-                  name="category_ids"
-                  value={val.id}
-                  defaultChecked={selectedIds.has(val.id)}
-                  className="h-4 w-4 rounded border-2 border-black accent-[var(--accent)]"
-                />
+              <option key={val.id} value={val.id}>
                 {val.name}
-              </label>
+              </option>
             ))}
-          </div>
-        </fieldset>
-      ))}
+          </Select>
+        );
+      })}
     </div>
   );
 }
@@ -112,7 +109,7 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
             {isOpen && (
               <div className="space-y-4 border-t-2 border-black bg-white p-4">
                 <Form action={updateAction} className="space-y-3">
-                  <VariantCheckboxes dimensions={dimensions} selectedIds={selectedIds} />
+                  <VariantSelects dimensions={dimensions} selectedIds={selectedIds} />
 
                   <Input
                       label="Stock"
@@ -156,7 +153,7 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
         >
           <p className="font-semibold text-sm">Nueva variante</p>
 
-          <VariantCheckboxes dimensions={dimensions} selectedIds={new Set()} />
+          <VariantSelects dimensions={dimensions} selectedIds={new Set()} />
 
           <Input
             label="Stock"
