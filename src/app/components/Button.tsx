@@ -1,6 +1,8 @@
-﻿import clsx from "clsx";
+﻿"use client";
+
+import clsx from "clsx";
 import Link from "next/link";
-import { type AnchorHTMLAttributes,type ButtonHTMLAttributes } from "react";
+import { useRef, useState, type AnchorHTMLAttributes, type ButtonHTMLAttributes } from "react";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success";
 /** Use "none" to skip automatic padding/rounding/font — supply those via className instead */
@@ -19,6 +21,12 @@ type SharedProps = {
 type AsButton = SharedProps &
   Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof SharedProps> & {
     href?: never;
+    /**
+     * When set, the first click shows a confirmation label (default "¿Seguro?").
+     * The action only fires on the second click. Reverts automatically after 3 s.
+     * Pass a string to customise the confirmation label.
+     */
+    confirm?: boolean | string;
   };
 
 type AsLink = SharedProps &
@@ -63,6 +71,9 @@ const shadowClasses: Record<Exclude<ButtonSize, "none">, string> = {
 };
 
 export default function Button(props: ButtonProps) {
+  const [confirming, setConfirming] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const variant = props.variant ?? "secondary";
   const size = props.size ?? "md";
   const shadow = props.shadow ?? false;
@@ -88,14 +99,34 @@ export default function Button(props: ButtonProps) {
   }
 
   const { disabled, type = "button", ...buttonRest } = omitShared(props as AsButton) as ButtonHTMLAttributes<HTMLButtonElement>;
+  const { confirm: confirmProp, onClick, ...safeButtonRest } = buttonRest as AsButton;
+  const confirmLabel = typeof confirmProp === "string" ? confirmProp : "¿Seguro?";
+
+  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+    if (!confirmProp) {
+      onClick?.(e);
+      return;
+    }
+    if (!confirming) {
+      setConfirming(true);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setConfirming(false), 3000);
+      return;
+    }
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setConfirming(false);
+    onClick?.(e);
+  }
+
   return (
     <button
       type={type}
       disabled={disabled}
       className={clsx(classes, disabled && "opacity-40 pointer-events-none")}
-      {...buttonRest}
+      onClick={handleClick}
+      {...safeButtonRest}
     >
-      {children}
+      {confirming ? confirmLabel : children}
     </button>
   );
 }
