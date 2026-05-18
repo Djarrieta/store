@@ -45,8 +45,8 @@ export default async function AdminShipsPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111]">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto rounded-xl border-2 border-black bg-[var(--card)] shadow-[3px_3px_0_0_#111]">
+            <table className="w-full min-w-[500px] text-sm">
               <thead className="border-b-2 border-black bg-[var(--accent)]">
                 <tr>
                   <th className="p-3 text-left font-bold">Departamento</th>
@@ -102,7 +102,7 @@ export default async function AdminShipsPage() {
             Deja vacío para desactivar el envío gratis. Cuando el subtotal del pedido
             supere este monto, el envío será gratuito.
           </p>
-          <Form action={updateShipsConfig} className="flex items-end gap-3">
+          <Form action={updateShipsConfig} className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-end">
             <Input
               label="Envío gratis desde (COP)"
               name="free_above_cop"
@@ -112,7 +112,7 @@ export default async function AdminShipsPage() {
               defaultValue={config?.free_above_cop ?? ""}
               placeholder="ej. 150000 (dejar vacío para desactivar)"
               fullWidth={false}
-              className="w-64"
+              className="w-full sm:w-64"
             />
             <Button variant="primary" size="lg" shadow type="submit">
               Guardar
