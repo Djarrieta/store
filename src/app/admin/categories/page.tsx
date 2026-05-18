@@ -50,7 +50,7 @@ export default async function AdminCategoriesPage() {
                     await deleteCategory(parent.id);
                   }}
                 >
-                  <Button variant="danger" size="sm" shadow type="submit">
+                  <Button variant="danger" size="sm" shadow type="submit" confirm>
                     Eliminar
                   </Button>
                 </Form>
@@ -76,7 +76,7 @@ export default async function AdminCategoriesPage() {
                           await deleteCategory(sub.id);
                         }}
                       >
-                      <Button variant="danger" size="sm" shadow type="submit">
+                      <Button variant="danger" size="sm" shadow type="submit" confirm>
                           Eliminar
                         </Button>
                       </Form>

@@ -127,6 +127,7 @@ export default async function PerfilPage() {
                           shadow
                           fullWidth
                           type="submit"
+                          confirm
                         >
                           Eliminar
                         </Button>

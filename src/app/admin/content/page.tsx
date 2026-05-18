@@ -59,7 +59,7 @@ export default async function AdminContentPage() {
                   await deleteContent(entry.key);
                 }}
               >
-                <Button variant="danger" size="sm" shadow type="submit">
+                <Button variant="danger" size="sm" shadow type="submit" confirm>
                   Eliminar
                 </Button>
               </Form>

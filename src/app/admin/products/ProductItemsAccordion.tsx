@@ -128,7 +128,7 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
                 </Form>
 
                 <Form action={deleteAction} className="border-t-2 border-dashed border-black pt-3">
-                <Button variant="secondary" size="md" shadow type="submit">
+                <Button variant="secondary" size="md" shadow type="submit" confirm>
                   Eliminar variante
                 </Button>
                 </Form>

@@ -108,6 +108,7 @@ export default function Button(props: ButtonProps) {
       return;
     }
     if (!confirming) {
+      e.preventDefault();
       setConfirming(true);
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => setConfirming(false), 3000);

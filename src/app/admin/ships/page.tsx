@@ -80,7 +80,7 @@ export default async function AdminShipsPage() {
                             await deleteShip(ship.id);
                           }}
                         >
-                          <Button variant="danger" size="sm" shadow type="submit">
+                          <Button variant="danger" size="sm" shadow type="submit" confirm>
                             Eliminar
                           </Button>
                         </Form>

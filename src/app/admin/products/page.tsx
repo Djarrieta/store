@@ -95,7 +95,7 @@ export default async function AdminProductsPage({
                     await deleteProduct(product.id);
                   }}
                 >
-                  <Button variant="danger" size="sm" shadow type="submit">
+                  <Button variant="danger" size="sm" shadow type="submit" confirm>
                     Eliminar
                   </Button>
                 </form>
