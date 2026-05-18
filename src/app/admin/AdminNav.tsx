@@ -38,9 +38,9 @@ export default function AdminNav() {
 
   if (isTopLevel) {
     return (
-      <nav className="flex gap-2">
-        {NAV_LINKS.map(({ href, label }) => (
-          <Button key={href} href={href} variant="secondary" size="md" shadow>
+      <nav className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:flex-wrap">
+        {NAV_LINKS.filter(({ href }) => !pathname.startsWith(href)).map(({ href, label }) => (
+          <Button key={href} href={href} variant="secondary" size="md" shadow fullWidth className="sm:w-auto justify-center">
             {label}
           </Button>
         ))}
