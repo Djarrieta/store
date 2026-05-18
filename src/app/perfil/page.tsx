@@ -1,6 +1,6 @@
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
-import { signOut } from "@/app/components/user-actions";
+import SignOutButton from "@/app/components/SignOutButton";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { Address, Order } from "@/types";
@@ -36,11 +36,7 @@ export default async function PerfilPage() {
     <main className="mx-auto max-w-2xl space-y-10 px-4 py-8">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold">Mi perfil</h1>
-        <Form action={signOut}>
-          <Button variant="secondary" size="lg" shadow type="submit">
-            Cerrar sesión
-          </Button>
-        </Form>
+        <SignOutButton />
       </div>
 
       {/* ── Addresses ── */}

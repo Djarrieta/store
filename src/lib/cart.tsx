@@ -9,9 +9,9 @@ import {
   useReducer,
   useRef,
 } from "react";
-
 import { getShippingCost, type ShippingResult } from "@/app/actions/shipping";
 import { getDefaultAddress } from "@/app/perfil/actions";
+import { CART_STORAGE_KEY } from "@/lib/constants";
 import type { Address } from "@/types";
 
 export type CartItem = {
@@ -122,7 +122,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
   }
 }
 
-const STORAGE_KEY = "store:cart";
+const STORAGE_KEY = CART_STORAGE_KEY;
 
 type StoredCart = {
   items: CartItem[];

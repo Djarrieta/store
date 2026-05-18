@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
+import { CHAT_STORAGE_KEY } from "@/lib/constants";
 import { useCart } from "@/lib/cart";
 
 import { migrateGuestChat,sendMessage } from "./actions";
@@ -15,7 +16,7 @@ interface Message {
   text: string;
 }
 
-const STORAGE_KEY = "chat_messages";
+const STORAGE_KEY = CHAT_STORAGE_KEY;
 
 export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boolean }) {
   const { items: cartItems } = useCart();
