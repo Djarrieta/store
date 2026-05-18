@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import Badge from "@/app/components/Badge";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
@@ -73,9 +74,9 @@ export default function FilterableList({
             </span>
             <span>Filtros</span>
             {hasFilters && (
-              <span className="rounded-full border-2 border-black bg-[var(--accent)] px-2 py-0.5 text-xs font-bold leading-none">
+              <Badge variant="primary" size="sm">
                 {[q && "búsqueda", tags && "etiquetas"].filter(Boolean).join(" · ")}
-              </span>
+              </Badge>
             )}
           </span>
           <svg

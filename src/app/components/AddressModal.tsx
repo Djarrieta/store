@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 
+import Badge from "@/app/components/Badge";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
 import Input, { LabeledField } from "@/app/components/Input";
@@ -132,9 +133,9 @@ export default function AddressModal({ isOpen, onClose, onSelect }: AddressModal
                           <p className="text-xs text-[var(--muted)]">{addr.phone}</p>
                         </div>
                         {addr.is_default && (
-                          <span className="shrink-0 rounded-full border-2 border-black bg-green-200 px-2 py-0.5 text-xs font-bold">
+                          <Badge variant="success" size="sm" className="shrink-0">
                             Principal
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     </Button>
