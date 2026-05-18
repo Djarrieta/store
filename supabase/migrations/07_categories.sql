@@ -4,7 +4,7 @@ CREATE TABLE public.categories (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name        text NOT NULL,
   slug        text NOT NULL,
-  parent_id   uuid REFERENCES public.categories(id) ON DELETE RESTRICT,
+  parent_id   uuid REFERENCES public.categories(id) ON DELETE CASCADE,
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 

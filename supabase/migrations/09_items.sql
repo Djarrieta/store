@@ -33,7 +33,7 @@ DROP TABLE IF EXISTS public.item_categories CASCADE;
 
 CREATE TABLE public.item_categories (
   item_id     uuid NOT NULL REFERENCES public.items(id) ON DELETE CASCADE,
-  category_id uuid NOT NULL REFERENCES public.categories(id) ON DELETE RESTRICT,
+  category_id uuid NOT NULL REFERENCES public.categories(id) ON DELETE CASCADE,
   PRIMARY KEY (item_id, category_id)
 );
 
