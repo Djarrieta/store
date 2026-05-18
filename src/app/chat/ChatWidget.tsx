@@ -118,6 +118,14 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
                     ul: ({ children }) => <ul className="list-disc pl-4 mb-1">{children}</ul>,
                     ol: ({ children }) => <ol className="list-decimal pl-4 mb-1">{children}</ol>,
                     li: ({ children }) => <li className="mb-0.5">{children}</li>,
+                    a: ({ href, children }) => (
+                      <a
+                        href={href}
+                        className="inline-flex items-center gap-1 font-semibold underline underline-offset-2 text-[var(--accent-foreground,#000)] bg-[var(--accent)] border border-black rounded px-1.5 py-0.5 hover:brightness-95 transition-[filter]"
+                      >
+                        {children}
+                      </a>
+                    ),
                   }}
                 >
                   {msg.text}
