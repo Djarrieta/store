@@ -14,6 +14,7 @@
   --border: #000000;
   --shadow: #111111;
   --surface: #ffffff;
+  --border-disabled: #888888;
   /* ── Semantic: interactive states ──────────────────────── */
   --danger: #fca5a5;
   --success: #86efac;
@@ -53,6 +54,7 @@
   --border: #e2e8f0;
   --shadow: #0ab6c9;
   --surface: #1e2435;
+  --border-disabled: #3d4a5c;
 }
 
 @theme inline {
@@ -73,6 +75,10 @@ body {
 
 button {
   cursor: pointer;
+}
+
+button:disabled {
+  border-color: var(--border-disabled);
 }
 
 .font-display {
