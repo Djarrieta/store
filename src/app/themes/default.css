@@ -29,4 +29,20 @@
   --ok-bg: #f0fdf4;
   --ok-border: #15803d;
   --ok-text: #15803d;
+  /* ── Border radii ─────────────────────────────────────── */
+  --radius-btn-sm: 0.375rem;   /* rounded-md */
+  --radius-btn-md: 0.375rem;   /* rounded-md */
+  --radius-btn-lg: 0.5rem;     /* rounded-lg */
+  --radius-btn-xl: 0.75rem;    /* rounded-xl */
+  --radius-btn-icon: 0.25rem;  /* rounded */
+  --radius-card: 0.75rem;      /* rounded-xl */
+  /* ── Offset shadow sizes (NeoBrutalism) ───────────────── */
+  /* Each value is the X/Y offset used in shadow-[X_Y_0_0_var(--shadow)]
+     and the matching hover translate distance. */
+  --shadow-btn-sm: 2px;
+  --shadow-btn-md: 2px;
+  --shadow-btn-lg: 3px;
+  --shadow-btn-xl: 4px;
+  --shadow-btn-icon: 2px;
+  --shadow-card: 4px;
 }

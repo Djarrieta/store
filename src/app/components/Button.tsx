@@ -54,24 +54,24 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-[var(--accent)] border-2 border-[var(--border)] text-[var(--accent-foreground)]",
   secondary: "bg-[var(--surface)] border-2 border-[var(--border)] hover:bg-[var(--bg)]",
   ghost: "text-[var(--muted)] underline hover:text-[var(--fg)]",
-  danger: "bg-[var(--danger)] border-2 border-[var(--border)]",
-  success: "bg-[var(--success)] border-2 border-[var(--border)]",
+  danger: "bg-[var(--danger)] border-2 border-[var(--border)] text-black",
+  success: "bg-[var(--success)] border-2 border-[var(--border)] text-black",
 };
 
 const sizeClasses: Record<Exclude<ButtonSize, "none">, string> = {
-  sm: "px-2 py-1 text-xs rounded-md font-semibold",
-  md: "px-3 py-2 text-sm rounded-md font-semibold",
-  lg: "px-4 py-2 text-sm rounded-lg font-bold",
-  xl: "px-6 py-3 rounded-xl font-bold",
-  icon: "h-6 w-6 flex items-center justify-center rounded font-bold text-sm",
+  sm: "px-2 py-1 text-xs rounded-[var(--radius-btn-sm)] font-semibold",
+  md: "px-3 py-2 text-sm rounded-[var(--radius-btn-md)] font-semibold",
+  lg: "px-4 py-2 text-sm rounded-[var(--radius-btn-lg)] font-bold",
+  xl: "px-6 py-3 rounded-[var(--radius-btn-xl)] font-bold",
+  icon: "h-6 w-6 flex items-center justify-center rounded-[var(--radius-btn-icon)] font-bold text-sm",
 };
 
 const shadowClasses: Record<Exclude<ButtonSize, "none">, string> = {
-  sm: "shadow-[2px_2px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
-  md: "shadow-[2px_2px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
-  lg: "shadow-[3px_3px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all",
-  xl: "shadow-[4px_4px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
-  icon: "shadow-[2px_2px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all",
+  sm: "shadow-[var(--shadow-btn-sm)_var(--shadow-btn-sm)_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[var(--shadow-btn-sm)] hover:translate-y-[var(--shadow-btn-sm)] transition-all",
+  md: "shadow-[var(--shadow-btn-md)_var(--shadow-btn-md)_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[var(--shadow-btn-md)] hover:translate-y-[var(--shadow-btn-md)] transition-all",
+  lg: "shadow-[var(--shadow-btn-lg)_var(--shadow-btn-lg)_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[var(--shadow-btn-lg)] hover:translate-y-[var(--shadow-btn-lg)] transition-all",
+  xl: "shadow-[var(--shadow-btn-xl)_var(--shadow-btn-xl)_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[var(--shadow-btn-xl)] hover:translate-y-[var(--shadow-btn-xl)] transition-all",
+  icon: "shadow-[var(--shadow-btn-icon)_var(--shadow-btn-icon)_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[var(--shadow-btn-icon)] hover:translate-y-[var(--shadow-btn-icon)] transition-all",
 };
 
 export default function Button(props: ButtonProps) {

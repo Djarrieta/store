@@ -13,11 +13,11 @@ export type BadgeProps = {
 };
 
 const variantClasses: Record<BadgeVariant, string> = {
-  primary: "bg-[var(--accent)] border-2 border-[var(--border)] text-[var(--fg)]",
+  primary: "bg-[var(--accent)] border-2 border-[var(--border)] text-[var(--accent-foreground)]",
   secondary: "bg-[var(--surface)] border-2 border-[var(--border)] text-[var(--fg)]",
-  danger: "bg-[var(--danger)] border-2 border-[var(--border)] text-[var(--fg)]",
-  success: "bg-[var(--success)] border-2 border-[var(--border)] text-[var(--fg)]",
-  warning: "bg-[var(--warning)] border-2 border-[var(--border)] text-[var(--fg)]",
+  danger: "bg-[var(--danger)] border-2 border-[var(--border)] text-black",
+  success: "bg-[var(--success)] border-2 border-[var(--border)] text-black",
+  warning: "bg-[var(--warning)] border-2 border-[var(--border)] text-black",
   muted: "bg-[var(--bg)] border-2 border-[var(--border)] text-[var(--muted)]",
 };
 

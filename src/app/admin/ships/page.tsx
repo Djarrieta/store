@@ -47,7 +47,7 @@ export default async function AdminShipsPage() {
         ) : (
           <div className="overflow-x-auto rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)]">
             <table className="w-full min-w-[500px] text-sm">
-              <thead className="border-b-2 border-[var(--border)] bg-[var(--accent)]">
+              <thead className="border-b-2 border-[var(--border)] bg-[var(--accent)] text-[var(--accent-foreground)]">
                 <tr>
                   <th className="p-3 text-left font-bold">Departamento</th>
                   <th className="p-3 text-left font-bold">Ciudad</th>

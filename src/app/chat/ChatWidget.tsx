@@ -107,7 +107,7 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
             <div
               className={`max-w-[80%] rounded-xl border-2 border-[var(--border)] px-4 py-2 text-sm shadow-[2px_2px_0_0_var(--shadow)] ${
                 msg.role === "user"
-                  ? "bg-[var(--accent)] font-medium"
+                  ? "bg-[var(--accent)] text-[var(--accent-foreground)] font-medium"
                   : "bg-[var(--surface)]"
               }`}
             >

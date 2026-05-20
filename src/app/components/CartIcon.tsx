@@ -14,7 +14,7 @@ export default function CartIcon() {
     >
       🛒
       {totalItems > 0 && (
-        <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--border)] bg-[var(--accent)] text-xs font-bold leading-none">
+        <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--border)] bg-[var(--accent)] text-[var(--accent-foreground)] text-xs font-bold leading-none">
           {totalItems > 99 ? "99+" : totalItems}
         </span>
       )}

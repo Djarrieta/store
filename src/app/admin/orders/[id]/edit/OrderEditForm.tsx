@@ -233,7 +233,7 @@ export default function OrderEditForm({ order }: Props) {
           <h2 className="font-bold text-base">Ítems del pedido</h2>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-[var(--accent)] border-b-2 border-[var(--border)]">
+          <thead className="bg-[var(--accent)] text-[var(--accent-foreground)] border-b-2 border-[var(--border)]">
             <tr>
               <th className="p-3 text-left font-bold">Producto</th>
               <th className="p-3 text-right font-bold">P. Unit.</th>

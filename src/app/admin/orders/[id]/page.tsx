@@ -136,7 +136,7 @@ export default async function OrderDetailPage({
       {/* Line items */}
       <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="border-b-2 border-[var(--border)] bg-[var(--accent)]">
+          <thead className="border-b-2 border-[var(--border)] bg-[var(--accent)] text-[var(--accent-foreground)]">
             <tr>
               <th className="p-3 text-left font-bold">Producto</th>
               <th className="p-3 text-right font-bold">Cant.</th>

@@ -34,7 +34,7 @@ export default function ProductCard({ product, items = [], priority = false }: P
   const hasStock = items.some((i) => i.stock > 0);
 
   return (
-    <article className="overflow-hidden rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] shadow-[4px_4px_0_0_var(--shadow)]">
+    <article className="overflow-hidden rounded-[var(--radius-card)] border-2 border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)_var(--shadow-card)_0_0_var(--shadow)]">
       <Link href={`/products/${product.id}`} className="block">
         {image ? (
           <Image
@@ -107,7 +107,7 @@ export default function ProductCard({ product, items = [], priority = false }: P
         ) : (
           <Link
             href={`/products/${product.id}`}
-            className="mt-1 block w-full rounded-xl border-2 border-[var(--border)] bg-[var(--accent)] px-4 py-2 text-center text-sm font-bold shadow-[3px_3px_0_0_var(--shadow)] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+            className="mt-1 block w-full rounded-[var(--radius-btn-xl)] border-2 border-[var(--border)] bg-[var(--accent)] px-4 py-2 text-center text-sm font-bold text-[var(--accent-foreground)] shadow-[var(--shadow-btn-xl)_var(--shadow-btn-xl)_0_0_var(--shadow)] transition-all hover:translate-x-[var(--shadow-btn-xl)] hover:translate-y-[var(--shadow-btn-xl)] hover:shadow-none"
           >
             Ver producto
           </Link>
