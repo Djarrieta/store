@@ -1,61 +1,7 @@
 @import "tailwindcss";
-
-:root {
-  /* ── Fallback palette (mirrors ten-lemmon) ──────────────── */
-  --bg: #f5f0e7;
-  --fg: #111111;
-  --card: #fff9ee;
-  --muted: #5c564d;
-  --accent: #ffca3a;
-  --accent-foreground: var(--border);
-  --gradient-1: #fff2c6;
-  --gradient-2: #ffd7ce;
-  /* ── Structural (NeoBrutalism ink — theme-invariant) ────── */
-  --border: #000000;
-  --shadow: #111111;
-  --surface: #ffffff;
-  --border-disabled: #888888;
-  /* ── Semantic: interactive states ──────────────────────── */
-  --danger: #fca5a5;
-  --success: #86efac;
-  --warning: #fde047;
-  /* ── Semantic: feedback messages ───────────────────────── */
-  --error-bg: #fee2e2;
-  --error-border: #dc2626;
-  --error-text: #dc2626;
-  --ok-bg: #f0fdf4;
-  --ok-border: #15803d;
-  --ok-text: #15803d;
-}
-
-/* ── ten-lemmon ──────────────────────────────────────────── */
-[data-theme="ten-lemmon"] {
-  --bg: #f5f0e7;
-  --fg: #111111;
-  --card: #fff9ee;
-  --muted: #5c564d;
-  --accent: #ffca3a;
-  --accent-foreground: var(--border);
-  --gradient-1: #fff2c6;
-  --gradient-2: #ffd7ce;
-}
-
-/* ── 3d-cases ────────────────────────────────────────────── */
-[data-theme="3d-cases"] {
-  --bg: #0d0f14;
-  --fg: #e2e8f0;
-  --card: #161b24;
-  --muted: #6b7a99;
-  --accent: #00e5ff;
-  --accent-foreground: #000000;
-  --gradient-1: #001a2e;
-  --gradient-2: #0d001a;
-  /* Override structural vars for dark theme */
-  --border: #e2e8f0;
-  --shadow: #0ab6c9;
-  --surface: #1e2435;
-  --border-disabled: #3d4a5c;
-}
+@import "./themes/default.css";
+@import "./themes/ten-lemmon.css";
+@import "./themes/3d-cases.css";
 
 @theme inline {
   --color-background: var(--bg);

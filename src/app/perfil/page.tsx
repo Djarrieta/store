@@ -1,4 +1,3 @@
-import Badge from "@/app/components/Badge";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
 import SignOutButton from "@/app/components/SignOutButton";
@@ -50,7 +49,7 @@ export default async function PerfilPage() {
         </div>
 
         {allAddresses.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--card)] p-8 text-center">
+          <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-dashed border-black bg-[var(--card)] p-8 text-center">
             <p className="text-[var(--muted)]">Aún no tienes direcciones guardadas.</p>
             <Button href="/perfil/addresses/new" variant="primary" size="lg" shadow>
               Agregar mi primera dirección
@@ -61,16 +60,16 @@ export default async function PerfilPage() {
             {allAddresses.map((addr) => (
               <div
                 key={addr.id}
-                className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-4 shadow-[3px_3px_0_0_var(--shadow)]"
+                className="rounded-xl border-2 border-black bg-[var(--card)] p-4 shadow-[3px_3px_0_0_#111]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-semibold">{addr.recipient_name}</p>
                       {addr.is_default && (
-                        <Badge variant="success" size="sm">
+                        <span className="rounded-full border-2 border-black bg-green-200 px-2 py-0.5 text-xs font-bold">
                           Principal
-                        </Badge>
+                        </span>
                       )}
                     </div>
                     <p className="mt-1 text-sm text-[var(--muted)]">
@@ -142,7 +141,7 @@ export default async function PerfilPage() {
         <h2 className="font-display text-xl font-bold">Mis pedidos</h2>
 
         {allOrders.length === 0 ? (
-          <div className="rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--card)] p-8 text-center">
+          <div className="rounded-xl border-2 border-dashed border-black bg-[var(--card)] p-8 text-center">
             <p className="text-[var(--muted)]">Aún no tienes pedidos.</p>
           </div>
         ) : (

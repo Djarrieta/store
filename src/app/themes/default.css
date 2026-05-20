@@ -1,0 +1,32 @@
+/* ── Default theme ───────────────────────────────────────── */
+/* Applied to :root as a fallback for any document without an  */
+/* explicit [data-theme] attribute. Other theme files may       */
+/* either reuse these values verbatim (see ten-lemmon.css) or   */
+/* override them (see 3d-cases.css).                            */
+:root {
+  /* ── Palette ──────────────────────────────────────────── */
+  --bg: #f5f0e7;
+  --fg: #111111;
+  --card: #fff9ee;
+  --muted: #5c564d;
+  --accent: #ffca3a;
+  --accent-foreground: var(--border);
+  --gradient-1: #fff2c6;
+  --gradient-2: #ffd7ce;
+  /* ── Structural (NeoBrutalism ink) ────────────────────── */
+  --border: #000000;
+  --shadow: #111111;
+  --surface: #ffffff;
+  --border-disabled: #888888;
+  /* ── Semantic: interactive states ─────────────────────── */
+  --danger: #fca5a5;
+  --success: #86efac;
+  --warning: #fde047;
+  /* ── Semantic: feedback messages ──────────────────────── */
+  --error-bg: #fee2e2;
+  --error-border: #dc2626;
+  --error-text: #dc2626;
+  --ok-bg: #f0fdf4;
+  --ok-border: #15803d;
+  --ok-text: #15803d;
+}

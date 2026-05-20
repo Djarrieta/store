@@ -2,7 +2,6 @@
 
 import { signOut } from "@/app/components/user-actions";
 import { CART_STORAGE_KEY, CHAT_STORAGE_KEY } from "@/lib/constants";
-
 import Button from "./Button";
 
 export default function SignOutButton() {

@@ -1,0 +1,20 @@
+/* ── 3d-cases theme ──────────────────────────────────────── */
+/* Dark, neon-accented variant. Overrides both palette and       */
+/* structural tokens away from the default ink-on-cream look.    */
+[data-theme="3d-cases"] {
+  /* ── Palette ──────────────────────────────────────────── */
+  --bg: #0d0f14;
+  --fg: #e2e8f0;
+  --card: #161b24;
+  --muted: #6b7a99;
+  --accent: #00e5ff;
+  --accent-foreground: #000000;
+  --gradient-1: #001a2e;
+  --gradient-2: #0d001a;
+  /* ── Structural overrides for dark mode ───────────────── */
+  --border: #e2e8f0;
+  --shadow: #0ab6c9;
+  --surface: #1e2435;
+  /* Keep disabled border in sync with the enabled border in this theme. */
+  --border-disabled: var(--border);
+}

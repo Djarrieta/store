@@ -1,0 +1,9 @@
+/* ── ten-lemmon theme ────────────────────────────────────── */
+/* ten-lemmon intentionally uses the default theme palette as-is.
+   All custom properties are inherited from :root (see default.css).
+   This selector exists so the theme can be explicitly opted into
+   via <html data-theme="ten-lemmon"> without falling back to the
+   bare :root cascade. No overrides on purpose. */
+[data-theme="ten-lemmon"] {
+  /* Inherits every var from :root. */
+}
