@@ -11,7 +11,8 @@
     "lint:fix": "eslint --fix",
     "typecheck": "tsc --noEmit",
     "db:link": "npx supabase login && npx supabase link",
-    "db:reset": "node supabase/reset.js"
+    "db:reset": "node supabase/reset.js && node supabase/remove-orphans.js",
+    "db:remove-orphans": "node supabase/remove-orphans.js"
   },
   "dependencies": {
     "@langchain/openai": "^1.4.5",
