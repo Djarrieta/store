@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Blank t-shirt mockup for seed data.
+  Used as both product gallery image and print template mockup.
+  Plain shape, neutral colours — designed to sit behind a customer image.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
+  <defs>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#ececec"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="600" height="800" fill="#f6f5f0"/>
+
+  <!-- T-shirt silhouette: body + sleeves + neckline -->
+  <path d="
+      M 180 120
+      L 110 170
+      L 70  280
+      L 150 330
+      L 170 270
+      L 170 720
+      L 430 720
+      L 430 270
+      L 450 330
+      L 530 280
+      L 490 170
+      L 420 120
+      C 400 170 360 195 300 195
+      C 240 195 200 170 180 120
+      Z"
+    fill="url(#shade)" stroke="#333" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Neckline rib -->
+  <path d="M 220 130 C 250 175 350 175 380 130"
+        fill="none" stroke="#666" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Subtle fabric stitches at sleeve hems -->
+  <path d="M 95 265 L 150 295" stroke="#bbb" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+  <path d="M 505 265 L 450 295" stroke="#bbb" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+
+  <!-- Bottom hem -->
+  <line x1="170" y1="705" x2="430" y2="705" stroke="#bbb" stroke-width="1.5" stroke-dasharray="4 4"/>
+</svg>

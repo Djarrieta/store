@@ -4,25 +4,43 @@ import { useMemo, useState } from "react";
 
 import Button from "@/app/components/Button";
 import { FormActions, FormCard } from "@/app/components/FormCard";
-import Input, { Textarea } from "@/app/components/Input";
+import Input, { Select, Textarea } from "@/app/components/Input";
 import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
 import { uploadImage } from "@/lib/supabase/storage";
-import type { Product, ProductImage } from "@/types";
+import type { CustomizationKind, Product, ProductImage } from "@/types";
 
 interface ProductFormProps {
   action: (formData: FormData) => Promise<void>;
   defaultValues?: Partial<Product>;
+  /** Whether this product already has variations (items). Controls the kind-change confirm. */
+  hasItems?: boolean;
 }
+
+const KIND_LABELS: Record<CustomizationKind, string> = {
+  phone_case: "Funda de teléfono",
+  tshirt: "Camiseta",
+  mug: "Mug",
+};
 
 export default function ProductForm({
   action,
   defaultValues,
+  hasItems = false,
 }: ProductFormProps) {
   const [imagesText, setImagesText] = useState(
     (defaultValues?.images ?? []).map((img: ProductImage) => img.url).join(", "),
   );
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [customizable, setCustomizable] = useState<boolean>(
+    defaultValues?.customizable ?? false,
+  );
+  const [kind, setKind] = useState<CustomizationKind | "">(
+    defaultValues?.customization_kind ?? "",
+  );
+
+  const originalKind = defaultValues?.customization_kind ?? null;
+  const kindChanged = originalKind !== null && kind !== "" && kind !== originalKind;
 
   const imageUrls = useMemo(
     () =>
@@ -58,8 +76,18 @@ export default function ProductForm({
     }
   }
 
+  async function handleAction(formData: FormData) {
+    if (kindChanged && hasItems) {
+      const ok = window.confirm(
+        "Cambiar el tipo de personalización borrará todas las variaciones existentes y sus plantillas. ¿Continuar?",
+      );
+      if (!ok) return;
+    }
+    await action(formData);
+  }
+
   return (
-    <FormCard action={action}>
+    <FormCard action={handleAction}>
       <Input
         label="Título"
         name="title"
@@ -163,6 +191,58 @@ export default function ProductForm({
         />
         <span className="text-sm font-semibold">Ocultar producto (no visible al público)</span>
       </label>
+
+      <fieldset className="space-y-3 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[2px_2px_0_0_var(--shadow)]">
+        <legend className="px-1 text-sm font-bold uppercase tracking-wide">
+          Personalización
+        </legend>
+
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            name="customizable"
+            checked={customizable}
+            onChange={(e) => setCustomizable(e.target.checked)}
+            className="h-4 w-4 accent-[var(--accent)]"
+          />
+          <span className="text-sm font-semibold">
+            Personalizable (imprime una imagen del cliente)
+          </span>
+        </label>
+
+        <Select
+          label="Tipo de personalización"
+          name="customization_kind"
+          value={kind}
+          onChange={(e) => setKind(e.target.value as CustomizationKind | "")}
+          required={customizable}
+          disabled={!customizable && !originalKind}
+        >
+          <option value="">— Selecciona —</option>
+          {(Object.keys(KIND_LABELS) as CustomizationKind[]).map((k) => (
+            <option key={k} value={k}>
+              {KIND_LABELS[k]}
+            </option>
+          ))}
+        </Select>
+
+        {!customizable && originalKind && (
+          <p className="text-xs text-[var(--muted)]">
+            El tipo se conserva mientras la personalización esté desactivada. Vuelve a activarla
+            para mostrarla al público.
+          </p>
+        )}
+        {kindChanged && hasItems && (
+          <p className="text-xs font-semibold text-[var(--error-text)]">
+            Cambiar el tipo borrará las variaciones existentes y sus plantillas.
+          </p>
+        )}
+        {customizable && !kind && (
+          <p className="text-xs text-[var(--muted)]">
+            Selecciona un tipo para poder guardar.
+          </p>
+        )}
+      </fieldset>
 
       <FormActions>
         <Button variant="primary" size="lg" type="submit" disabled={uploading}>

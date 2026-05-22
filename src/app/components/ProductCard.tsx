@@ -94,11 +94,13 @@ export default function ProductCard({ product, items = [], priority = false }: P
         ) : hasVariants ? (
           <VariantSelector
             items={items}
-            product={{ title: product.title, price: payablePrice, amountInCents, image }}
+            product={{ id: product.id, title: product.title, price: payablePrice, amountInCents, image }}
           />
         ) : singleItem ? (
           <AddToCartButton
             id={singleItem.id}
+            productId={product.id}
+            itemId={singleItem.id}
             title={product.title}
             price={payablePrice}
             amountInCents={amountInCents}

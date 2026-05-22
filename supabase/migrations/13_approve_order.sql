@@ -27,12 +27,12 @@ BEGIN
   LOOP
     UPDATE public.items
     SET stock = stock - (v_item->>'qty')::int
-    WHERE product_id = (v_item->>'product_id')::uuid
+    WHERE id = (v_item->>'item_id')::uuid
       AND stock >= (v_item->>'qty')::int;
 
     GET DIAGNOSTICS v_rows = ROW_COUNT;
     IF v_rows = 0 THEN
-      RAISE EXCEPTION 'Insufficient stock for product %', v_item->>'product_id';
+      RAISE EXCEPTION 'Insufficient stock for item %', v_item->>'item_id';
     END IF;
   END LOOP;
 

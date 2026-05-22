@@ -23,14 +23,30 @@ export default async function EditProductPage({
 
   if (!product) notFound();
 
+  const { count: itemsCount } = await supabase
+    .from("items")
+    .select("id", { count: "exact", head: true })
+    .eq("product_id", id);
+
   const updateWithId = updateProduct.bind(null, id);
 
   return (
     <section className="space-y-6">
-      <h1 className="font-display text-3xl font-bold">Editar producto</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-display text-3xl font-bold">Editar producto</h1>
+        {product.customizable && product.customization_kind && (
+          <a
+            href={`/admin/products/${id}/preview-editor`}
+            className="rounded-md border-2 border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm font-semibold shadow-[2px_2px_0_0_var(--shadow)] hover:bg-[var(--bg)]"
+          >
+            Probar editor (sandbox)
+          </a>
+        )}
+      </div>
       <ProductForm
         action={updateWithId}
         defaultValues={product}
+        hasItems={(itemsCount ?? 0) > 0}
       />
       <ProductItemsSection productId={id} />
     </section>

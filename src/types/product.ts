@@ -1,4 +1,5 @@
 import type { CategoryWithParent } from "./category";
+import type { CustomizationKind } from "./print-template";
 
 export interface ProductImage {
   url: string;
@@ -15,6 +16,8 @@ export interface Product {
   category_id: string | null;
   tags: string[];
   ocultar: boolean;
+  customizable: boolean;
+  customization_kind: CustomizationKind | null;
   created_at: string;
   updated_at: string;
 }

@@ -1,9 +1,13 @@
+import type { OrderCustomizationSnapshot } from "./customization";
+
 export interface OrderItem {
   product_id: string;
+  item_id: string;
   title: string;
   qty: number;
   unit_price: number;
   sku: string | null;
+  customization?: OrderCustomizationSnapshot;
 }
 
 export type OrderStatus = "created" | "pending_approval" | "approved" | "rejected" | "fulfilled" | "cancelled";

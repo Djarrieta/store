@@ -40,6 +40,16 @@ loadEnvLocal();
 runDir("supabase/migrations");
 runDir("supabase/seed");
 
+// Upload binary seed assets (mockups, gallery images) to Supabase Storage.
+// Must run BEFORE seed-customizable.js so the URLs the inserts reference exist.
+console.log("→ Running supabase/seed-storage.js...");
+execSync("node supabase/seed-storage.js", { stdio: "inherit" });
+
+// Insert the customizable demo product (Camiseta Personalizable) + variations + templates.
+// Uses PostgREST + service role; deterministic UUIDs make it idempotent.
+console.log("→ Running supabase/seed-customizable.js...");
+execSync("node supabase/seed-customizable.js", { stdio: "inherit" });
+
 // Grant admin to users listed in ADMIN_USER_IDS (comma-separated UUIDs).
 // Sets both profiles.is_admin (UI visibility) and admin_users table (RLS).
 const adminUserIds = (process.env.ADMIN_USER_IDS ?? "")

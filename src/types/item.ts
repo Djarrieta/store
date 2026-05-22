@@ -1,3 +1,5 @@
+import type { PrintTemplate } from "./print-template";
+
 export interface Item {
   id: string;
   product_id: string;
@@ -20,6 +22,7 @@ export interface ItemVariantCategory {
 
 export interface ItemWithCategories extends Item {
   item_categories: Array<{ category: ItemVariantCategory }>;
+  print_template?: PrintTemplate | null;
 }
 
 export type CreateItemInput = Omit<Item, "id" | "created_at" | "updated_at">;

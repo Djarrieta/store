@@ -24,6 +24,10 @@ export type CartItem = {
   amountInCents: number;
   quantity: number;
   image?: string;
+  /** Product (catalog row) the variation belongs to. */
+  productId: string;
+  /** Variation (items row) actually being purchased — used for stock deduction. */
+  itemId: string;
 };
 
 export type ShippingDisplay = "none" | "loading" | "free" | "price" | "unknown_city";

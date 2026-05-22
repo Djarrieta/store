@@ -7,9 +7,16 @@ import {
   deleteItemFromProduct,
   updateItemFromProduct,
 } from "@/app/admin/items/actions";
+import {
+  deletePrintTemplate,
+  upsertPrintTemplate,
+} from "@/app/admin/products/actions";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
 import Input, { Select } from "@/app/components/Input";
+import type { CustomizationKind, PrintTemplate } from "@/types";
+
+import PrintTemplateFields from "./PrintTemplateFields";
 
 interface CategoryValue {
   id: string;
@@ -26,12 +33,15 @@ interface ItemRow {
   id: string;
   stock: number;
   item_categories: Array<{ category: { id: string; name: string } | null }>;
+  print_template: PrintTemplate | null;
 }
 
 interface Props {
   productId: string;
   items: ItemRow[];
   dimensions: Dimension[];
+  customizable: boolean;
+  customizationKind: CustomizationKind | null;
 }
 
 function VariantSelects({
@@ -66,11 +76,18 @@ function VariantSelects({
   );
 }
 
-export default function ProductItemsAccordion({ productId, items, dimensions }: Props) {
+export default function ProductItemsAccordion({
+  productId,
+  items,
+  dimensions,
+  customizable,
+  customizationKind,
+}: Props) {
   const [openItemId, setOpenItemId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
   const createAction = createItemForProduct.bind(null, productId);
+  const showTemplateBlock = customizable && !!customizationKind;
 
   return (
     <div className="space-y-2">
@@ -90,6 +107,9 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
         );
         const updateAction = updateItemFromProduct.bind(null, productId, item.id);
         const deleteAction = deleteItemFromProduct.bind(null, productId, item.id);
+        const upsertTemplateAction = upsertPrintTemplate.bind(null, productId, item.id);
+        const deleteTemplateAction = deletePrintTemplate.bind(null, productId, item.id);
+        const templateMissing = showTemplateBlock && !item.print_template;
 
         return (
           <div key={item.id} className="overflow-hidden rounded-xl border-2 border-[var(--border)] shadow-[2px_2px_0_0_var(--shadow)]">
@@ -98,7 +118,14 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
               onClick={() => setOpenItemId(isOpen ? null : item.id)}
               className="flex w-full items-center justify-between bg-[var(--card)] px-4 py-3 text-left transition-colors hover:bg-[var(--bg)]"
             >
-              <span className="text-sm font-semibold">{label}</span>
+              <span className="flex items-center gap-2 text-sm font-semibold">
+                {label}
+                {templateMissing && (
+                  <span className="rounded-full border-2 border-[var(--error-text)] bg-[var(--error-bg,transparent)] px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--error-text)]">
+                    Plantilla faltante — variación oculta
+                  </span>
+                )}
+              </span>
               <span className="flex items-center gap-3 text-xs text-[var(--muted)]">
                 Stock: <strong className="text-[var(--fg)]">{item.stock}</strong>
                 <span className="text-base leading-none">{isOpen ? "▲" : "▼"}</span>
@@ -132,6 +159,30 @@ export default function ProductItemsAccordion({ productId, items, dimensions }: 
                   Eliminar variante
                 </Button>
                 </Form>
+
+                {showTemplateBlock && customizationKind && (
+                  <div className="space-y-3 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-4 shadow-[2px_2px_0_0_var(--shadow)]">
+                    <h3 className="text-sm font-bold uppercase tracking-wide">
+                      Plantilla de impresión
+                    </h3>
+                    <Form action={upsertTemplateAction} className="space-y-3">
+                      <PrintTemplateFields
+                        kind={customizationKind}
+                        defaultValue={item.print_template}
+                      />
+                      <Button variant="primary" size="md" shadow type="submit">
+                        {item.print_template ? "Actualizar plantilla" : "Guardar plantilla"}
+                      </Button>
+                    </Form>
+                    {item.print_template && (
+                      <Form action={deleteTemplateAction}>
+                        <Button variant="secondary" size="md" shadow type="submit" confirm>
+                          Eliminar plantilla
+                        </Button>
+                      </Form>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

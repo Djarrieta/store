@@ -106,6 +106,7 @@ Key points:
 - **PK is `item_id`** — strict 1:1 with the variation. Stock lives on `items.stock`.
 - `mockup_path` / `mask_path` store **object paths**, not URLs.
 - Per-kind required keys in `attributes` are enforced in the Server Action (not the DB) so the JSON stays flexible.
+- **Silhouette clipping (editor + render).** v2 will add a `clip_path text` column holding an SVG `d` string (in normalized 0..1 or template-mm coordinates) used by both the Konva editor (`clipFunc`) and the server renderer to keep the user image inside the product body. v1 sandbox hardcodes the t-shirt silhouette derived from the seed mockup.
 - **Kind-match trigger** (cross-table):
   ```sql
   CREATE FUNCTION public.print_templates_kind_match() RETURNS trigger AS $$
@@ -298,6 +299,8 @@ Product detail page (customizable product)
         ├─ Background: mockup (signed URL) scaled to canvas
         ├─ User image: drag, resize (uniform scale), arbitrary rotation
         │              (pivot = image top-left → keep editor + renderer in lockstep)
+        │              Clipped to the product silhouette via Konva <Group clipFunc>
+        │              so the image never spills outside the shirt/case/mug body.
         ├─ Overlay: dashed safe-area rectangle
         ├─ Controls: zoom slider, rotación, Reiniciar, "Ajustar a la plantilla" (CONTAIN)
         ├─ Live warning: DPI bajo (formula in §3.2)
@@ -423,6 +426,74 @@ Admin → "Nuevo producto" → /admin/products/new
 - **Disabling personalizable:** preserves `customization_kind` (greyed), preserves all items/templates. Re-enabling restores intact.
 - **Changing tipo:** items have kind-specific templates (via trigger); the only safe path is delete-and-recreate. UI shows one-click confirm; server action does it transactionally.
 - **Historical orders:** never touched. `OrderItem.customization` snapshot keeps them rendering even if the underlying item/template is later deleted.
+
+### 4.1 Per-item plantilla subsection — concrete contract
+
+Implementation contract for step 4 (todo: *Per-item plantilla subsection + actions*). Soft validation in v1 — admin can save a `customizable=true` product with templateless items; those items are just hidden on the storefront. (Plan §4 "Validation before publish" downgraded to a UI hint to keep step 4 self-contained.)
+
+#### `PrintTemplateFields.tsx` (client component)
+
+Props: `{ kind: CustomizationKind, defaultValue: PrintTemplate | null }`. Renders:
+
+| Field | Input | Required |
+|---|---|---|
+| `label` | text | yes |
+| Attributes (kind-aware) | see below | yes |
+| `width_mm` / `height_mm` | number | yes |
+| `print_dpi` | number, default `300` | yes |
+| Mockup (`mockup_path`) | file → uploads to `print-templates` bucket, hidden input holds object path | optional |
+| Mask (`mask_path`) | file → same | optional |
+| `safe_area_{x,y,width,height}` | numbers 0..1 | optional (all four together) |
+
+Kind-aware attributes:
+
+- `phone_case` → `attr_brand` (text), `attr_model` (text) — both required.
+- `tshirt` → `attr_placement` (select: `front` / `back`) — required.
+- `mug` → `attr_wrap` (select: `full` / `partial`) — required.
+
+Upload pattern mirrors `ProductForm`: client `uploadImage(file, 'print-templates')` returns a public URL, but we store the **object path** (per §2.6). To get the path we add a sibling client helper `uploadStorageObject(file, bucket): Promise<{ path, publicUrl }>` in `src/lib/supabase/storage.ts` and use that here.
+
+#### Server actions (add to `src/app/admin/products/actions.ts`)
+
+```ts
+export async function upsertPrintTemplate(
+  productId: string,
+  itemId: string,
+  formData: FormData,
+): Promise<void>
+export async function deletePrintTemplate(
+  productId: string,
+  itemId: string,
+): Promise<void>
+```
+
+Behavior:
+
+- `requireAdmin()`.
+- `upsertPrintTemplate` reads `products.customization_kind` for `productId` (single source of truth — never trust the client). Throws if null.
+- Builds `attributes` jsonb from per-kind form keys; validates required keys.
+- Parses `safe_area` into `{x,y,width,height}` only if all four are present and finite.
+- Upserts into `print_templates` with `item_id` as conflict target. The DB kind-match trigger from §2.2 provides the safety net.
+- `deletePrintTemplate` deletes the row by `item_id`.
+- Both `revalidatePath('/admin/products/<id>/edit')` and `revalidatePath('/products/<id>')`.
+
+#### `ProductItemsSection.tsx` (server component) extensions
+
+- Also `select` `customizable, customization_kind` from `products` (already on the product, but pass explicitly to the accordion).
+- Join `print_templates` per item: extend the items query to `items(*, print_template:print_templates(*))`.
+- Pass `customizable`, `customizationKind`, and the joined `printTemplate` per item to `<ProductItemsAccordion>`.
+
+#### `ProductItemsAccordion.tsx` changes
+
+- New props: `customizable: boolean`, `customizationKind: CustomizationKind | null`, plus each item carries an optional `printTemplate`.
+- Header pill: if `customizable && customizationKind && !item.printTemplate` → render a "Plantilla faltante — variación oculta" red pill.
+- Inside the expanded body, when `customizable && customizationKind`, render a new bordered subsection titled **"Plantilla de impresión"** containing `<PrintTemplateFields>` inside a `Form` whose action is `upsertPrintTemplate.bind(null, productId, item.id)`. Below it, a separate `Form` with `deletePrintTemplate` and `confirm`, only when `item.printTemplate` exists.
+
+#### Edit page wiring
+
+`/admin/products/[id]/edit` already passes `hasItems`. Add `customizationKind` to the data it forwards to the section. No new fetches beyond what `ProductItemsSection` already does.
+
+---
 
 ### Storefront list pages (decision #19)
 
@@ -555,7 +626,7 @@ For each `OrderItem.customization`:
 2. **Order create path**: add `item_id` to every cart line + every `OrderItem`. Non-customizable orders must work after this.
 3. **Product form**: personalizable toggle + tipo select with one-click confirm on tipo change.
 4. **Per-item plantilla subsection** in `<ProductItemsAccordion>` + CRUD actions; storage helpers; per-kind `attributes` validation.
-5. **Konva editor sandbox** at `/admin/products/[id]/preview-editor` — validate UX with phone_case first, then tshirt + mug.
+5. **Konva editor sandbox** at `/admin/products/[id]/preview-editor` — validate UX with phone_case first, then tshirt + mug. Includes silhouette clipping (hardcoded path for the seed mockup); the per-template `clip_path` field is deferred to v2.
 6. **Customer flow** on product detail page (`<CustomizationFlow />`); client-side preview; IndexedDB for guests; `createCustomization` for logged-in.
 7. **Cart integration**: extended `CartItem` shape + new line-id rule + thumbnail + "Editar diseño". Re-edit via `?edit=cust:<id>` / `?edit=local:<id>`.
 8. **Login persistence**: `persistGuestCustomizations` runs from login callback; swaps cart line keys.

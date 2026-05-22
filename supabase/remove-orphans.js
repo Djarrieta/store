@@ -81,10 +81,10 @@ async function collectReferencedPaths() {
   return referenced;
 }
 
-async function listAllObjects() {
+async function listPrefix(prefix) {
   // Storage REST: POST /storage/v1/object/list/{bucket}
-  // Files live at the bucket root (matches our uploadImage helper).
-  const all = [];
+  // Returns only direct children of `prefix` (files + folder placeholders).
+  const items = [];
   const pageSize = 1000;
   let offset = 0;
   while (true) {
@@ -94,7 +94,7 @@ async function listAllObjects() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prefix: "",
+          prefix,
           limit: pageSize,
           offset,
           sortBy: { column: "name", order: "asc" },
@@ -102,13 +102,31 @@ async function listAllObjects() {
       },
     );
     if (!Array.isArray(page) || page.length === 0) break;
-    for (const obj of page) {
-      // Folder placeholders have id === null
-      if (obj.id === null || obj.id === undefined) continue;
-      all.push(obj.name);
-    }
+    items.push(...page);
     if (page.length < pageSize) break;
     offset += pageSize;
+  }
+  return items;
+}
+
+async function listAllObjects() {
+  // Recursively walk the bucket so files under subfolders (e.g. seed/...)
+  // are visible and can be matched against referenced URLs.
+  const all = [];
+  const queue = [""];
+  while (queue.length > 0) {
+    const prefix = queue.shift();
+    const items = await listPrefix(prefix);
+    for (const obj of items) {
+      if (!obj || typeof obj.name !== "string") continue;
+      const fullPath = prefix ? `${prefix}/${obj.name}` : obj.name;
+      // Folder placeholders have id === null → recurse into them.
+      if (obj.id === null || obj.id === undefined) {
+        queue.push(fullPath);
+        continue;
+      }
+      all.push(fullPath);
+    }
   }
   return all;
 }

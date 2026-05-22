@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Category } from "@/types";
+import type { Category, CustomizationKind, PrintTemplate } from "@/types";
 
 import ProductItemsAccordion from "./ProductItemsAccordion";
 
@@ -7,15 +7,27 @@ interface ItemRow {
   id: string;
   stock: number;
   item_categories: Array<{ category: { id: string; name: string } | null }>;
+  print_template: PrintTemplate | null;
 }
 
 export default async function ProductItemsSection({ productId }: { productId: string }) {
   const supabase = await createClient();
 
-  const [{ data: rawItems }, { data: rawCategories }] = await Promise.all([
+  const [
+    { data: product },
+    { data: rawItems },
+    { data: rawCategories },
+  ] = await Promise.all([
+    supabase
+      .from("products")
+      .select("customizable, customization_kind")
+      .eq("id", productId)
+      .single(),
     supabase
       .from("items")
-      .select("id, stock, item_categories(category:category_id(id, name))")
+      .select(
+        "id, stock, item_categories(category:category_id(id, name)), print_template:print_templates(*)",
+      )
       .eq("product_id", productId)
       .order("created_at"),
     supabase
@@ -28,6 +40,8 @@ export default async function ProductItemsSection({ productId }: { productId: st
 
   const items = rawItems as ItemRow[] | null;
   const variantCategories = rawCategories as (Category & { parent: Pick<Category, "id" | "name"> | null })[] | null;
+  const customizable = Boolean(product?.customizable);
+  const customizationKind = (product?.customization_kind ?? null) as CustomizationKind | null;
 
   // Group variant values by parent dimension
   const dimensionMap = new Map<string, { id: string; name: string; values: { id: string; name: string }[] }>();
@@ -47,6 +61,8 @@ export default async function ProductItemsSection({ productId }: { productId: st
         productId={productId}
         items={items ?? []}
         dimensions={dimensions}
+        customizable={customizable}
+        customizationKind={customizationKind}
       />
     </section>
   );

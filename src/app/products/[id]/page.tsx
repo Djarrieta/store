@@ -107,11 +107,13 @@ export default async function ProductDetailPage({
         ) : hasVariants ? (
           <VariantSelector
             items={itemList}
-            product={{ title: product.title, price: payablePrice, amountInCents, image: product.images?.[0]?.url }}
+            product={{ id: product.id, title: product.title, price: payablePrice, amountInCents, image: product.images?.[0]?.url }}
           />
         ) : (
           <AddToCartButton
             id={singleItem!.id}
+            productId={product.id}
+            itemId={singleItem!.id}
             title={product.title}
             price={payablePrice}
             amountInCents={amountInCents}

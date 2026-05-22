@@ -20,6 +20,7 @@ interface ItemVariant {
 }
 
 interface ProductInfo {
+  id: string;
   title: string;
   price: number;
   amountInCents: number;
@@ -77,6 +78,8 @@ export default function VariantSelector({
     if (!resolvedItem || !inStock) return;
     addItem({
       id: resolvedItem.id,
+      productId: product.id,
+      itemId: resolvedItem.id,
       title: product.title,
       price: product.price,
       amountInCents: product.amountInCents,

@@ -30,7 +30,8 @@ export async function createOrderAndCheckout(
   const amountInCents = itemsAmountInCents + Math.round(shippingCost * 100);
 
   const orderItems = cartItems.map((item) => ({
-    product_id: item.id,
+    product_id: item.productId,
+    item_id: item.itemId,
     title: item.title,
     qty: item.quantity,
     unit_price: item.price,
