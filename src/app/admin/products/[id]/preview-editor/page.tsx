@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 
 import Breadcrumb from "@/app/components/Breadcrumb";
+import type { EditorVariant } from "@/app/components/customization/types";
 import { createClient } from "@/lib/supabase/server";
 import type { CustomizationKind, PrintTemplate, Product } from "@/types";
 
-import PreviewEditor, { type EditorVariant } from "./PreviewEditor";
+import PreviewEditorClient from "./PreviewEditorClient";
 
 interface ItemRow {
   id: string;
@@ -91,7 +92,7 @@ export default async function PreviewEditorPage({
           de impresión antes de previsualizar.
         </div>
       ) : (
-        <PreviewEditor kind={kind} variants={variants} />
+        <PreviewEditorClient kind={kind} variants={variants} />
       )}
     </section>
   );

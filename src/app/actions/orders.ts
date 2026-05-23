@@ -36,6 +36,7 @@ export async function createOrderAndCheckout(
     qty: item.quantity,
     unit_price: item.price,
     sku: null,
+    ...(item.customization ? { customization: item.customization } : {}),
   }));
 
   const userName =

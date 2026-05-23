@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -89,56 +90,68 @@ export default function CartDrawer() {
           <>
             {/* Items list */}
             <ul className="flex-1 divide-y-2 divide-black overflow-y-auto">
-              {items.map((item) => (
-                <li key={item.id} className="flex gap-3 p-4">
-                  {item.image && (
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      width={64}
-                      height={64}
-                      unoptimized
-                      className="h-16 w-16 shrink-0 rounded-lg border-2 border-[var(--border)] object-cover"
-                    />
-                  )}
-                  <div className="flex flex-1 flex-col gap-1">
-                    <p className="line-clamp-2 text-sm font-bold leading-tight">
-                      {item.title}
-                    </p>
-                    <p className="text-xs text-[var(--muted)]">
-                      {formatCurrency(item.price)}
-                    </p>
-                    <div className="mt-auto flex items-center gap-2">
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => setQuantity(item.id, item.quantity - 1)}
-                        aria-label="Decrease quantity"
-                      >
-                        −
-                      </Button>
-                      <span className="min-w-[1.5rem] text-center text-sm font-semibold">
-                        {item.quantity}
-                      </span>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => setQuantity(item.id, item.quantity + 1)}
-                        aria-label="Increase quantity"
-                      >
-                        +
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => removeItem(item.id)}
-                        className="ml-auto text-xs"
-                      >
-                        Remove
-                      </Button>
+              {items.map((item) => {
+                const thumb = item.customizationPreviewDataUrl ?? item.image;
+                return (
+                  <li key={item.id} className="flex gap-3 p-4">
+                    {thumb && (
+                      <Image
+                        src={thumb}
+                        alt={item.title}
+                        width={64}
+                        height={64}
+                        unoptimized
+                        className="h-16 w-16 shrink-0 rounded-lg border-2 border-[var(--border)] object-cover"
+                      />
+                    )}
+                    <div className="flex flex-1 flex-col gap-1">
+                      <p className="line-clamp-2 text-sm font-bold leading-tight">
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-[var(--muted)]">
+                        {formatCurrency(item.price)}
+                      </p>
+                      {item.customizationLocalKey && (
+                        <Link
+                          href={`/products/${item.productId}?edit=local:${item.customizationLocalKey}`}
+                          onClick={closeCart}
+                          className="text-xs font-semibold underline underline-offset-2 text-[var(--accent)] hover:opacity-80"
+                        >
+                          Editar diseño
+                        </Link>
+                      )}
+                      <div className="mt-auto flex items-center gap-2">
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={() => setQuantity(item.id, item.quantity - 1)}
+                          aria-label="Decrease quantity"
+                        >
+                          −
+                        </Button>
+                        <span className="min-w-[1.5rem] text-center text-sm font-semibold">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={() => setQuantity(item.id, item.quantity + 1)}
+                          aria-label="Increase quantity"
+                        >
+                          +
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => removeItem(item.id)}
+                          className="ml-auto text-xs"
+                        >
+                          Remove
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
 
             {/* Free-shipping progress */}

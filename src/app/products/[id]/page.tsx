@@ -1,13 +1,17 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import AddToCartButton from "@/app/components/AddToCartButton";
 import Badge from "@/app/components/Badge";
 import Breadcrumb from "@/app/components/Breadcrumb";
+import type { EditorVariant } from "@/app/components/customization/types";
 import ProductImageCarousel from "@/app/components/ProductImageCarousel";
 import VariantSelector from "@/app/components/VariantSelector";
 import { formatCurrency } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
-import type { ItemWithCategories, ProductWithCategory } from "@/types";
+import type { ItemWithCategories, PrintTemplate, ProductWithCategory } from "@/types";
+
+import CustomizationFlow from "./CustomizationFlow";
 
 export default async function ProductDetailPage({
   params,
@@ -26,7 +30,9 @@ export default async function ProductDetailPage({
       .single<ProductWithCategory>(),
     supabase
       .from("items")
-      .select("id, stock, item_categories(category:category_id(id, name, parent_id, parent:parent_id(id, name)))")
+      .select(
+        "id, stock, item_categories(category:category_id(id, name, parent_id, parent:parent_id(id, name))), print_template:print_templates(*)",
+      )
       .eq("product_id", id),
   ]);
   const items = rawItems as ItemWithCategories[] | null;
@@ -51,6 +57,38 @@ export default async function ProductDetailPage({
   const hasVariants = itemList.some((i) => i.item_categories.length > 0);
   const singleItem = !hasVariants && itemList.length === 1 ? itemList[0] : null;
   const isPurchasable = itemList.some((i) => i.stock > 0);
+
+  const isCustomizable =
+    product.customizable && product.customization_kind !== null;
+  const customizationVariants: EditorVariant[] = isCustomizable
+    ? itemList
+        .filter((item): item is ItemWithCategories & { print_template: PrintTemplate } => {
+          return !!item.print_template && item.stock > 0;
+        })
+        .map((item) => {
+          const tpl = item.print_template;
+          const label =
+            item.item_categories
+              .map((ic) => ic.category?.name)
+              .filter(Boolean)
+              .join(" / ") || tpl.label;
+          return {
+            itemId: item.id,
+            label,
+            template: tpl,
+            mockupUrl: tpl.mockup_path
+              ? supabase.storage
+                  .from("print-templates")
+                  .getPublicUrl(tpl.mockup_path).data.publicUrl
+              : null,
+            maskUrl: tpl.mask_path
+              ? supabase.storage
+                  .from("print-templates")
+                  .getPublicUrl(tpl.mask_path).data.publicUrl
+              : null,
+          };
+        })
+    : [];
 
   return (
     <article className="space-y-4">
@@ -104,6 +142,18 @@ export default async function ProductDetailPage({
 
         {!isPurchasable ? (
           <p className="mt-4 text-sm font-semibold text-[var(--error-text)]">Sin stock</p>
+        ) : isCustomizable ? (
+          <Suspense fallback={null}>
+            <CustomizationFlow
+              productId={product.id}
+              productTitle={product.title}
+              productImage={product.images?.[0]?.url}
+              price={payablePrice}
+              amountInCents={amountInCents}
+              kind={product.customization_kind!}
+              variants={customizationVariants}
+            />
+          </Suspense>
         ) : hasVariants ? (
           <VariantSelector
             items={itemList}

@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: [
     "@langchain/openai",
     "langchain",
+    "@napi-rs/canvas",
   ],
   images: {
     remotePatterns: [

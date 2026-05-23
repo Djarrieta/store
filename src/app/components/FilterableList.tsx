@@ -13,6 +13,7 @@ interface FilterableListProps {
   page: number;
   total: number;
   pageSize: number;
+  customizable?: boolean;
   children: React.ReactNode;
 }
 
@@ -40,9 +41,10 @@ export default function FilterableList({
   page,
   total,
   pageSize,
+  customizable = false,
   children,
 }: FilterableListProps) {
-  const hasFilters = Boolean(q || tags);
+  const hasFilters = Boolean(q || tags || customizable);
   const [open, setOpen] = useState(hasFilters);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -53,6 +55,7 @@ export default function FilterableList({
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (tags) params.set("tags", tags);
+    if (customizable) params.set("customizable", "1");
     params.set("page", String(targetPage));
     return `?${params.toString()}`;
   };
@@ -75,7 +78,7 @@ export default function FilterableList({
             <span>Filtros</span>
             {hasFilters && (
               <Badge variant="primary" size="sm">
-                {[q && "búsqueda", tags && "etiquetas"].filter(Boolean).join(" · ")}
+                {[q && "búsqueda", tags && "etiquetas", customizable && "personalizables"].filter(Boolean).join(" · ")}
               </Badge>
             )}
           </span>
@@ -112,6 +115,16 @@ export default function FilterableList({
               defaultValue={tags ?? ""}
               placeholder="tag1,tag2"
             />
+            <label className="flex items-center gap-2 text-sm font-semibold sm:col-span-3">
+              <input
+                type="checkbox"
+                name="customizable"
+                value="1"
+                defaultChecked={customizable}
+                className="h-4 w-4 rounded border-2 border-[var(--border)] accent-[var(--accent)]"
+              />
+              Solo personalizables
+            </label>
             <div className="flex gap-2 sm:col-span-3">
               <Button variant="primary" size="md" type="submit" className="flex-1">
                 Aplicar filtros

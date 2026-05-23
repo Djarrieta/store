@@ -6,6 +6,10 @@ import { useState } from "react";
 import { cancelOrder,createOrderAndCheckout, markOrderPaid } from "@/app/actions/orders";
 import Button from "@/app/components/Button";
 import type { CartItem } from "@/lib/cart";
+import {
+  cleanupPersistedLocals,
+  persistPendingCustomizations,
+} from "@/lib/customizations/persist";
 import type { Address } from "@/types";
 
 interface Props {
@@ -44,8 +48,23 @@ export default function BuyNowButton({
         phone: shippingAddress.phone,
       };
 
+      // Upload customized lines to Supabase and swap the local key for the
+      // server-issued snapshot. Errors here surface as alerts.
+      let persistedItems: CartItem[];
+      try {
+        persistedItems = await persistPendingCustomizations(items);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "No se pudo subir la personalización.";
+        alert(msg);
+        setLoading(false);
+        return;
+      }
+
       const { orderId, reference, integrityHash, amountInCents } =
-        await createOrderAndCheckout(items, snapshot, shippingCost);
+        await createOrderAndCheckout(persistedItems, snapshot, shippingCost);
+
+      // Order successfully created — drop local copies of customized images.
+      await cleanupPersistedLocals(persistedItems);
 
       onOrderCreated?.();
 

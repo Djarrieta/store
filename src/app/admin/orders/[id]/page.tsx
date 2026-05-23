@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import Button from "@/app/components/Button";
@@ -7,7 +8,7 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import { createServiceClient } from "@/lib/supabase/service";
 import type { Order, OrderItem, OrderStatus } from "@/types";
 
-import { approveOrder, fulfillOrder, rejectOrder, updateTrackingCode } from "../actions";
+import { approveOrder, fulfillOrder, regeneratePrintFile, rejectOrder, updateTrackingCode } from "../actions";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   created: "Creado (sin pagar)",
@@ -33,6 +34,24 @@ export default async function OrderDetailPage({
     .single<Order>();
 
   if (!order) notFound();
+
+  // Pre-sign storage URLs for any customized lines so the page can render
+  // thumbnails of the user source + preview, plus a download link for the
+  // print-ready file when it already exists.
+  const customizationUrls = await Promise.all(
+    order.items.map(async (item) => {
+      const snap = item.customization;
+      if (!snap) return null;
+      const [src, prev, print] = await Promise.all([
+        sign(supabase, "customizations-source", snap.source_image_path),
+        sign(supabase, "customizations-preview", snap.preview_path),
+        snap.print_path
+          ? sign(supabase, "customizations-print", snap.print_path)
+          : Promise.resolve(null),
+      ]);
+      return { src, prev, print };
+    }),
+  );
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -145,21 +164,91 @@ export default async function OrderDetailPage({
             </tr>
           </thead>
           <tbody>
-            {order.items.map((item: OrderItem, i: number) => (
-              <tr key={i} className="border-b border-[var(--border)]/10 last:border-0">
-                <td className="p-3">
-                  <p className="font-medium">{item.title}</p>
-                  {item.sku && (
-                    <p className="text-xs text-[var(--muted)]">SKU: {item.sku}</p>
-                  )}
-                </td>
-                <td className="p-3 text-right">{item.qty}</td>
-                <td className="p-3 text-right">{formatCurrency(item.unit_price)}</td>
-                <td className="p-3 text-right font-semibold">
-                  {formatCurrency(item.unit_price * item.qty)}
-                </td>
-              </tr>
-            ))}
+            {order.items.map((item: OrderItem, i: number) => {
+              const snap = item.customization;
+              const urls = customizationUrls[i];
+              return (
+                <tr key={i} className="border-b border-[var(--border)]/10 last:border-0 align-top">
+                  <td className="p-3">
+                    <p className="font-medium">{item.title}</p>
+                    {item.sku && (
+                      <p className="text-xs text-[var(--muted)]">SKU: {item.sku}</p>
+                    )}
+                    {snap && urls && (
+                      <div className="mt-2 rounded-lg border-2 border-[var(--border)] bg-[var(--bg)] p-3 text-xs space-y-2">
+                        <div className="flex items-center gap-2 font-bold uppercase tracking-wide">
+                          <span className="rounded-full border-2 border-[var(--accent)] bg-[var(--accent)] px-2 py-0.5 text-[var(--accent-foreground)]">
+                            Personalizado
+                          </span>
+                          <span className="text-[var(--muted)]">{snap.template_label}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          {urls.src && (
+                            <a href={urls.src} target="_blank" rel="noreferrer" className="block">
+                              <Image
+                                src={urls.src}
+                                alt="Imagen original"
+                                width={80}
+                                height={80}
+                                unoptimized
+                                className="h-20 w-20 rounded border-2 border-[var(--border)] object-cover"
+                              />
+                              <p className="mt-1 text-center text-[10px] text-[var(--muted)]">Original</p>
+                            </a>
+                          )}
+                          {urls.prev && (
+                            <a href={urls.prev} target="_blank" rel="noreferrer" className="block">
+                              <Image
+                                src={urls.prev}
+                                alt="Vista previa"
+                                width={80}
+                                height={80}
+                                unoptimized
+                                className="h-20 w-20 rounded border-2 border-[var(--border)] object-cover"
+                              />
+                              <p className="mt-1 text-center text-[10px] text-[var(--muted)]">Previa</p>
+                            </a>
+                          )}
+                        </div>
+                        <p className="font-mono text-[10px] text-[var(--muted)]">
+                          {snap.template.width_mm}×{snap.template.height_mm}mm · {snap.template.print_dpi} DPI
+                          {" · scale "}
+                          {snap.transform.scale.toFixed(2)}
+                          {" · rot "}
+                          {((snap.transform.rotation * 180) / Math.PI).toFixed(0)}°
+                        </p>
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {urls.print ? (
+                            <a
+                              href={urls.print}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="rounded-lg border-2 border-[var(--border)] bg-[var(--card)] px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_var(--shadow)] hover:-translate-y-0.5 transition-transform"
+                            >
+                              Descargar PNG de impresión
+                            </a>
+                          ) : (
+                            <p className="text-[var(--muted)]">
+                              Archivo de impresión aún no generado.
+                            </p>
+                          )}
+                          <form action={regeneratePrintFile.bind(null, order.id, i)}>
+                            <Button variant="secondary" size="sm" type="submit">
+                              {urls.print ? "Regenerar" : "Generar archivo"}
+                            </Button>
+                          </form>
+                        </div>
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-3 text-right">{item.qty}</td>
+                  <td className="p-3 text-right">{formatCurrency(item.unit_price)}</td>
+                  <td className="p-3 text-right font-semibold">
+                    {formatCurrency(item.unit_price * item.qty)}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
           <tfoot className="border-t-2 border-[var(--border)]">
             {order.shipping_cost > 0 && (
@@ -243,4 +332,17 @@ export default async function OrderDetailPage({
       </div>
     </div>
   );
+}
+
+async function sign(
+  supabase: ReturnType<typeof createServiceClient>,
+  bucket: string,
+  path: string,
+): Promise<string | null> {
+  if (!path) return null;
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(path, 60 * 30);
+  if (error || !data) return null;
+  return data.signedUrl;
 }

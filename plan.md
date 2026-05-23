@@ -11,20 +11,20 @@
 | # | Topic | Decision |
 |---|---|---|
 | 1 | Template ownership | **1:1 with `items`** — each customizable variation carries its own template. Stock = existing `items.stock`. |
-| 2 | Guest customization | **Client-only until checkout.** Source image lives in **IndexedDB** as a Blob; design metadata + preview dataURL live in `localStorage`. Nothing is uploaded or written to DB until login at checkout. |
+| 2 | Customization persistence | **Client-only until checkout for everyone (logged-in and guest alike).** Source image lives in **IndexedDB** as a Blob; design metadata + preview dataURL live in `localStorage`. Nothing is uploaded or written to DB until the order is created. Single code path — no `createCustomization` while browsing. |
 | 3 | Kind change with existing data | **One-click confirm** — server deletes affected items + their templates and switches `customization_kind`. |
 | 4 | Disable `customizable` | Preserve `customization_kind` (greyed in UI). Items + templates remain. Re-enable restores everything. |
 | 5 | Print render on approval | **Server Action wraps the SP**: call `approve_order` → re-`select` the order → render print files (`@napi-rs/canvas`) → persist `print_path` on both row and snapshot. |
 | 6 | Rotation | **Arbitrary rotation** via `@napi-rs/canvas` (not `sharp`). Pivot = image **top-left** (`transform.x/y` are top-left coordinates). |
 | 7 | Source storage | Private bucket, store **object path**; signed URL generated on read. |
-| 8 | Re-edit from cart | **v1.** Cart line carries `customizationId` (logged-in) or `customizationLocalKey` (guest). For logged-in users the row is updated; for guests the IndexedDB blob + localStorage entry are mutated. |
+| 8 | Re-edit from cart | **v1.** Cart line carries `customizationLocalKey` (always). Editing mutates the IndexedDB blob + localStorage entry. After order creation the cart line is discarded; re-editing a past order is not in v1. |
 | 9 | Moderation | None (rely on ToS); admin can flag/cancel orders manually. |
 | 10 | Pricing | **Flat** — uses the item's price; no per-template surcharge. |
 | 11 | Editor library | **`react-konva`** (Konva.js). |
 | 12 | Print format | PNG with alpha. |
 | 13 | Scale model | **Uniform only** — `transform.scale` is a single number; no skewing. |
 | 14 | Fit-to-template | **Contain** — whole image visible, may leave empty edges. |
-| 15 | Checkout auth | **v1: login required at checkout.** Guest customizations are persisted at login (`persistGuestCustomizations`). |
+| 15 | Checkout auth | **v1: login required at checkout.** All customizations (guest or logged-in) are uploaded at order-creation time via `persistPendingCustomizations`, then snapshotted into the order. |
 | 16 | Storage policies | **Relaxed** — match existing `04_storage.sql` convention (`auth.uid() IS NOT NULL`). No per-user prefix enforcement in v1. |
 | 17 | Order snapshot | `OrderItem.customization` carries **everything needed to render** (transform + source path + full template fields). Renders survive item/template deletion. |
 | 18 | UI language | **Spanish** (matches existing storefront/admin). |
@@ -201,8 +201,7 @@ type CartItem = {
 
   // new
   itemId: string;                          // the variation (now required)
-  customizationId?: string;                // logged-in: customizations.id
-  customizationLocalKey?: string;          // guest: IndexedDB key (uuid)
+  customizationLocalKey?: string;          // IndexedDB key (uuid) — always client-side until checkout
   customizationPreviewDataUrl?: string;    // small dataURL for thumbnails
 };
 ```
@@ -210,9 +209,11 @@ type CartItem = {
 **Cart line id rule** (replaces existing dedup-by-id):
 
 - Non-customized: `id = itemId`
-- Customized: `id = ${itemId}:${customizationId ?? customizationLocalKey}`
+- Customized: `id = ${itemId}:${customizationLocalKey}`
 
 `ADD_ITEM` increments qty only when `id` matches exactly. Re-adding the same customization increments qty; adding a different customization on the same item creates a distinct line.
+
+Since customizations are not persisted to the DB while browsing, there is no `customizationId` on the cart line. The DB id only exists *after* order creation, where it lives inside `OrderItem.customization.id`.
 
 `OrderItem` (`src/types/order.ts` + persisted JSON in `orders.items`) — self-contained render-ready snapshot:
 
@@ -290,49 +291,50 @@ Product detail page (customizable product)
         ▼
 [ Paso 2 ] Sube tu imagen       ──► drag/drop or file picker
                                     Client checks: type, ≤ 20 MB, ≥ 1000 × 1000 px
-                                    Guest: store Blob in IndexedDB, key = uuid
-                                    Logged-in: upload to 'customizations-source'
-                                                under any path (relaxed policy)
+                                    Always: store Blob in IndexedDB, key = uuid
+                                    (no upload to Supabase yet — logged-in or not)
         │
         ▼
 [ Paso 3 ] Editor (Konva canvas)
-        ├─ Background: mockup (signed URL) scaled to canvas
+        ├─ Background: mockup (public URL from print-templates bucket)
         ├─ User image: drag, resize (uniform scale), arbitrary rotation
         │              (pivot = image top-left → keep editor + renderer in lockstep)
         │              Clipped to the product silhouette via Konva <Group clipFunc>
         │              so the image never spills outside the shirt/case/mug body.
         ├─ Overlay: dashed safe-area rectangle
         ├─ Controls: zoom slider, rotación, Reiniciar, "Ajustar a la plantilla" (CONTAIN)
-        ├─ Live warning: DPI bajo (formula in §3.2)
-        └─ Live warning: la imagen sale del área segura
+        ├─ Live warning: DPI bajo (formula in §3.2) — yellow/red, never blocks
+        └─ Live warning: la imagen sale del área segura — warning only
         │
         ▼
 [ Paso 4 ] Confirmar + Añadir al carrito
         ├─ Client renders preview PNG (Konva stage → toBlob; max 1024 px, ≤ 500 KB)
-        ├─ Logged-in: createCustomization(itemId, sourcePath, transform, previewBlob)
-        │             → server uploads preview, returns customizationId
-        │             → cart line: { id: `${itemId}:${customizationId}`, itemId,
-        │                            customizationId, customizationPreviewDataUrl }
-        └─ Guest:     keep IndexedDB blob + localStorage record:
-                       { localKey, itemId, transform, sourceWidth, sourceHeight,
-                         previewDataUrl }
-                       Cart line: { id: `${itemId}:${localKey}`, itemId,
-                                    customizationLocalKey: localKey,
-                                    customizationPreviewDataUrl }
+        └─ Always client-side:
+             1. Write source Blob to IndexedDB under localKey = uuid().
+             2. Write entry to localStorage:
+                { localKey, itemId, productId, transform, sourceWidth, sourceHeight,
+                  previewDataUrl, kind, templateLabel, createdAt }
+             3. Cart line: { id: `${itemId}:${localKey}`, itemId,
+                             customizationLocalKey: localKey,
+                             customizationPreviewDataUrl }
         │
         ▼
 Checkout (login required — decision #15)
-        ├─ Guest path: on login, persistGuestCustomizations() iterates every cart line
-        │              with customizationLocalKey:
-        │                1. Read source Blob from IndexedDB.
-        │                2. Upload source to 'customizations-source'.
-        │                3. Upload preview PNG to 'customizations-preview'.
-        │                4. Insert customizations row.
-        │                5. Swap cart line: drop customizationLocalKey, set
-        │                   customizationId; new cart line id is updated too.
-        │                6. Delete IndexedDB entry on success.
-        ├─ Logged-in: rows already exist.
-        └─ Order is created with the full customization snapshot (§2.5) per line.
+        ├─ On "Comprar ahora", BEFORE calling createOrderAndCheckout:
+        │     persistPendingCustomizations(cartItems) iterates every line with
+        │     customizationLocalKey and, for each:
+        │       1. Read source Blob from IndexedDB.
+        │       2. Read metadata from localStorage.
+        │       3. Call createCustomization(formData) Server Action with the source,
+        │          preview, itemId, transform, source dims — returns customizationId
+        │          and the full snapshot for the order line.
+        │       4. Replace customizationLocalKey on the cart line with the snapshot
+        │          (held in memory only — the cart line itself is about to be cleared).
+        ├─ createOrderAndCheckout receives an enriched cart where customized lines
+        │   carry the full snapshot, and embeds it in OrderItem.customization (§2.5).
+        └─ On order success: cart is cleared. IndexedDB + localStorage entries for
+           localKeys included in the order are deleted (best-effort — the DB row
+           and order snapshot are the source of truth from here on).
         │
         ▼
 Order approval (admin)
@@ -342,6 +344,11 @@ Order approval (admin)
            'customizations-print' → write print_path back to the customization
            row AND the order snapshot.
 ```
+
+Notes:
+- **Re-edit from cart** opens the editor at `/products/[productId]?edit=local:<uuid>`; the editor hydrates the source Blob from IndexedDB. On confirm, the IndexedDB blob (if image changed) and the localStorage entry are rewritten in place. No DB writes.
+- **Cross-device / cleared-storage edge case.** If the user clears IndexedDB after adding to cart, the cart hydrator silently drops any line whose `customizationLocalKey` no longer resolves to an IndexedDB entry. Same applies if they switch device — the cart on the new device won't have these lines anyway (cart is localStorage).
+- **Guest TTL.** IndexedDB entries are swept after 7 days on app mount.
 
 ### 3.1 Per-kind editor presets
 
@@ -364,18 +371,15 @@ effective_dpi      = (sw / drawn_width_px) * print_dpi
 ```
 
 - Warn (yellow) when `effective_dpi < 150`.
-- Block "Añadir al carrito" (red) when `effective_dpi < 72`.
+- Warn (red) when `effective_dpi < 72`. **Never blocks add-to-cart** (decision: warnings only).
 
 ### 3.3 Re-edit from cart
 
-`CartDrawer` renders an **"Editar diseño"** button on lines where `customizationId` or `customizationLocalKey` is set. Click navigates to:
+`CartDrawer` renders an **"Editar diseño"** button on lines where `customizationLocalKey` is set. Click navigates to `/products/[productId]?edit=local:<uuid>`. The editor hydrates the source Blob + transform from IndexedDB / localStorage. On confirm:
 
-- `/products/[productId]?edit=cust:<uuid>` (logged-in)
-- `/products/[productId]?edit=local:<uuid>` (guest)
-
-The prefix tells the editor which source to hydrate (DB row vs IndexedDB). On confirm:
-- Logged-in: `updateCustomization(id, transform, previewBlob)` — re-uploads preview, updates row.
-- Guest: rewrite IndexedDB blob (if image was changed) + localStorage record.
+- The IndexedDB blob is rewritten only if the user replaced the source image.
+- The localStorage metadata (transform, preview dataURL) is always rewritten.
+- The cart line keeps the same `customizationLocalKey` and the same line id.
 
 ---
 
@@ -599,8 +603,9 @@ For each `OrderItem.customization`:
 | `src/types/order.ts` | Add `item_id` to `OrderItem`; add `customization` snapshot |
 | `src/lib/supabase/storage.ts` | Add `signStoragePath(bucket, path, expiresIn?)`; ensure `uploadImage` accepts a bucket param |
 | `src/lib/print/render.ts` | **NEW** — `renderPrintFile()` (`@napi-rs/canvas`, `image-size` server) |
-| `src/lib/cart.tsx` | Require `itemId`; add customization fields; new line-id rule; persist new shape to localStorage |
-| `src/lib/customizations/indexedDb.ts` | **NEW** — guest blob store (`put`, `get`, `delete`, `list`) using `idb` |
+| `src/lib/cart.tsx` | Require `itemId`; add `customizationLocalKey` + `customizationPreviewDataUrl`; new line-id rule; hydrator drops lines whose localKey is missing from IndexedDB |
+| `src/lib/customizations/indexedDb.ts` | **NEW** — client blob store (`put`, `get`, `delete`, `list`, `sweepStale`) using `idb` |
+| `src/lib/customizations/localStore.ts` | **NEW** — localStorage wrapper for design metadata records (typed accessors + TTL sweep) |
 | `src/app/components/CartDrawer.tsx` | Show preview thumbnail + "Editar diseño" button on customized lines |
 | `src/app/components/ProductCard.tsx` | Show "Personalizable" badge when applicable |
 | `src/app/components/FilterableList.tsx` (or list pages) | Add "Solo personalizables" chip (URL param `customizable=1`) |
@@ -610,12 +615,15 @@ For each `OrderItem.customization`:
 | `src/app/admin/products/actions.ts` | Add template upsert/delete, tipo-change cleanup action, no-empty-templated-items validation |
 | `src/app/admin/orders/actions.ts` | **NEW** `approveOrder` Server Action (wraps SP + renders); `regeneratePrintFile(orderId, lineIndex)` |
 | `src/app/admin/orders/[id]/page.tsx` | Show customization info + download/generate buttons |
+| `src/app/components/customization/CustomizationEditor.tsx` | **NEW** — shared Konva-based editor (was inline in admin sandbox). Used by both `/admin/products/[id]/preview-editor` and the customer flow. |
+| `src/app/components/customization/KonvaStage.tsx` | **NEW** — moved from the admin sandbox folder so customer + admin reuse it. |
+| `src/app/admin/products/[id]/preview-editor/page.tsx` | Now thin — just renders the shared editor with seeded variants; no persistence. |
 | `src/app/products/[id]/page.tsx` | If `customizable`, render `<CustomizationFlow />`; otherwise existing flow |
-| `src/app/products/[id]/CustomizationFlow.tsx` | **NEW** — picker → upload → Konva editor → confirm; supports `?edit=cust:<id>` / `?edit=local:<id>` |
+| `src/app/products/[id]/CustomizationFlow.tsx` | **NEW** — picker → upload → shared editor → confirm; supports `?edit=local:<id>`; writes IndexedDB + cart line on confirm |
 | `src/app/products/[id]/customization/presets.ts` | **NEW** — per-kind editor presets |
-| `src/app/actions/customizations.ts` | **NEW** — `createCustomization`, `updateCustomization`, `getCustomizationForEdit`, `persistGuestCustomizations` |
-| `src/app/login/LoginActions.tsx` (or callback) | After successful login, run `persistGuestCustomizations` for any localStorage entries |
-| `src/app/actions/orders.ts` | Order create: include `item_id` and `customization` snapshot per line |
+| `src/app/actions/customizations.ts` | **NEW** — `createCustomization(formData)` Server Action (uploads source + preview, inserts row, returns snapshot). Called only at checkout via `persistPendingCustomizations`. |
+| `src/app/components/BuyNowButton.tsx` | Before `createOrderAndCheckout`, run `persistPendingCustomizations` to upload all customized lines and inject the snapshots into the cart payload. |
+| `src/app/actions/orders.ts` | Order create: include `item_id` and `customization` snapshot per line. The snapshot is passed in from the client (already created by `persistPendingCustomizations`). |
 | `package.json` | Add `react-konva`, `konva`, `@napi-rs/canvas`, `image-size`, `idb` |
 
 ---
@@ -626,20 +634,20 @@ For each `OrderItem.customization`:
 2. **Order create path**: add `item_id` to every cart line + every `OrderItem`. Non-customizable orders must work after this.
 3. **Product form**: personalizable toggle + tipo select with one-click confirm on tipo change.
 4. **Per-item plantilla subsection** in `<ProductItemsAccordion>` + CRUD actions; storage helpers; per-kind `attributes` validation.
-5. **Konva editor sandbox** at `/admin/products/[id]/preview-editor` — validate UX with phone_case first, then tshirt + mug. Includes silhouette clipping (hardcoded path for the seed mockup); the per-template `clip_path` field is deferred to v2.
-6. **Customer flow** on product detail page (`<CustomizationFlow />`); client-side preview; IndexedDB for guests; `createCustomization` for logged-in.
-7. **Cart integration**: extended `CartItem` shape + new line-id rule + thumbnail + "Editar diseño". Re-edit via `?edit=cust:<id>` / `?edit=local:<id>`.
-8. **Login persistence**: `persistGuestCustomizations` runs from login callback; swaps cart line keys.
-9. **Order snapshot** wiring in order create; admin order page rendering.
-10. **`approveOrder` Server Action** wrapping `approve_order` SP + print render; `regeneratePrintFile` action.
-11. **Storefront polish**: "Personalizable" badge + filter chip; DPI/safe-area warnings; storage cleanup job.
+5. **Konva editor sandbox** at `/admin/products/[id]/preview-editor` — validate UX. Includes silhouette clipping (hardcoded path for the seed mockup); the per-template `clip_path` field is deferred to v2.
+6. **Extract shared editor**: move the working Konva editor out of the admin sandbox into `src/app/components/customization/` so both admin and storefront render the exact same component. Sandbox becomes a thin host.
+7. **Customer flow** on product detail page (`<CustomizationFlow />`): wizard → shared editor → preview → IndexedDB write → cart line. Same code path for logged-in and guest users.
+8. **Cart integration**: extended `CartItem` shape (`customizationLocalKey` + preview dataURL); new line-id rule; thumbnail + "Editar diseño" button. Cart hydrator drops lines whose localKey is gone from IndexedDB.
+9. **Checkout persistence**: `createCustomization` Server Action + client-side `persistPendingCustomizations` invoked from `BuyNowButton` before `createOrderAndCheckout`. Order create accepts the snapshot in its payload and stores it in `OrderItem.customization`. IndexedDB + localStorage entries for the persisted lines are deleted on order success.
+10. **`approveOrder` Server Action** wrapping `approve_order` SP + print render; `regeneratePrintFile` action; admin order page UI.
+11. **Storefront polish**: "Personalizable" badge + filter chip; storage cleanup job (orphans + IndexedDB TTL sweep on app mount).
 
 ---
 
 ## 9. Storage cleanup
 
-- `customizations` rows created and never referenced by an order older than 30 days → delete row + source + preview (extend `supabase/remove-orphans.js`).
-- Guest IndexedDB entries: client-side TTL of 7 days; sweep on app mount.
+- `customizations` rows created and never referenced by an order older than 30 days → delete row + source + preview (extend `supabase/remove-orphans.js`). In practice these are rare because rows are only inserted at order-creation time, but it covers the failure case where order insert fails after `createCustomization` succeeded.
+- IndexedDB + localStorage entries: client-side TTL of 7 days; sweep on app mount.
 - Print files for cancelled/rejected orders: kept 90 days, then purged.
 
 ---

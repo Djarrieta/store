@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@langchain/openai": "^1.4.5",
+    "@napi-rs/canvas": "^1.0.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.57.4",
     "clsx": "^2.1.1",
@@ -38,5 +39,8 @@
     "supabase": "^2.98.2",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "@napi-rs/canvas-win32-x64-msvc": "^1.0.0"
   }
 }

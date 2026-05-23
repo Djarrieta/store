@@ -12,9 +12,11 @@ export default async function Home({
     q?: string;
     tags?: string;
     page?: string;
+    customizable?: string;
   }>;
 }) {
-  const { q, tags: tagsParam, page: pageStr } = await searchParams;
+  const { q, tags: tagsParam, page: pageStr, customizable } = await searchParams;
+  const onlyCustomizable = customizable === "1";
 
   const page = Math.max(1, parseInt(pageStr ?? "1", 10) || 1);
   const from = (page - 1) * PAGE_SIZE;
@@ -47,6 +49,10 @@ export default async function Home({
     query = query.contains("tags", activeTags);
   }
 
+  if (onlyCustomizable) {
+    query = query.eq("customizable", true);
+  }
+
   const { data: rawProducts, count } = await query.range(from, to);
   const products = rawProducts as ProductWithCategory[] | null;
 
@@ -70,7 +76,7 @@ export default async function Home({
   return (
     <PageHeader
       title="Productos"
-      isEmpty={total === 0 && !q && activeTags.length === 0}
+      isEmpty={total === 0 && !q && activeTags.length === 0 && !onlyCustomizable}
       emptyText="Aún no hay productos."
     >
       <FilterableList
@@ -79,6 +85,7 @@ export default async function Home({
         page={page}
         total={total}
         pageSize={PAGE_SIZE}
+        customizable={onlyCustomizable}
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(products ?? []).map((product, i) => (

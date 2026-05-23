@@ -1,18 +1,34 @@
 "use client";
 
+import type Konva from "konva";
 import { useEffect, useRef, useState } from "react";
 import { Group, Image as KonvaImage, Layer, Line, Rect, Stage } from "react-konva";
 
-import type { EditorVariant, SourceImage, Transform } from "./PreviewEditor";
+import {
+  computeEffectiveDpi,
+  dpiTone,
+  type EditorVariant,
+  type SourceImage,
+  type Transform,
+} from "./types";
+
+const MAX_STAGE = 560;
+
+export interface KonvaStageHandle {
+  /** Capture the current stage as a PNG data URL (multiplied for crispness). */
+  toDataUrl(pixelRatio?: number): string | null;
+}
 
 interface Props {
   variant: EditorVariant;
   source: SourceImage | null;
   transform: Transform;
   onTransformChange: (next: Transform) => void;
+  /** Called once on mount with a handle to capture the canvas as a PNG. */
+  onReady?: (handle: KonvaStageHandle) => void;
+  /** Hide the warnings/status pills under the canvas (useful in compact wizards). */
+  hideStatus?: boolean;
 }
-
-const MAX_STAGE = 560;
 
 function fitStage(widthMm: number, heightMm: number) {
   const aspect = widthMm / heightMm;
@@ -23,15 +39,11 @@ function fitStage(widthMm: number, heightMm: number) {
 }
 
 function useHtmlImage(url: string | null): HTMLImageElement | null {
-  const [loaded, setLoaded] = useState<{ url: string; img: HTMLImageElement } | null>(
-    null,
-  );
+  const [loaded, setLoaded] = useState<{ url: string; img: HTMLImageElement } | null>(null);
   useEffect(() => {
     if (!url) return;
     let cancelled = false;
     const el = new window.Image();
-    // CORS is only needed for cross-origin URLs (mockup served from Supabase).
-    // Setting it on blob: / data: URLs can silently break the load in some browsers.
     if (!url.startsWith("blob:") && !url.startsWith("data:")) {
       el.crossOrigin = "anonymous";
     }
@@ -51,30 +63,35 @@ function useHtmlImage(url: string | null): HTMLImageElement | null {
   return loaded && loaded.url === url ? loaded.img : null;
 }
 
-export default function KonvaStage({
+const KonvaStage = function KonvaStage({
   variant,
   source,
   transform,
   onTransformChange,
+  onReady,
+  hideStatus = false,
 }: Props) {
   const { template, mockupUrl } = variant;
   const stage = fitStage(template.width_mm, template.height_mm);
   const mockup = useHtmlImage(mockupUrl);
   const userImg = useHtmlImage(source?.url ?? null);
-  const imgRef = useRef<unknown>(null);
+  const stageRef = useRef<Konva.Stage | null>(null);
+
+  useEffect(() => {
+    if (!onReady) return;
+    onReady({
+      toDataUrl(pixelRatio = 2) {
+        if (!stageRef.current) return null;
+        return stageRef.current.toDataURL({ mimeType: "image/png", pixelRatio });
+      },
+    });
+  }, [onReady]);
 
   const drawnW = source ? transform.scale * stage.width : 0;
   const drawnH = source ? (source.height / source.width) * drawnW : 0;
 
   const effectiveDpi = computeEffectiveDpi(source, transform, template);
-  const dpiTone =
-    effectiveDpi === null
-      ? "muted"
-      : effectiveDpi < 72
-        ? "danger"
-        : effectiveDpi < 150
-          ? "warn"
-          : "ok";
+  const tone = dpiTone(effectiveDpi);
 
   const safe = template.safe_area;
 
@@ -84,7 +101,7 @@ export default function KonvaStage({
         className="mx-auto overflow-hidden rounded-xl border-2 border-[var(--border)] bg-[var(--surface)]"
         style={{ width: stage.width, height: stage.height }}
       >
-        <Stage width={stage.width} height={stage.height}>
+        <Stage ref={stageRef} width={stage.width} height={stage.height}>
           <Layer listening={false}>
             <Rect x={0} y={0} width={stage.width} height={stage.height} fill="#f4f4f4" />
             {mockup && (
@@ -99,12 +116,9 @@ export default function KonvaStage({
           </Layer>
 
           <Layer>
-            <Group
-              clipFunc={(ctx) => drawTshirtClip(ctx, stage.width, stage.height)}
-            >
+            <Group clipFunc={(ctx) => drawTshirtClip(ctx as unknown as CanvasRenderingContext2D, stage.width, stage.height)}>
               {userImg && source && (
                 <KonvaImage
-                  ref={imgRef as never}
                   image={userImg}
                   x={transform.x * stage.width}
                   y={transform.y * stage.height}
@@ -138,16 +152,11 @@ export default function KonvaStage({
             )}
             <Line
               points={[
-                0,
-                0,
-                stage.width,
-                0,
-                stage.width,
-                stage.height,
-                0,
-                stage.height,
-                0,
-                0,
+                0, 0,
+                stage.width, 0,
+                stage.width, stage.height,
+                0, stage.height,
+                0, 0,
               ]}
               stroke="var(--border)"
               strokeWidth={2}
@@ -156,24 +165,27 @@ export default function KonvaStage({
         </Stage>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <Pill tone="muted">
-          Lienzo {stage.width} × {stage.height} px
-        </Pill>
-        {effectiveDpi !== null && (
-          <Pill tone={dpiTone}>DPI efectivo: {effectiveDpi.toFixed(0)}</Pill>
-        )}
-        {!source && (
-          <Pill tone="muted">Sube una imagen para empezar</Pill>
-        )}
-        {safe && <Pill tone="muted">Área segura visible</Pill>}
-      </div>
+      {!hideStatus && (
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <Pill tone="muted">
+            Lienzo {stage.width} × {stage.height} px
+          </Pill>
+          {effectiveDpi !== null && (
+            <Pill tone={tone}>DPI efectivo: {effectiveDpi.toFixed(0)}</Pill>
+          )}
+          {!source && <Pill tone="muted">Sube una imagen para empezar</Pill>}
+          {safe && <Pill tone="muted">Área segura visible</Pill>}
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default KonvaStage;
 
 // T-shirt silhouette derived from supabase/seed/images/tshirt-blank.svg (viewBox 600x800).
 // Used as Konva clipFunc so the uploaded image only renders inside the shirt body.
+// v2: this will be driven by a per-template clip_path.
 function drawTshirtClip(
   ctx: CanvasRenderingContext2D,
   stageW: number,
@@ -199,18 +211,6 @@ function drawTshirtClip(
   ctx.bezierCurveTo(X(400), Y(170), X(360), Y(195), X(300), Y(195));
   ctx.bezierCurveTo(X(240), Y(195), X(200), Y(170), X(180), Y(120));
   ctx.closePath();
-}
-
-function computeEffectiveDpi(
-  source: SourceImage | null,
-  transform: Transform,
-  template: { width_mm: number; print_dpi: number },
-): number | null {
-  if (!source) return null;
-  const printableWidthPx = (template.width_mm / 25.4) * template.print_dpi;
-  const drawnWidthPx = transform.scale * printableWidthPx;
-  if (drawnWidthPx <= 0) return null;
-  return (source.width / drawnWidthPx) * template.print_dpi;
 }
 
 function Pill({

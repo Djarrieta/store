@@ -13,7 +13,9 @@ import {
 import { getShippingCost, type ShippingResult } from "@/app/actions/shipping";
 import { getDefaultAddress } from "@/app/perfil/actions";
 import { CART_STORAGE_KEY } from "@/lib/constants";
-import type { Address } from "@/types";
+import { listKeys as listIdbKeys } from "@/lib/customizations/indexedDb";
+import { sweepStale } from "@/lib/customizations/localStore";
+import type { Address, OrderCustomizationSnapshot } from "@/types";
 
 export type CartItem = {
   id: string;
@@ -28,6 +30,16 @@ export type CartItem = {
   productId: string;
   /** Variation (items row) actually being purchased — used for stock deduction. */
   itemId: string;
+  /** Local key (uuid) pairing this line with an IndexedDB blob + localStorage record. */
+  customizationLocalKey?: string;
+  /** Tiny PNG dataURL for the cart thumbnail. */
+  customizationPreviewDataUrl?: string;
+  /**
+   * In-memory only (never persisted to localStorage): the server-issued snapshot
+   * after `persistPendingCustomizations` swaps `customizationLocalKey` for a
+   * real DB row just before order creation.
+   */
+  customization?: OrderCustomizationSnapshot;
 };
 
 export type ShippingDisplay = "none" | "loading" | "free" | "price" | "unknown_city";
@@ -170,27 +182,55 @@ export function CartProvider({ children, isAuthenticated, freeShippingAbove = nu
     info: null,
   });
 
-  // Hydrate from localStorage on mount
+  // Hydrate from localStorage on mount; drop lines whose IndexedDB blob is gone.
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) return;
-      const parsed = JSON.parse(stored) as StoredCart;
-      dispatch({
-        type: "HYDRATE",
-        items: parsed.items ?? [],
-        selectedAddress: parsed.selectedAddress ?? null,
-      });
-    } catch {
-      // ignore parse errors
-    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) return;
+        const parsed = JSON.parse(stored) as StoredCart;
+        let items = parsed.items ?? [];
+
+        const needsCustomization = items.some((i) => i.customizationLocalKey);
+        if (needsCustomization) {
+          try {
+            const present = new Set(await listIdbKeys());
+            items = items.filter(
+              (i) => !i.customizationLocalKey || present.has(i.customizationLocalKey),
+            );
+          } catch {
+            // If IndexedDB is unavailable, keep the lines as-is.
+          }
+        }
+
+        if (cancelled) return;
+        dispatch({
+          type: "HYDRATE",
+          items,
+          selectedAddress: parsed.selectedAddress ?? null,
+        });
+      } catch {
+        // ignore parse errors
+      }
+      // Best-effort TTL sweep for stale records.
+      void sweepStale();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Persist to localStorage on change
+  // Persist to localStorage on change. Strip in-memory-only fields (the
+  // OrderCustomizationSnapshot only lives between persist + order-create).
   useEffect(() => {
     try {
       const payload: StoredCart = {
-        items: state.items,
+        items: state.items.map((i) => {
+          const copy = { ...i };
+          delete copy.customization;
+          return copy;
+        }),
         selectedAddress: state.selectedAddress,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));

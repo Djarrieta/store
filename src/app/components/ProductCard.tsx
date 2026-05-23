@@ -72,6 +72,11 @@ export default function ProductCard({ product, items = [], priority = false }: P
           <p className="text-xs text-[var(--muted)]">{categoryLabel}</p>
         )}
         <div className="flex flex-wrap gap-1">
+          {product.customizable && product.customization_kind && (
+            <Badge variant="primary" size="sm" className="rounded-full">
+              Personalizable
+            </Badge>
+          )}
           {product.tags.map((tag) => (
             <Badge key={tag} variant="secondary" size="sm" className="rounded-full">
               {tag}
