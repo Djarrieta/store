@@ -9,11 +9,13 @@ import type { ProductImage } from "@/types/product";
 interface ProductImageCarouselProps {
   images: ProductImage[];
   title: string;
+  compact?: boolean;
 }
 
 export default function ProductImageCarousel({
   images,
   title,
+  compact = false,
 }: ProductImageCarouselProps) {
   const [current, setCurrent] = useState(0);
 
@@ -68,44 +70,48 @@ export default function ProductImageCarousel({
       </div>
 
       {/* Dot indicators */}
-      <div className="mt-3 flex justify-center gap-2" role="tablist" aria-label="Seleccionar imagen">
-        {images.map((img, i) => (
-          <Button
-            key={i}
-            role="tab"
-            aria-selected={i === current}
-            aria-label={img.description ?? `Imagen ${i + 1}`}
-            onClick={() => setCurrent(i)}
-            className={`h-2.5 w-2.5 rounded-full border-2 border-[var(--border)] transition-colors ${
-              i === current ? "bg-[var(--border)]" : "bg-[var(--surface)]"
-            }`}
-          />
-        ))}
-      </div>
+      {!compact && (
+        <div className="mt-3 flex justify-center gap-2" role="tablist" aria-label="Seleccionar imagen">
+          {images.map((img, i) => (
+            <Button
+              key={i}
+              role="tab"
+              aria-selected={i === current}
+              aria-label={img.description ?? `Imagen ${i + 1}`}
+              onClick={() => setCurrent(i)}
+              className={`h-2.5 w-2.5 rounded-full border-2 border-[var(--border)] transition-colors ${
+                i === current ? "bg-[var(--border)]" : "bg-[var(--surface)]"
+              }`}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Thumbnail strip */}
-      <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-        {images.map((img, i) => (
-          <Button
-            key={i}
-            onClick={() => setCurrent(i)}
-            aria-label={img.description ?? `Imagen ${i + 1}`}
-            className={`relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
-              i === current
-                ? "border-[var(--border)] shadow-[2px_2px_0_0_var(--shadow)]"
-                : "border-[var(--border)]/30 opacity-60 hover:opacity-100"
-            }`}
-          >
-            <Image
-              src={img.url}
-              alt={img.description ?? `Miniatura ${i + 1}`}
-              fill
-              unoptimized
-              className="object-cover"
-            />
-          </Button>
-        ))}
-      </div>
+      {!compact && (
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          {images.map((img, i) => (
+            <Button
+              key={i}
+              onClick={() => setCurrent(i)}
+              aria-label={img.description ?? `Imagen ${i + 1}`}
+              className={`relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
+                i === current
+                  ? "border-[var(--border)] shadow-[2px_2px_0_0_var(--shadow)]"
+                  : "border-[var(--border)]/30 opacity-60 hover:opacity-100"
+              }`}
+            >
+              <Image
+                src={img.url}
+                alt={img.description ?? `Miniatura ${i + 1}`}
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            </Button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -89,7 +89,7 @@ export default async function Home({
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(products ?? []).map((product) => (
-            <ProductCard key={product.id} product={product} items={itemsByProduct.get(product.id) ?? []} />
+            <ProductCard key={product.id} product={product} items={itemsByProduct.get(product.id) ?? []} compact />
           ))}
         </div>
       </FilterableList>

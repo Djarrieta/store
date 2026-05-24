@@ -87,7 +87,7 @@ export default async function ProductDetailPage({
           { label: product.title },
         ]}
       />
-      <ProductCard product={product} items={itemList} variant="detail" />
+      <ProductCard product={product} items={itemList} />
 
       {isPurchasable && isCustomizable && (
         <section className="rounded-2xl border-4 border-[var(--border)] bg-[var(--surface)] p-5 shadow-[6px_6px_0_0_var(--shadow)]">

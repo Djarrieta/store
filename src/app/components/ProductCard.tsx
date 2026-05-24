@@ -10,15 +10,14 @@ import type { ItemWithCategories, ProductWithCategory } from "@/types";
 interface ProductCardProps {
   product: ProductWithCategory;
   items?: ItemWithCategories[];
-  variant?: "card" | "detail";
+  compact?: boolean;
 }
 
 export default function ProductCard({
   product,
   items = [],
-  variant = "card",
+  compact = false,
 }: ProductCardProps) {
-  const isDetail = variant === "detail";
   const image = product.images?.[0]?.url;
   const effectivePrice =
     product.discount > 0
@@ -39,17 +38,65 @@ export default function ProductCard({
   const hasStock = items.some((i) => i.stock > 0);
   const isCustomizable = product.customizable && !!product.customization_kind;
 
-  const containerClass = isDetail
-    ? "overflow-hidden rounded-2xl border-4 border-[var(--border)] bg-[var(--surface)] shadow-[6px_6px_0_0_var(--shadow)]"
-    : "overflow-hidden rounded-[var(--radius-card)] border-2 border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)_var(--shadow-card)_0_0_var(--shadow)]";
+  const containerClass = compact
+    ? "flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border-2 border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)_var(--shadow-card)_0_0_var(--shadow)]"
+    : "flex flex-col overflow-hidden rounded-2xl border-4 border-[var(--border)] bg-[var(--surface)] shadow-[6px_6px_0_0_var(--shadow)]";
 
-  const bodyClass = isDetail ? "space-y-3 p-5" : "space-y-2 p-4";
+  const bodyClass = compact
+    ? "flex flex-1 flex-col gap-2 p-4"
+    : "flex flex-col gap-3 p-5";
+
+  const cta = !hasStock ? (
+    compact ? (
+      <Badge variant="secondary" size="sm" className="rounded-full">
+        Sin stock
+      </Badge>
+    ) : (
+      <p className="text-sm font-semibold text-[var(--error-text)]">Sin stock</p>
+    )
+  ) : isCustomizable ? (
+    compact ? (
+      hasVariants ? (
+        <VariantSelector
+          items={items}
+          product={{ id: product.id, title: product.title, price: payablePrice, amountInCents, image }}
+          customizable
+        />
+      ) : (
+        <Link
+          href={`/products/${product.id}`}
+          className="block w-full rounded-[var(--radius-btn-xl)] border-2 border-[var(--border)] bg-[var(--accent)] px-4 py-2 text-center text-sm font-bold text-[var(--accent-foreground)] shadow-[var(--shadow-btn-xl)_var(--shadow-btn-xl)_0_0_var(--shadow)] transition-all hover:translate-x-[var(--shadow-btn-xl)] hover:translate-y-[var(--shadow-btn-xl)] hover:shadow-none"
+        >
+          Personalizar
+        </Link>
+      )
+    ) : null
+  ) : hasVariants ? (
+    <VariantSelector
+      items={items}
+      product={{ id: product.id, title: product.title, price: payablePrice, amountInCents, image }}
+    />
+  ) : singleItem ? (
+    <AddToCartButton
+      id={singleItem.id}
+      productId={product.id}
+      itemId={singleItem.id}
+      title={product.title}
+      price={payablePrice}
+      amountInCents={amountInCents}
+      image={image}
+    />
+  ) : null;
 
   return (
     <article className={containerClass}>
       {product.images?.length ? (
-        <div className={isDetail ? "" : "px-4 pt-4"}>
-          <ProductImageCarousel images={product.images} title={product.title} />
+        <div className={compact ? "px-4 pt-4" : ""}>
+          <ProductImageCarousel
+            images={product.images}
+            title={product.title}
+            compact={compact}
+          />
         </div>
       ) : (
         <div className="flex h-40 items-center justify-center bg-[var(--bg)] text-sm text-[var(--muted)]">
@@ -57,7 +104,39 @@ export default function ProductCard({
         </div>
       )}
       <div className={bodyClass}>
-        {isDetail ? (
+        {compact ? (
+          <>
+            <div className="flex items-start justify-between gap-2">
+              <Link
+                href={`/products/${product.id}`}
+                className="line-clamp-1 text-base font-bold hover:underline"
+              >
+                {product.title}
+              </Link>
+              <div className="shrink-0 text-right">
+                {effectivePrice !== null ? (
+                  <>
+                    <p className="text-sm font-semibold">{formatCurrency(effectivePrice)}</p>
+                    <p className="text-xs text-[var(--muted)] line-through">{formatCurrency(product.price)}</p>
+                  </>
+                ) : (
+                  <p className="text-sm font-semibold">{formatCurrency(product.price)}</p>
+                )}
+              </div>
+            </div>
+            {product.description && (
+              <p className="line-clamp-2 text-sm text-[var(--muted)]">{product.description}</p>
+            )}
+            <div className="flex items-center justify-end gap-2">
+              <Link
+                href={`/products/${product.id}`}
+                className="text-xs font-semibold underline underline-offset-2 text-[var(--muted)] hover:text-[var(--fg)]"
+              >
+                Ver detalle →
+              </Link>
+            </div>
+          </>
+        ) : (
           <>
             <h1 className="font-display text-3xl font-bold">{product.title}</h1>
             {product.description && (
@@ -86,93 +165,19 @@ export default function ProductCard({
                 </p>
               )}
             </div>
-          </>
-        ) : (
-          <>
-            <div className="flex items-start justify-between gap-2">
-              <Link
-                href={`/products/${product.id}`}
-                className="line-clamp-1 text-base font-bold hover:underline"
-              >
-                {product.title}
-              </Link>
-              <div className="shrink-0 text-right">
-                {effectivePrice !== null ? (
-                  <>
-                    <p className="text-sm font-semibold">{formatCurrency(effectivePrice)}</p>
-                    <p className="text-xs text-[var(--muted)] line-through">{formatCurrency(product.price)}</p>
-                  </>
-                ) : (
-                  <p className="text-sm font-semibold">{formatCurrency(product.price)}</p>
-                )}
+            {product.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {product.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" size="sm" className="rounded-full">
+                    {tag}
+                  </Badge>
+                ))}
               </div>
-            </div>
-            <p className="line-clamp-2 text-sm text-[var(--muted)]">{product.description ?? "No description"}</p>
-            <div className="flex items-center justify-between gap-2">
-              {categoryLabel ? (
-                <p className="text-xs text-[var(--muted)]">{categoryLabel}</p>
-              ) : (
-                <span />
-              )}
-              <Link
-                href={`/products/${product.id}`}
-                className="text-xs font-semibold underline underline-offset-2 text-[var(--muted)] hover:text-[var(--fg)]"
-              >
-                Ver detalle →
-              </Link>
-            </div>
+            )}
           </>
         )}
 
-        {product.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {product.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" size="sm" className="rounded-full">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        {!hasStock ? (
-          isDetail ? (
-            <p className="text-sm font-semibold text-[var(--error-text)]">Sin stock</p>
-          ) : (
-            <Badge variant="secondary" size="sm" className="rounded-full">
-              Sin stock
-            </Badge>
-          )
-        ) : isCustomizable ? (
-          isDetail ? null : hasVariants ? (
-            <VariantSelector
-              items={items}
-              product={{ id: product.id, title: product.title, price: payablePrice, amountInCents, image }}
-              customizable
-            />
-          ) : (
-            <Link
-              href={`/products/${product.id}`}
-              className="mt-4 block w-full rounded-[var(--radius-btn-xl)] border-2 border-[var(--border)] bg-[var(--accent)] px-4 py-2 text-center text-sm font-bold text-[var(--accent-foreground)] shadow-[var(--shadow-btn-xl)_var(--shadow-btn-xl)_0_0_var(--shadow)] transition-all hover:translate-x-[var(--shadow-btn-xl)] hover:translate-y-[var(--shadow-btn-xl)] hover:shadow-none"
-            >
-              Personalizar
-            </Link>
-          )
-        ) : hasVariants ? (
-          <VariantSelector
-            items={items}
-            product={{ id: product.id, title: product.title, price: payablePrice, amountInCents, image }}
-          />
-        ) : singleItem ? (
-          <AddToCartButton
-            id={singleItem.id}
-            productId={product.id}
-            itemId={singleItem.id}
-            title={product.title}
-            price={payablePrice}
-            amountInCents={amountInCents}
-            image={image}
-          />
-        ) : null}
+        {cta && <div className="mt-auto pt-2">{cta}</div>}
       </div>
     </article>
   );
