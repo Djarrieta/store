@@ -96,6 +96,13 @@ export default function ProductCard({ product, items = [], priority = false }: P
               Ver detalle
             </Link>
           </div>
+        ) : product.customizable && product.customization_kind ? (
+          <Link
+            href={`/products/${product.id}`}
+            className="mt-4 block w-full rounded-[var(--radius-btn-xl)] border-2 border-[var(--border)] bg-[var(--accent)] px-4 py-2 text-center text-sm font-bold text-[var(--accent-foreground)] shadow-[var(--shadow-btn-xl)_var(--shadow-btn-xl)_0_0_var(--shadow)] transition-all hover:translate-x-[var(--shadow-btn-xl)] hover:translate-y-[var(--shadow-btn-xl)] hover:shadow-none"
+          >
+            Personalizar
+          </Link>
         ) : hasVariants ? (
           <VariantSelector
             items={items}

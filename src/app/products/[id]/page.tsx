@@ -90,6 +90,51 @@ export default async function ProductDetailPage({
         })
     : [];
 
+  const productInfo = (
+    <>
+      <ProductImageCarousel images={product.images} title={product.title} />
+
+      <h1 className="font-display text-3xl font-bold">{product.title}</h1>
+      {product.description && (
+        <p className="mt-2 text-sm text-[var(--muted)]">{product.description}</p>
+      )}
+
+      <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+        <p>
+          <strong>Precio:</strong>{" "}
+          {effectivePrice !== null ? (
+            <>
+              <span>{formatCurrency(effectivePrice)}</span>
+              <span className="ml-2 text-[var(--muted)] line-through">
+                {formatCurrency(product.price)}
+              </span>
+              <span className="ml-2 text-[var(--ok-text)] font-semibold">
+                −{product.discount}%
+              </span>
+            </>
+          ) : (
+            formatCurrency(product.price)
+          )}
+        </p>
+        {categoryLabel && (
+          <p>
+            <strong>Categoría:</strong> {categoryLabel}
+          </p>
+        )}
+      </div>
+
+      {product.tags.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {product.tags.map((tag) => (
+            <Badge key={tag} variant="secondary" size="sm" className="rounded-full">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      )}
+    </>
+  );
+
   return (
     <article className="space-y-4">
       <Breadcrumb
@@ -99,62 +144,11 @@ export default async function ProductDetailPage({
         ]}
       />
       <div className="rounded-2xl border-4 border-[var(--border)] bg-[var(--surface)] p-5 shadow-[6px_6px_0_0_var(--shadow)]">
-        <ProductImageCarousel images={product.images} title={product.title} />
-
-        <h1 className="font-display text-3xl font-bold">{product.title}</h1>
-        {product.description && (
-          <p className="mt-2 text-sm text-[var(--muted)]">{product.description}</p>
-        )}
-
-        <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-          <p>
-            <strong>Precio:</strong>{" "}
-            {effectivePrice !== null ? (
-              <>
-                <span>{formatCurrency(effectivePrice)}</span>
-                <span className="ml-2 text-[var(--muted)] line-through">
-                  {formatCurrency(product.price)}
-                </span>
-                <span className="ml-2 text-[var(--ok-text)] font-semibold">
-                  −{product.discount}%
-                </span>
-              </>
-            ) : (
-              formatCurrency(product.price)
-            )}
-          </p>
-          {categoryLabel && (
-            <p>
-              <strong>Categoría:</strong> {categoryLabel}
-            </p>
-          )}
-        </div>
-
-        {product.tags.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {product.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" size="sm" className="rounded-full">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
+        {productInfo}
 
         {!isPurchasable ? (
           <p className="mt-4 text-sm font-semibold text-[var(--error-text)]">Sin stock</p>
-        ) : isCustomizable ? (
-          <Suspense fallback={null}>
-            <CustomizationFlow
-              productId={product.id}
-              productTitle={product.title}
-              productImage={product.images?.[0]?.url}
-              price={payablePrice}
-              amountInCents={amountInCents}
-              kind={product.customization_kind!}
-              variants={customizationVariants}
-            />
-          </Suspense>
-        ) : hasVariants ? (
+        ) : isCustomizable ? null : hasVariants ? (
           <VariantSelector
             items={itemList}
             product={{ id: product.id, title: product.title, price: payablePrice, amountInCents, image: product.images?.[0]?.url }}
@@ -171,6 +165,23 @@ export default async function ProductDetailPage({
           />
         )}
       </div>
+
+      {isPurchasable && isCustomizable && (
+        <section className="rounded-2xl border-4 border-[var(--border)] bg-[var(--surface)] p-5 shadow-[6px_6px_0_0_var(--shadow)]">
+          <h2 className="font-display text-xl font-bold">Diseña tu producto</h2>
+          <Suspense fallback={null}>
+            <CustomizationFlow
+              productId={product.id}
+              productTitle={product.title}
+              productImage={product.images?.[0]?.url}
+              price={payablePrice}
+              amountInCents={amountInCents}
+              kind={product.customization_kind!}
+              variants={customizationVariants}
+            />
+          </Suspense>
+        </section>
+      )}
     </article>
   );
 }
