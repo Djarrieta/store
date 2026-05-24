@@ -1,5 +1,5 @@
 ---
-applyTo: "src/app/**/actions.ts"
+applyTo: "src/app/**/actions.ts,src/app/actions/*.ts"
 ---
 
 # Server Actions Conventions
