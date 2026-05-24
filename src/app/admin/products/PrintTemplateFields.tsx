@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import Button from "@/app/components/Button";
 import Input, { Select } from "@/app/components/Input";
@@ -216,20 +216,42 @@ function FileSlot({
   onFile: (file: File | null) => void;
   onClear: () => void;
 }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   return (
     <div className="grid gap-1">
       <span className="text-sm font-semibold">
         {label} {uploading && <span className="text-[var(--muted)]">(subiendo…)</span>}
       </span>
-      <Input
+      <input
+        ref={fileInputRef}
         type="file"
         accept="image/png"
         disabled={uploading}
+        className="sr-only"
         onChange={(e) => {
-          onFile(e.target.files?.[0] ?? null);
-          e.target.value = "";
+          const input = e.currentTarget;
+          const file = input.files?.[0] ?? null;
+          setFileName(file?.name ?? null);
+          onFile(file);
+          input.value = "";
         }}
       />
+      <div className="flex flex-wrap items-center gap-2 rounded-md border-2 border-[var(--border)] bg-[var(--card)] px-3 py-2">
+        <Button
+          type="button"
+          variant="primary"
+          size="sm"
+          shadow
+          disabled={uploading}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Elegir archivo
+        </Button>
+        <span className="text-sm text-[var(--muted)] truncate">
+          {fileName ?? "Ningún archivo seleccionado"}
+        </span>
+      </div>
       <input type="hidden" name={name} value={value} />
       {value && (
         <div className="flex items-center justify-between gap-2 text-xs text-[var(--muted)]">
@@ -239,7 +261,10 @@ function FileSlot({
             variant="ghost"
             size="none"
             className="font-semibold !text-[var(--error-text)] hover:!text-[var(--error-text)]"
-            onClick={onClear}
+            onClick={() => {
+              setFileName(null);
+              onClear();
+            }}
           >
             quitar
           </Button>
