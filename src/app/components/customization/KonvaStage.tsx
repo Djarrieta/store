@@ -13,6 +13,7 @@ import {
 } from "./types";
 
 const MAX_STAGE = 560;
+const MIN_STAGE = 200;
 
 export interface KonvaStageHandle {
   /** Capture the current stage as a PNG data URL (multiplied for crispness). */
@@ -30,12 +31,12 @@ interface Props {
   hideStatus?: boolean;
 }
 
-function fitStage(widthMm: number, heightMm: number) {
+function fitStage(widthMm: number, heightMm: number, maxDim: number) {
   const aspect = widthMm / heightMm;
   if (aspect >= 1) {
-    return { width: MAX_STAGE, height: Math.round(MAX_STAGE / aspect) };
+    return { width: maxDim, height: Math.round(maxDim / aspect) };
   }
-  return { width: Math.round(MAX_STAGE * aspect), height: MAX_STAGE };
+  return { width: Math.round(maxDim * aspect), height: maxDim };
 }
 
 function useHtmlImage(url: string | null): HTMLImageElement | null {
@@ -72,10 +73,26 @@ const KonvaStage = function KonvaStage({
   hideStatus = false,
 }: Props) {
   const { template, mockupUrl } = variant;
-  const stage = fitStage(template.width_mm, template.height_mm);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [maxDim, setMaxDim] = useState<number>(MAX_STAGE);
+  const stage = fitStage(template.width_mm, template.height_mm, maxDim);
   const mockup = useHtmlImage(mockupUrl);
   const userImg = useHtmlImage(source?.url ?? null);
   const stageRef = useRef<Konva.Stage | null>(null);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const update = () => {
+      const available = el.clientWidth;
+      if (available <= 0) return;
+      setMaxDim(Math.max(MIN_STAGE, Math.min(MAX_STAGE, Math.floor(available))));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!onReady) return;
@@ -97,10 +114,11 @@ const KonvaStage = function KonvaStage({
 
   return (
     <div className="space-y-3">
-      <div
-        className="mx-auto overflow-hidden rounded-xl border-2 border-[var(--border)] bg-[var(--surface)]"
-        style={{ width: stage.width, height: stage.height }}
-      >
+      <div ref={wrapperRef} className="w-full">
+        <div
+          className="mx-auto overflow-hidden rounded-xl border-2 border-[var(--border)] bg-[var(--surface)]"
+          style={{ width: stage.width, height: stage.height }}
+        >
         <Stage ref={stageRef} width={stage.width} height={stage.height}>
           <Layer listening={false}>
             <Rect x={0} y={0} width={stage.width} height={stage.height} fill="#f4f4f4" />
@@ -163,6 +181,7 @@ const KonvaStage = function KonvaStage({
             />
           </Layer>
         </Stage>
+      </div>
       </div>
 
       {!hideStatus && (
