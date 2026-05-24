@@ -13,11 +13,10 @@ import {
   type SourceImage,
   type Transform,
 } from "@/app/components/customization/types";
-import Input, { Select } from "@/app/components/Input";
+import { Select } from "@/app/components/Input";
 import { useCart } from "@/lib/cart";
 import { getSource, putSource } from "@/lib/customizations/indexedDb";
 import {
-  deleteLocalCustomization,
   getLocalCustomization,
   newLocalKey,
   putLocalCustomization,
@@ -161,20 +160,6 @@ export default function CustomizationFlow({
     }
   }
 
-  function handleStartOver() {
-    if (source?.url.startsWith("blob:")) URL.revokeObjectURL(source.url);
-    if (activeLocalKey) {
-      deleteLocalCustomization(activeLocalKey);
-    }
-    setSource(null);
-    setVariantId("");
-    setTransform(DEFAULT_TRANSFORM);
-    setActiveLocalKey(null);
-    setStep(1);
-    setConfirmMsg(null);
-    setEditError(null);
-  }
-
   if (variants.length === 0) {
     return (
       <p className="mt-4 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--bg)] p-4 text-sm text-[var(--muted)]">
@@ -228,10 +213,11 @@ export default function CustomizationFlow({
               setSource(next);
               setEditError(err);
             }}
+            showFileInput={false}
           />
           <div className="flex flex-wrap justify-between gap-2">
-            <Button variant="secondary" onClick={handleStartOver}>
-              Empezar de nuevo
+            <Button variant="secondary" onClick={() => setStep(2)}>
+              Cambiar imagen
             </Button>
             <Button
               variant="primary"
@@ -437,6 +423,9 @@ function UploadStep({
   onPicked: (img: SourceImage) => void;
   onError: (msg: string) => void;
 }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+
   async function handleFile(file: File | null) {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
@@ -471,16 +460,32 @@ function UploadStep({
       <p className="text-sm text-[var(--muted)]">
         Mínimo {MIN_DIM}×{MIN_DIM} px, máximo 20 MB. PNG / JPG / WEBP.
       </p>
-      <Input
+      <input
+        ref={fileInputRef}
         type="file"
         accept="image/png,image/jpeg,image/webp"
+        className="sr-only"
         onChange={async (e) => {
           const input = e.currentTarget;
           const file = input.files?.[0] ?? null;
+          setFileName(file?.name ?? null);
           await handleFile(file);
           input.value = "";
         }}
       />
+      <div className="flex flex-wrap items-center gap-2 rounded-md border-2 border-[var(--border)] bg-[var(--card)] px-3 py-2">
+        <Button
+          variant="primary"
+          size="sm"
+          shadow
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Elegir archivo
+        </Button>
+        <span className="text-sm text-[var(--muted)] truncate">
+          {fileName ?? "Ningún archivo seleccionado"}
+        </span>
+      </div>
       <Button variant="secondary" onClick={onBack}>
         Cambiar variación
       </Button>

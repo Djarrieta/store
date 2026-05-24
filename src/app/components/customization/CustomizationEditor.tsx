@@ -1,10 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
 
 import Button from "@/app/components/Button";
-import Input from "@/app/components/Input";
 
 import type { KonvaStageHandle } from "./KonvaStage";
 import {
@@ -42,6 +41,8 @@ const CustomizationEditor = forwardRef<CustomizationEditorHandle, Props>(
     ref,
   ) {
     const stageRef = useRef<KonvaStageHandle | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [fileName, setFileName] = useState<string | null>(null);
     const handleReady = useCallback((handle: KonvaStageHandle) => {
       stageRef.current = handle;
     }, []);
@@ -102,16 +103,32 @@ const CustomizationEditor = forwardRef<CustomizationEditorHandle, Props>(
           {showFileInput && (
             <div className="grid gap-1">
               <span className="text-sm font-semibold">Imagen</span>
-              <Input
+              <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                className="sr-only"
                 onChange={async (e) => {
                   const input = e.currentTarget;
                   const file = input.files?.[0] ?? null;
+                  setFileName(file?.name ?? null);
                   await handleFile(file);
                   input.value = "";
                 }}
               />
+              <div className="flex flex-wrap items-center gap-2 rounded-md border-2 border-[var(--border)] bg-[var(--card)] px-3 py-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  shadow
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Elegir archivo
+                </Button>
+                <span className="text-sm text-[var(--muted)] truncate">
+                  {fileName ?? "Ningún archivo seleccionado"}
+                </span>
+              </div>
               {source && (
                 <span className="text-xs text-[var(--muted)]">
                   {source.width} × {source.height} px
