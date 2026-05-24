@@ -1,13 +1,9 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import AddToCartButton from "@/app/components/AddToCartButton";
-import Badge from "@/app/components/Badge";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import type { EditorVariant } from "@/app/components/customization/types";
-import ProductImageCarousel from "@/app/components/ProductImageCarousel";
-import VariantSelector from "@/app/components/VariantSelector";
-import { formatCurrency } from "@/lib/format";
+import ProductCard from "@/app/components/ProductCard";
 import { createClient } from "@/lib/supabase/server";
 import type { ItemWithCategories, PrintTemplate, ProductWithCategory } from "@/types";
 
@@ -47,15 +43,7 @@ export default async function ProductDetailPage({
   const payablePrice = effectivePrice ?? product.price;
   const amountInCents = Math.round(payablePrice * 100);
 
-  const categoryLabel = product.category
-    ? product.category.parent
-      ? `${product.category.parent.name} / ${product.category.name}`
-      : product.category.name
-    : null;
-
   const itemList = items ?? [];
-  const hasVariants = itemList.some((i) => i.item_categories.length > 0);
-  const singleItem = !hasVariants && itemList.length === 1 ? itemList[0] : null;
   const isPurchasable = itemList.some((i) => i.stock > 0);
 
   const isCustomizable =
@@ -91,51 +79,6 @@ export default async function ProductDetailPage({
         })
     : [];
 
-  const productInfo = (
-    <>
-      <ProductImageCarousel images={product.images} title={product.title} />
-
-      <h1 className="font-display text-3xl font-bold">{product.title}</h1>
-      {product.description && (
-        <p className="mt-2 text-sm text-[var(--muted)]">{product.description}</p>
-      )}
-
-      <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-        <p>
-          <strong>Precio:</strong>{" "}
-          {effectivePrice !== null ? (
-            <>
-              <span>{formatCurrency(effectivePrice)}</span>
-              <span className="ml-2 text-[var(--muted)] line-through">
-                {formatCurrency(product.price)}
-              </span>
-              <span className="ml-2 text-[var(--ok-text)] font-semibold">
-                −{product.discount}%
-              </span>
-            </>
-          ) : (
-            formatCurrency(product.price)
-          )}
-        </p>
-        {categoryLabel && (
-          <p>
-            <strong>Categoría:</strong> {categoryLabel}
-          </p>
-        )}
-      </div>
-
-      {product.tags.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {product.tags.map((tag) => (
-            <Badge key={tag} variant="secondary" size="sm" className="rounded-full">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-      )}
-    </>
-  );
-
   return (
     <article className="space-y-4">
       <Breadcrumb
@@ -144,28 +87,7 @@ export default async function ProductDetailPage({
           { label: product.title },
         ]}
       />
-      <div className="rounded-2xl border-4 border-[var(--border)] bg-[var(--surface)] p-5 shadow-[6px_6px_0_0_var(--shadow)]">
-        {productInfo}
-
-        {!isPurchasable ? (
-          <p className="mt-4 text-sm font-semibold text-[var(--error-text)]">Sin stock</p>
-        ) : isCustomizable ? null : hasVariants ? (
-          <VariantSelector
-            items={itemList}
-            product={{ id: product.id, title: product.title, price: payablePrice, amountInCents, image: product.images?.[0]?.url }}
-          />
-        ) : (
-          <AddToCartButton
-            id={singleItem!.id}
-            productId={product.id}
-            itemId={singleItem!.id}
-            title={product.title}
-            price={payablePrice}
-            amountInCents={amountInCents}
-            image={product.images?.[0]?.url}
-          />
-        )}
-      </div>
+      <ProductCard product={product} items={itemList} variant="detail" />
 
       {isPurchasable && isCustomizable && (
         <section className="rounded-2xl border-4 border-[var(--border)] bg-[var(--surface)] p-5 shadow-[6px_6px_0_0_var(--shadow)]">
