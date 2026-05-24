@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import Button from "@/app/components/Button";
 import Input, { Select } from "@/app/components/Input";
 import { uploadStorageObject } from "@/lib/supabase/storage";
 import type { CustomizationKind, PrintTemplate, SafeArea } from "@/types";
@@ -233,13 +234,15 @@ function FileSlot({
       {value && (
         <div className="flex items-center justify-between gap-2 text-xs text-[var(--muted)]">
           <span className="truncate" title={value}>{value}</span>
-          <button
+          <Button
             type="button"
-            className="font-semibold text-[var(--error-text)] underline"
+            variant="ghost"
+            size="none"
+            className="font-semibold !text-[var(--error-text)] hover:!text-[var(--error-text)]"
             onClick={onClear}
           >
             quitar
-          </button>
+          </Button>
         </div>
       )}
     </div>

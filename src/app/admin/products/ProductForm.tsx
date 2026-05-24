@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import Button from "@/app/components/Button";
 import { FormActions, FormCard } from "@/app/components/FormCard";
-import Input, { Select, Textarea } from "@/app/components/Input";
+import Input, { Checkbox, Select, Textarea } from "@/app/components/Input";
 import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
 import { uploadImage } from "@/lib/supabase/storage";
 import type { CustomizationKind, Product, ProductImage } from "@/types";
@@ -182,12 +182,9 @@ export default function ProductForm({
       <input type="hidden" name="images" value={serializedImages} />
 
       <label className="flex items-center gap-3 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[2px_2px_0_0_var(--shadow)] cursor-pointer">
-        <Input
-          type="checkbox"
+        <Checkbox
           name="ocultar"
           defaultChecked={defaultValues?.ocultar ?? false}
-          fullWidth={false}
-          className="h-4 w-4 accent-[var(--accent)]"
         />
         <span className="text-sm font-semibold">Ocultar producto (no visible al público)</span>
       </label>
@@ -198,12 +195,10 @@ export default function ProductForm({
         </legend>
 
         <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
+          <Checkbox
             name="customizable"
             checked={customizable}
             onChange={(e) => setCustomizable(e.target.checked)}
-            className="h-4 w-4 accent-[var(--accent)]"
           />
           <span className="text-sm font-semibold">
             Personalizable (imprime una imagen del cliente)

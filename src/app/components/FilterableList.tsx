@@ -5,7 +5,7 @@ import { useState } from "react";
 import Badge from "@/app/components/Badge";
 import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
-import Input from "@/app/components/Input";
+import Input, { Checkbox } from "@/app/components/Input";
 
 interface FilterableListProps {
   q?: string;
@@ -116,12 +116,10 @@ export default function FilterableList({
               placeholder="tag1,tag2"
             />
             <label className="flex items-center gap-2 text-sm font-semibold sm:col-span-3">
-              <input
-                type="checkbox"
+              <Checkbox
                 name="customizable"
                 value="1"
                 defaultChecked={customizable}
-                className="h-4 w-4 rounded border-2 border-[var(--border)] accent-[var(--accent)]"
               />
               Solo personalizables
             </label>
