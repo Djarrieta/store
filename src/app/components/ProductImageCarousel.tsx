@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import Button from "@/app/components/Button";
 import type { ProductImage } from "@/types/product";
@@ -17,74 +17,152 @@ export default function ProductImageCarousel({
   title,
   compact = false,
 }: ProductImageCarouselProps) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(images.length > 1);
   const [current, setCurrent] = useState(0);
+
+  const updateScrollState = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollPrev(scrollLeft > 1);
+    setCanScrollNext(scrollLeft + clientWidth < scrollWidth - 1);
+    const idx = clientWidth > 0 ? Math.round(scrollLeft / clientWidth) : 0;
+    setCurrent(Math.min(Math.max(idx, 0), images.length - 1));
+  }, [images.length]);
+
+  useEffect(() => {
+    updateScrollState();
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("resize", updateScrollState);
+    return () => {
+      el.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, [updateScrollState]);
+
+  const scrollToIndex = (index: number) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollTo({ left: index * el.clientWidth, behavior: "smooth" });
+  };
+
+  const scrollPrev = () => scrollToIndex(Math.max(current - 1, 0));
+  const scrollNext = () => scrollToIndex(Math.min(current + 1, images.length - 1));
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      scrollPrev();
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      scrollNext();
+    }
+  };
 
   if (images.length === 0) return null;
 
   if (images.length === 1) {
     return (
-      <Image
-        src={images[0].url}
-        alt={images[0].description ?? title}
-        width={1200}
-        height={600}
-        unoptimized
-        priority
-        className="mb-5 h-64 w-full rounded-xl border-2 border-[var(--border)] object-cover"
-      />
+      <div className="relative mx-auto mb-5 aspect-[4/3] w-full max-w-[min(100%,80vh)] overflow-hidden rounded-xl border-2 border-[var(--border)] bg-[var(--bg)]">
+        <Image
+          src={images[0].url}
+          alt={images[0].description ?? title}
+          fill
+          unoptimized
+          priority
+          sizes="(min-width: 768px) 50vw, 100vw"
+          className="object-contain"
+        />
+      </div>
     );
   }
 
-  return (
-    <div className="mb-5 select-none">
-      {/* Main image */}
-      <div className="relative h-64 w-full overflow-hidden rounded-xl border-2 border-[var(--border)]">
-        <Image
-          src={images[current].url}
-          alt={images[current].description ?? `${title} — imagen ${current + 1}`}
-          fill
-          unoptimized
-          priority={current === 0}
-          className="object-cover"
-        />
+  const arrowBtnClass =
+    "absolute top-1/2 z-10 h-8 w-8 -translate-y-1/2 rounded-full p-0 shadow-[2px_2px_0_0_var(--shadow)] transition-all hover:shadow-none active:translate-y-[calc(-50%+2px)]";
+  const arrowIconProps = {
+    width: 14,
+    height: 14,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2.5,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
 
-        {/* Prev / Next arrows */}
+  return (
+    <div
+      className="mb-5 select-none"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={title}
+      onKeyDownCapture={handleKeyDown}
+      tabIndex={0}
+    >
+      <div className="relative mx-auto w-full max-w-[min(100%,80vh)]">
+        {/* Scroll-snap track (swipeable) */}
+        <div
+          ref={scrollerRef}
+          className="flex aspect-[4/3] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden rounded-xl border-2 border-[var(--border)] bg-[var(--bg)] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {images.map((img, i) => (
+            <div
+              key={i}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${i + 1} de ${images.length}`}
+              className="relative h-full min-w-0 shrink-0 grow-0 basis-full snap-start"
+            >
+              <Image
+                src={img.url}
+                alt={img.description ?? `${title} — imagen ${i + 1}`}
+                fill
+                unoptimized
+                priority={i === 0}
+                sizes="(min-width: 768px) 50vw, 100vw"
+                className="object-contain"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Prev / Next arrows — project Button (icon variant + shadow) */}
         <Button
           variant="secondary"
-          size="none"
-          onClick={() => setCurrent((c) => (c - 1 + images.length) % images.length)}
+          size="icon"
+          onClick={scrollPrev}
+          disabled={!canScrollPrev}
           aria-label="Imagen anterior"
-          className="absolute left-2 top-1/2 -translate-y-1/2 px-2 py-1 text-sm font-bold rounded-lg shadow-[3px_3px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
+          className={`${arrowBtnClass} left-2`}
         >
-          ‹
+          <svg {...arrowIconProps}>
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
         </Button>
         <Button
           variant="secondary"
-          size="none"
-          onClick={() => setCurrent((c) => (c + 1) % images.length)}
+          size="icon"
+          onClick={scrollNext}
+          disabled={!canScrollNext}
           aria-label="Imagen siguiente"
-          className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-sm font-bold rounded-lg shadow-[3px_3px_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all"
+          className={`${arrowBtnClass} right-2`}
         >
-          ›
+          <svg {...arrowIconProps}>
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
         </Button>
       </div>
 
-      {/* Dot indicators */}
+      {/* Slide counter */}
       {!compact && (
-        <div className="mt-3 flex justify-center gap-2" role="tablist" aria-label="Seleccionar imagen">
-          {images.map((img, i) => (
-            <Button
-              key={i}
-              role="tab"
-              aria-selected={i === current}
-              aria-label={img.description ?? `Imagen ${i + 1}`}
-              onClick={() => setCurrent(i)}
-              className={`h-2.5 w-2.5 rounded-full border-2 border-[var(--border)] transition-colors ${
-                i === current ? "bg-[var(--border)]" : "bg-[var(--surface)]"
-              }`}
-            />
-          ))}
-        </div>
+        <p className="mt-2 text-center text-xs font-semibold text-[var(--muted)]">
+          {current + 1} / {images.length}
+        </p>
       )}
 
       {/* Thumbnail strip */}
@@ -93,8 +171,9 @@ export default function ProductImageCarousel({
           {images.map((img, i) => (
             <Button
               key={i}
-              onClick={() => setCurrent(i)}
+              onClick={() => scrollToIndex(i)}
               aria-label={img.description ?? `Imagen ${i + 1}`}
+              aria-current={i === current}
               className={`relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                 i === current
                   ? "border-[var(--border)] shadow-[2px_2px_0_0_var(--shadow)]"
