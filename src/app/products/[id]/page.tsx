@@ -67,11 +67,11 @@ export default async function ProductDetailPage({
         })
         .map((item) => {
           const tpl = item.print_template;
+          const categories = item.item_categories
+            .map((ic) => ic.category)
+            .filter((c): c is NonNullable<typeof c> => !!c);
           const label =
-            item.item_categories
-              .map((ic) => ic.category?.name)
-              .filter(Boolean)
-              .join(" / ") || tpl.label;
+            categories.map((c) => c.name).filter(Boolean).join(" / ") || tpl.label;
           return {
             itemId: item.id,
             label,
@@ -86,6 +86,7 @@ export default async function ProductDetailPage({
                   .from("print-templates")
                   .getPublicUrl(tpl.mask_path).data.publicUrl
               : null,
+            categories,
           };
         })
     : [];

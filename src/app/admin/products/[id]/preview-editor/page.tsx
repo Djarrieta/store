@@ -61,6 +61,7 @@ export default async function PreviewEditorPage({
         maskUrl: tpl.mask_path
           ? supabase.storage.from("print-templates").getPublicUrl(tpl.mask_path).data.publicUrl
           : null,
+        categories: [],
       };
     });
 

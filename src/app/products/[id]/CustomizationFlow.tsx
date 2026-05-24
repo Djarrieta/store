@@ -13,7 +13,7 @@ import {
   type SourceImage,
   type Transform,
 } from "@/app/components/customization/types";
-import Input from "@/app/components/Input";
+import Input, { Select } from "@/app/components/Input";
 import { useCart } from "@/lib/cart";
 import { getSource, putSource } from "@/lib/customizations/indexedDb";
 import {
@@ -56,12 +56,19 @@ export default function CustomizationFlow({
   const editLocalKey = editParam?.startsWith("local:")
     ? editParam.slice("local:".length)
     : null;
+  const preselectVariantId = params.get("variant");
 
   const { addItem, openCart } = useCart();
   const editorRef = useRef<CustomizationEditorHandle | null>(null);
 
   const [step, setStep] = useState<Step>(1);
-  const [variantId, setVariantId] = useState<string>("");
+  const [variantId, setVariantId] = useState<string>(() =>
+    !editLocalKey &&
+    preselectVariantId &&
+    variants.some((v) => v.itemId === preselectVariantId)
+      ? preselectVariantId
+      : "",
+  );
   const [source, setSource] = useState<SourceImage | null>(null);
   const [transform, setTransform] = useState<Transform>(DEFAULT_TRANSFORM);
   const [editError, setEditError] = useState<string | null>(null);
@@ -191,10 +198,8 @@ export default function CustomizationFlow({
           kind={kind}
           variants={variants}
           selectedId={variantId}
-          onPick={(id) => {
-            setVariantId(id);
-            setStep(2);
-          }}
+          onSelect={setVariantId}
+          onContinue={() => setStep(2)}
         />
       )}
 
@@ -307,35 +312,114 @@ function StepIndicator({ current }: { current: Step }) {
   );
 }
 
+interface Dimension {
+  id: string;
+  name: string;
+  values: { id: string; name: string }[];
+}
+
+function deriveDimensions(variants: EditorVariant[]): Dimension[] {
+  const map = new Map<string, Dimension>();
+  for (const v of variants) {
+    for (const cat of v.categories) {
+      if (!cat.parent_id || !cat.parent) continue;
+      if (!map.has(cat.parent_id)) {
+        map.set(cat.parent_id, { id: cat.parent_id, name: cat.parent.name, values: [] });
+      }
+      const dim = map.get(cat.parent_id)!;
+      if (!dim.values.find((vv) => vv.id === cat.id)) {
+        dim.values.push({ id: cat.id, name: cat.name });
+      }
+    }
+  }
+  return Array.from(map.values());
+}
+
 function VariantPicker({
   kind,
   variants,
   selectedId,
-  onPick,
+  onSelect,
+  onContinue,
 }: {
   kind: CustomizationKind;
   variants: EditorVariant[];
   selectedId: string;
-  onPick: (id: string) => void;
+  onSelect: (id: string) => void;
+  onContinue: () => void;
 }) {
+  const dimensions = useMemo(() => deriveDimensions(variants), [variants]);
+  const selectedVariant = variants.find((v) => v.itemId === selectedId);
+  const [selected, setSelected] = useState<Record<string, string>>(() => {
+    const acc: Record<string, string> = {};
+    if (selectedVariant) {
+      for (const cat of selectedVariant.categories) {
+        if (cat.parent_id) acc[cat.parent_id] = cat.id;
+      }
+    }
+    return acc;
+  });
+
+  function handleChange(dimId: string, valueId: string) {
+    const next = { ...selected, [dimId]: valueId };
+    setSelected(next);
+    const valueIds = Object.values(next);
+    if (valueIds.length === dimensions.length && dimensions.length > 0) {
+      const match = variants.find((v) =>
+        valueIds.every((vid) => v.categories.some((c) => c.id === vid)),
+      );
+      if (match) onSelect(match.itemId);
+      else onSelect("");
+    } else {
+      onSelect("");
+    }
+  }
+
+  // Fallback: if there are no dimensions (single-variant customizable), auto-select.
+  useEffect(() => {
+    if (dimensions.length === 0 && variants.length === 1 && !selectedId) {
+      onSelect(variants[0].itemId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dimensions.length, variants.length]);
+
+  const allSelected =
+    dimensions.length > 0 && Object.values(selected).length === dimensions.length;
+  const ready = !!selectedId && (dimensions.length === 0 || allSelected);
+
   return (
     <div className="space-y-3">
       <h2 className="font-display text-lg font-bold">{KIND_PICKER_LABEL[kind]}</h2>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {variants.map((v) => (
-          <button
-            key={v.itemId}
-            type="button"
-            onClick={() => onPick(v.itemId)}
-            className={`rounded-xl border-2 px-3 py-3 text-left text-sm font-semibold shadow-[2px_2px_0_0_var(--shadow)] transition-transform hover:-translate-y-0.5 ${
-              selectedId === v.itemId
-                ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
-                : "border-[var(--border)] bg-[var(--card)]"
-            }`}
-          >
-            {v.label}
-          </button>
-        ))}
+      {dimensions.length === 0 ? (
+        <p className="text-sm text-[var(--muted)]">Variación única disponible.</p>
+      ) : (
+        dimensions.map((dim) => (
+          <label key={dim.id} className="grid gap-1">
+            <span className="text-sm font-semibold">{dim.name}</span>
+            <Select
+              shadow
+              value={selected[dim.id] ?? ""}
+              onChange={(e) => handleChange(dim.id, e.target.value)}
+            >
+              <option value="">— Selecciona —</option>
+              {dim.values.map((val) => (
+                <option key={val.id} value={val.id}>
+                  {val.name}
+                </option>
+              ))}
+            </Select>
+          </label>
+        ))
+      )}
+      {allSelected && !selectedId && (
+        <p className="text-xs font-semibold text-[var(--error-text)]">
+          Esa combinación no está disponible.
+        </p>
+      )}
+      <div className="flex justify-end">
+        <Button variant="primary" shadow disabled={!ready} onClick={onContinue}>
+          Continuar
+        </Button>
       </div>
     </div>
   );

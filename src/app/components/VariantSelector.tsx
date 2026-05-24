@@ -36,9 +36,12 @@ interface Dimension {
 export default function VariantSelector({
   items,
   product,
+  customizable = false,
 }: {
   items: ItemVariant[];
   product: ProductInfo;
+  /** When true, replaces "Agregar al carrito" with a "Personalizar" link to the product detail page. */
+  customizable?: boolean;
 }) {
   // Derive dimensions from items
   const dimensionMap = new Map<string, Dimension>();
@@ -115,16 +118,35 @@ export default function VariantSelector({
         </p>
       )}
 
-      <Button
-        variant="primary"
-        size="xl"
-        shadow
-        fullWidth
-        onClick={handleAdd}
-        disabled={!allSelected || !inStock}
-      >
-        {added ? "✓ Agregado!" : "Agregar al carrito"}
-      </Button>
+      {customizable ? (
+        resolvedItem && inStock ? (
+          <Button
+            href={`/products/${product.id}?variant=${resolvedItem.id}`}
+            variant="primary"
+            size="xl"
+            shadow
+            fullWidth
+            className="text-center"
+          >
+            Personalizar
+          </Button>
+        ) : (
+          <Button variant="primary" size="xl" shadow fullWidth disabled>
+            Personalizar
+          </Button>
+        )
+      ) : (
+        <Button
+          variant="primary"
+          size="xl"
+          shadow
+          fullWidth
+          onClick={handleAdd}
+          disabled={!allSelected || !inStock}
+        >
+          {added ? "✓ Agregado!" : "Agregar al carrito"}
+        </Button>
+      )}
     </div>
   );
 }

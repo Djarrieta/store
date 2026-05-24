@@ -1,11 +1,19 @@
 import type { CustomizationTransform, PrintTemplate } from "@/types";
 
+export interface VariantCategoryRef {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  parent: { id: string; name: string } | null;
+}
+
 export interface EditorVariant {
   itemId: string;
   label: string;
   template: PrintTemplate;
   mockupUrl: string | null;
   maskUrl: string | null;
+  categories: VariantCategoryRef[];
 }
 
 export interface SourceImage {
