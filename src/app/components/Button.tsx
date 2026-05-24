@@ -97,7 +97,10 @@ export default function Button(props: ButtonProps) {
 
   if ("href" in props) {
     return (
-      <Link className={classes} {...omitShared(props as AsLink)}>
+      <Link
+        className={clsx("inline-flex items-center justify-center text-center", classes)}
+        {...omitShared(props as AsLink)}
+      >
         {children}
       </Link>
     );
