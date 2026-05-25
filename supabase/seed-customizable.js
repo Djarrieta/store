@@ -6,9 +6,10 @@
 //
 // Idempotent: uses deterministic UUIDs + Prefer: resolution=merge-duplicates.
 // Depends on:
-//   - migrations 08 (products.customizable), 09 (items), 16 (print_templates)
+//   - migrations 08 (customization_kinds), 09 (products), 10 (items), 17 (print_templates)
+//   - seed 00_customization_kinds.sql (tshirt kind row)
 //   - seed 01_categories.sql (variant dimensions Talla + Color)
-//   - seed-storage.js (uploads the mockup PNG/SVG referenced below)
+//   - seed-storage.js (uploads the mockup + mask referenced below)
 const { readFileSync } = require("fs");
 const { join } = require("path");
 
@@ -42,7 +43,9 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
 }
 
 const PRODUCT_ID = "c2a00000-0000-0000-0000-000000000001";
+const TSHIRT_KIND_ID = "b2000000-0000-0000-0000-000000000002";
 const MOCKUP_PATH = "seed/tshirt-front-mockup.svg";
+const MASK_PATH = "seed/tshirt-mask.svg";
 // Storefront card image — external photo, not uploaded to Supabase Storage.
 const GALLERY_URL =
   "https://mongooseboutique.com/wp-content/uploads/2019/05/Principe-de-la-casa.jpg";
@@ -113,7 +116,7 @@ async function main() {
         tags: ["camiseta", "personalizable", "algodon", "unisex"],
         ocultar: false,
         customizable: true,
-        customization_kind: "tshirt",
+        customization_kind_id: TSHIRT_KIND_ID,
       },
     ],
     "id",
@@ -146,14 +149,13 @@ async function main() {
     "print_templates",
     SIZE_VARIANTS.map((v) => ({
       item_id: v.itemId,
-      kind: "tshirt",
       label: `Talla ${v.code} — Frente`,
       attributes: { placement: "front" },
       width_mm: 300,
       height_mm: 400,
       print_dpi: 300,
       mockup_path: MOCKUP_PATH,
-      mask_path: null,
+      mask_path: MASK_PATH,
       safe_area: { x: 0.1, y: 0.1, width: 0.8, height: 0.8 },
     })),
     "item_id",

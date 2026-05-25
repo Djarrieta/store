@@ -1,24 +1,3 @@
-export type CustomizationKind = "phone_case" | "tshirt" | "mug";
-
-export interface PhoneCaseAttributes {
-  brand: string;
-  model: string;
-}
-
-export interface TshirtAttributes {
-  placement: "front" | "back";
-}
-
-export interface MugAttributes {
-  wrap: "full" | "partial";
-}
-
-export type PrintTemplateAttributes =
-  | PhoneCaseAttributes
-  | TshirtAttributes
-  | MugAttributes
-  | Record<string, unknown>;
-
 export interface SafeArea {
   x: number;
   y: number;
@@ -26,11 +5,47 @@ export interface SafeArea {
   height: number;
 }
 
+export type KindAttributeField =
+  | {
+      key: string;
+      label: string;
+      type: "text" | "number";
+      required: boolean;
+      placeholder?: string;
+    }
+  | {
+      key: string;
+      label: string;
+      type: "select";
+      required: boolean;
+      options: { value: string; label: string }[];
+    };
+
+export interface CustomizationKind {
+  id: string;
+  slug: string;
+  label: string;
+  picker_label: string;
+  attribute_schema: KindAttributeField[];
+  sort_order: number;
+  archived: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CreateCustomizationKindInput = Omit<
+  CustomizationKind,
+  "id" | "created_at" | "updated_at"
+>;
+
+export type UpdateCustomizationKindInput = Partial<
+  Omit<CustomizationKind, "id" | "slug" | "created_at" | "updated_at">
+>;
+
 export interface PrintTemplate {
   item_id: string;
-  kind: CustomizationKind;
   label: string;
-  attributes: PrintTemplateAttributes;
+  attributes: Record<string, string | number>;
   width_mm: number;
   height_mm: number;
   print_dpi: number;

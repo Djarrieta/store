@@ -13,6 +13,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   content: "Contenido",
   orders: "Pedidos",
   ships: "Envíos",
+  "customization-kinds": "Personalización",
   new: "Nuevo",
   edit: "Editar",
 };
@@ -20,6 +21,7 @@ const SEGMENT_LABELS: Record<string, string> = {
 const NAV_LINKS = [
   { href: "/admin/categories", label: "Categorías" },
   { href: "/admin/products", label: "Productos" },
+  { href: "/admin/customization-kinds", label: "Personalización" },
   { href: "/admin/content", label: "Contenido" },
   { href: "/admin/orders", label: "Pedidos" },
   { href: "/admin/ships", label: "Envíos" },
@@ -50,7 +52,7 @@ export default function AdminNav() {
 
   // Deep page: build breadcrumb, skipping UUIDs
   // Only section-level segments are linkable (admin has no page, slugs/IDs/actions are not)
-  const LINKABLE_SEGMENTS = new Set(["categories", "products", "items", "content", "orders", "ships"]);
+  const LINKABLE_SEGMENTS = new Set(["categories", "products", "items", "content", "orders", "ships", "customization-kinds"]);
 
   const crumbs: { label: string; href?: string }[] = [];
   let accPath = "";

@@ -3,14 +3,11 @@
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type {
-  CustomizationKind,
   CustomizationTransform,
   OrderCustomizationSnapshot,
   PrintTemplate,
   SafeArea,
 } from "@/types";
-
-const VALID_KINDS: CustomizationKind[] = ["phone_case", "tshirt", "mug"];
 
 function parseTransform(raw: FormDataEntryValue | null): CustomizationTransform {
   if (typeof raw !== "string") throw new Error("transform requerido");
@@ -73,17 +70,28 @@ export async function createCustomization(
   if (!(source instanceof Blob)) throw new Error("source file requerido");
   if (!(preview instanceof Blob)) throw new Error("preview file requerido");
 
-  // Load the print template to validate + snapshot it.
+  // Load the print template + resolve customization kind via item→product join.
   const { data: templateRow, error: tplErr } = await supabase
     .from("print_templates")
-    .select("*")
+    .select(
+      "*, item:item_id(product:product_id(customization_kind:customization_kind_id(slug, label)))",
+    )
     .eq("item_id", itemId)
-    .single<PrintTemplate>();
+    .single<
+      PrintTemplate & {
+        item: {
+          product: {
+            customization_kind: { slug: string; label: string } | null;
+          } | null;
+        } | null;
+      }
+    >();
   if (tplErr || !templateRow) {
     throw new Error("Esta variación no tiene plantilla de impresión.");
   }
-  if (!VALID_KINDS.includes(templateRow.kind)) {
-    throw new Error(`kind inválido (${templateRow.kind})`);
+  const kind = templateRow.item?.product?.customization_kind;
+  if (!kind) {
+    throw new Error("El producto no tiene tipo de personalización configurado.");
   }
 
   const sourceName =
@@ -122,7 +130,7 @@ export async function createCustomization(
   const snapshot: OrderCustomizationSnapshot = {
     id: row.id,
     item_id: itemId,
-    template_kind: templateRow.kind,
+    template_kind: { slug: kind.slug, label: kind.label },
     template_label: templateRow.label,
     source_image_path: sourcePath,
     source_width_px: sourceWidth,

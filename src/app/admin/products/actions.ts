@@ -6,16 +6,11 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
-import type { CreateProductInput, CustomizationKind, UpdateProductInput } from "@/types";
-
-const VALID_KINDS: CustomizationKind[] = ["phone_case", "tshirt", "mug"];
-
-function parseKind(raw: FormDataEntryValue | null): CustomizationKind | null {
-  const value = typeof raw === "string" ? raw.trim() : "";
-  return (VALID_KINDS as string[]).includes(value)
-    ? (value as CustomizationKind)
-    : null;
-}
+import type {
+  CreateProductInput,
+  KindAttributeField,
+  UpdateProductInput,
+} from "@/types";
 
 function parseTags(raw: string | null) {
   return (raw ?? "")
@@ -32,15 +27,32 @@ function parseImages(raw: string | null) {
   }
 }
 
-function parseInput(formData: FormData): CreateProductInput {
+async function parseInput(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  formData: FormData,
+): Promise<CreateProductInput> {
   const category_id =
     (formData.get("category_id") as string | null)?.trim() || null;
 
   const customizable = formData.get("customizable") === "on";
-  const customization_kind = parseKind(formData.get("customization_kind"));
+  const customization_kind_id =
+    (formData.get("customization_kind_id") as string | null)?.trim() || null;
 
-  if (customizable && !customization_kind) {
+  if (customizable && !customization_kind_id) {
     throw new Error("Debes seleccionar un tipo de personalización.");
+  }
+
+  if (customization_kind_id) {
+    const { data: kind, error } = await supabase
+      .from("customization_kinds")
+      .select("id, archived")
+      .eq("id", customization_kind_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!kind) throw new Error("Tipo de personalización inválido.");
+    if (kind.archived) {
+      throw new Error("Ese tipo de personalización está archivado.");
+    }
   }
 
   return {
@@ -56,14 +68,14 @@ function parseInput(formData: FormData): CreateProductInput {
     category_id: category_id || null,
     ocultar: formData.get("ocultar") === "on",
     customizable,
-    customization_kind,
+    customization_kind_id: customizable ? customization_kind_id : null,
   };
 }
 
 export async function createProduct(formData: FormData) {
   await requireAdmin();
   const supabase = await createClient();
-  const input = parseInput(formData);
+  const input = await parseInput(supabase, formData);
 
   const { data: product, error } = await supabase.from("products").insert(input).select("id").single();
   if (error) throw new Error(error.message);
@@ -76,18 +88,18 @@ export async function createProduct(formData: FormData) {
 export async function updateProduct(id: string, formData: FormData) {
   await requireAdmin();
   const supabase = await createClient();
-  const input: UpdateProductInput = parseInput(formData);
+  const input: UpdateProductInput = await parseInput(supabase, formData);
 
   // Detect destructive customization_kind change.
   const { data: existing, error: readErr } = await supabase
     .from("products")
-    .select("customization_kind")
+    .select("customization_kind_id")
     .eq("id", id)
     .single();
   if (readErr) throw new Error(readErr.message);
 
-  const previousKind = existing?.customization_kind ?? null;
-  const nextKind = input.customization_kind ?? null;
+  const previousKind = existing?.customization_kind_id ?? null;
+  const nextKind = input.customization_kind_id ?? null;
   const kindChanged =
     previousKind !== null && nextKind !== null && previousKind !== nextKind;
 
@@ -143,28 +155,35 @@ function parseSafeArea(formData: FormData) {
 }
 
 function parseKindAttributes(
-  kind: CustomizationKind,
+  schema: KindAttributeField[],
   formData: FormData,
-): Record<string, string> {
-  if (kind === "phone_case") {
-    const brand = trimmed(formData.get("attr_brand"));
-    const model = trimmed(formData.get("attr_model"));
-    if (!brand || !model) throw new Error("Marca y modelo son obligatorios.");
-    return { brand, model };
-  }
-  if (kind === "tshirt") {
-    const placement = trimmed(formData.get("attr_placement"));
-    if (placement !== "front" && placement !== "back") {
-      throw new Error("Selecciona la ubicación del estampado.");
+): Record<string, string | number> {
+  const out: Record<string, string | number> = {};
+  for (const field of schema) {
+    const raw = trimmed(formData.get(`attr_${field.key}`));
+    if (!raw) {
+      if (field.required) {
+        throw new Error(`El campo "${field.label}" es obligatorio.`);
+      }
+      continue;
     }
-    return { placement };
+    if (field.type === "number") {
+      const n = Number(raw);
+      if (!Number.isFinite(n)) {
+        throw new Error(`El campo "${field.label}" debe ser numérico.`);
+      }
+      out[field.key] = n;
+    } else if (field.type === "select") {
+      const valid = field.options.some((opt) => opt.value === raw);
+      if (!valid) {
+        throw new Error(`Valor inválido para "${field.label}".`);
+      }
+      out[field.key] = raw;
+    } else {
+      out[field.key] = raw;
+    }
   }
-  // mug
-  const wrap = trimmed(formData.get("attr_wrap"));
-  if (wrap !== "full" && wrap !== "partial") {
-    throw new Error("Selecciona el tipo de wrap del mug.");
-  }
-  return { wrap };
+  return out;
 }
 
 export async function upsertPrintTemplate(
@@ -175,14 +194,21 @@ export async function upsertPrintTemplate(
   await requireAdmin();
   const supabase = await createClient();
 
-  // Look up the product to determine the kind — never trust the client.
+  // Resolve the product's kind + its attribute schema via join.
   const { data: product, error: prodErr } = await supabase
     .from("products")
-    .select("customization_kind")
+    .select(
+      "customization_kind:customization_kind_id(id, attribute_schema)",
+    )
     .eq("id", productId)
-    .single();
+    .single<{
+      customization_kind: {
+        id: string;
+        attribute_schema: KindAttributeField[];
+      } | null;
+    }>();
   if (prodErr) throw new Error(prodErr.message);
-  const kind = product?.customization_kind as CustomizationKind | null;
+  const kind = product?.customization_kind;
   if (!kind) {
     throw new Error("El producto no está marcado como personalizable.");
   }
@@ -201,7 +227,7 @@ export async function upsertPrintTemplate(
     throw new Error("DPI inválido.");
   }
 
-  const attributes = parseKindAttributes(kind, formData);
+  const attributes = parseKindAttributes(kind.attribute_schema ?? [], formData);
   const mockup_path = trimmed(formData.get("mockup_path")) || null;
   const mask_path = trimmed(formData.get("mask_path")) || null;
   const safe_area = parseSafeArea(formData);
@@ -209,7 +235,6 @@ export async function upsertPrintTemplate(
   const { error } = await supabase.from("print_templates").upsert(
     {
       item_id: itemId,
-      kind,
       label,
       attributes,
       width_mm,

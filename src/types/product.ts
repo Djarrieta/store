@@ -17,7 +17,7 @@ export interface Product {
   tags: string[];
   ocultar: boolean;
   customizable: boolean;
-  customization_kind: CustomizationKind | null;
+  customization_kind_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -26,6 +26,12 @@ export interface Product {
 // .select('*, category:category_id(*, parent:parent_id(*))')
 export interface ProductWithCategory extends Product {
   category: CategoryWithParent | null;
+}
+
+// Joined shape including the customization kind row.
+// .select('*, customization_kind:customization_kind_id(*)')
+export interface ProductWithKind extends Product {
+  customization_kind: CustomizationKind | null;
 }
 
 export type CreateProductInput = Omit<Product, "id" | "created_at" | "updated_at">;

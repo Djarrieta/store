@@ -14,6 +14,10 @@ interface ItemRow {
   print_template: PrintTemplate | null;
 }
 
+type ProductRow = Pick<Product, "id" | "title" | "customizable"> & {
+  customization_kind: CustomizationKind | null;
+};
+
 export default async function PreviewEditorPage({
   params,
 }: {
@@ -25,9 +29,9 @@ export default async function PreviewEditorPage({
   const [{ data: product }, { data: rawItems }] = await Promise.all([
     supabase
       .from("products")
-      .select("id, title, customizable, customization_kind")
+      .select("id, title, customizable, customization_kind:customization_kind_id(*)")
       .eq("id", id)
-      .single<Pick<Product, "id" | "title" | "customizable" | "customization_kind">>(),
+      .single<ProductRow>(),
     supabase
       .from("items")
       .select(
@@ -40,7 +44,7 @@ export default async function PreviewEditorPage({
   if (!product) notFound();
 
   const items = (rawItems as ItemRow[] | null) ?? [];
-  const kind = (product.customization_kind ?? null) as CustomizationKind | null;
+  const kind = product.customization_kind;
 
   const variants: EditorVariant[] = items
     .filter((item) => !!item.print_template)

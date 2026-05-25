@@ -11,11 +11,11 @@ CREATE TABLE public.products (
   tags                text[] NOT NULL DEFAULT '{}',
   ocultar             boolean NOT NULL DEFAULT false,
   customizable        boolean NOT NULL DEFAULT false,
-  customization_kind  text CHECK (customization_kind IN ('phone_case', 'tshirt', 'mug')),
+  customization_kind_id  uuid REFERENCES public.customization_kinds(id) ON DELETE RESTRICT,
   created_at          timestamptz NOT NULL DEFAULT now(),
   updated_at          timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT products_customizable_requires_kind
-    CHECK (customizable = false OR customization_kind IS NOT NULL)
+    CHECK (customizable = false OR customization_kind_id IS NOT NULL)
 );
 
 CREATE TRIGGER products_updated_at

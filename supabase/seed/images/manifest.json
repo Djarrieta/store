@@ -4,5 +4,11 @@
     "bucket": "print-templates",
     "path": "seed/tshirt-front-mockup.svg",
     "contentType": "image/svg+xml"
+  },
+  {
+    "src": "tshirt-mask.svg",
+    "bucket": "print-templates",
+    "path": "seed/tshirt-mask.svg",
+    "contentType": "image/svg+xml"
   }
 ]

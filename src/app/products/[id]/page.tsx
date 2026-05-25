@@ -5,9 +5,18 @@ import Breadcrumb from "@/app/components/Breadcrumb";
 import type { EditorVariant } from "@/app/components/customization/types";
 import ProductCard from "@/app/components/ProductCard";
 import { createClient } from "@/lib/supabase/server";
-import type { ItemWithCategories, PrintTemplate, ProductWithCategory } from "@/types";
+import type {
+  CustomizationKind,
+  ItemWithCategories,
+  PrintTemplate,
+  ProductWithCategory,
+} from "@/types";
 
 import CustomizationFlow from "./CustomizationFlow";
+
+type ProductDetail = ProductWithCategory & {
+  customization_kind: CustomizationKind | null;
+};
 
 export default async function ProductDetailPage({
   params,
@@ -20,10 +29,12 @@ export default async function ProductDetailPage({
   const [{ data: product }, { data: rawItems }] = await Promise.all([
     supabase
       .from("products")
-      .select("*, category:category_id(*, parent:parent_id(*))")
+      .select(
+        "*, category:category_id(*, parent:parent_id(*)), customization_kind:customization_kind_id(*)",
+      )
       .eq("id", id)
       .eq("ocultar", false)
-      .single<ProductWithCategory>(),
+      .single<ProductDetail>(),
     supabase
       .from("items")
       .select(

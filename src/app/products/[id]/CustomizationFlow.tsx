@@ -33,12 +33,6 @@ interface Props {
   variants: EditorVariant[];
 }
 
-const KIND_PICKER_LABEL: Record<CustomizationKind, string> = {
-  phone_case: "Elige tu teléfono",
-  tshirt: "Elige tu talla",
-  mug: "Elige el mug",
-};
-
 type Step = 1 | 2 | 3 | 4;
 
 export default function CustomizationFlow({
@@ -130,7 +124,7 @@ export default function CustomizationFlow({
         localKey,
         itemId: variant.itemId,
         productId,
-        kind,
+        kind: { slug: kind.slug, label: kind.label },
         templateLabel: variant.label,
         transform,
         sourceWidth: source.width,
@@ -375,7 +369,7 @@ function VariantPicker({
 
   return (
     <div className="space-y-3">
-      <h2 className="font-display text-lg font-bold">{KIND_PICKER_LABEL[kind]}</h2>
+      <h2 className="font-display text-lg font-bold">{kind.picker_label}</h2>
       {dimensions.length === 0 ? (
         <p className="text-sm text-[var(--muted)]">Variación única disponible.</p>
       ) : (

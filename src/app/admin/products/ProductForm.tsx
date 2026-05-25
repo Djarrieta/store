@@ -14,18 +14,15 @@ interface ProductFormProps {
   defaultValues?: Partial<Product>;
   /** Whether this product already has variations (items). Controls the kind-change confirm. */
   hasItems?: boolean;
+  /** Available customization kinds (active + the currently-selected archived one, if any). */
+  kinds: CustomizationKind[];
 }
-
-const KIND_LABELS: Record<CustomizationKind, string> = {
-  phone_case: "Funda de teléfono",
-  tshirt: "Camiseta",
-  mug: "Mug",
-};
 
 export default function ProductForm({
   action,
   defaultValues,
   hasItems = false,
+  kinds,
 }: ProductFormProps) {
   const [imagesText, setImagesText] = useState(
     (defaultValues?.images ?? []).map((img: ProductImage) => img.url).join(", "),
@@ -35,12 +32,13 @@ export default function ProductForm({
   const [customizable, setCustomizable] = useState<boolean>(
     defaultValues?.customizable ?? false,
   );
-  const [kind, setKind] = useState<CustomizationKind | "">(
-    defaultValues?.customization_kind ?? "",
+  const [kindId, setKindId] = useState<string>(
+    defaultValues?.customization_kind_id ?? "",
   );
 
-  const originalKind = defaultValues?.customization_kind ?? null;
-  const kindChanged = originalKind !== null && kind !== "" && kind !== originalKind;
+  const originalKindId = defaultValues?.customization_kind_id ?? null;
+  const kindChanged =
+    originalKindId !== null && kindId !== "" && kindId !== originalKindId;
 
   const imageUrls = useMemo(
     () =>
@@ -207,21 +205,22 @@ export default function ProductForm({
 
         <Select
           label="Tipo de personalización"
-          name="customization_kind"
-          value={kind}
-          onChange={(e) => setKind(e.target.value as CustomizationKind | "")}
+          name="customization_kind_id"
+          value={kindId}
+          onChange={(e) => setKindId(e.target.value)}
           required={customizable}
-          disabled={!customizable && !originalKind}
+          disabled={!customizable && !originalKindId}
         >
           <option value="">— Selecciona —</option>
-          {(Object.keys(KIND_LABELS) as CustomizationKind[]).map((k) => (
-            <option key={k} value={k}>
-              {KIND_LABELS[k]}
+          {kinds.map((k) => (
+            <option key={k.id} value={k.id}>
+              {k.label}
+              {k.archived ? " (archivado)" : ""}
             </option>
           ))}
         </Select>
 
-        {!customizable && originalKind && (
+        {!customizable && originalKindId && (
           <p className="text-xs text-[var(--muted)]">
             El tipo se conserva mientras la personalización esté desactivada. Vuelve a activarla
             para mostrarla al público.
@@ -232,7 +231,7 @@ export default function ProductForm({
             Cambiar el tipo borrará las variaciones existentes y sus plantillas.
           </p>
         )}
-        {customizable && !kind && (
+        {customizable && !kindId && (
           <p className="text-xs text-[var(--muted)]">
             Selecciona un tipo para poder guardar.
           </p>

@@ -36,7 +36,7 @@ export default function ProductCard({
   const hasVariants = items.some((i) => i.item_categories.length > 0);
   const singleItem = !hasVariants && items.length === 1 ? items[0] : null;
   const hasStock = items.some((i) => i.stock > 0);
-  const isCustomizable = product.customizable && !!product.customization_kind;
+  const isCustomizable = product.customizable && !!product.customization_kind_id;
 
   const containerClass = compact
     ? "flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border-2 border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)_var(--shadow-card)_0_0_var(--shadow)]"

@@ -12,12 +12,6 @@ import {
 import { Select } from "@/app/components/Input";
 import type { CustomizationKind } from "@/types";
 
-const KIND_LABELS: Record<CustomizationKind, string> = {
-  phone_case: "Funda de teléfono",
-  tshirt: "Camiseta",
-  mug: "Mug",
-};
-
 interface Props {
   kind: CustomizationKind;
   variants: EditorVariant[];
@@ -41,7 +35,7 @@ export default function PreviewEditorClient({ kind, variants }: Props) {
           <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
             Tipo
           </p>
-          <p className="text-sm font-semibold">{KIND_LABELS[kind]}</p>
+          <p className="text-sm font-semibold">{kind.label}</p>
         </div>
         <Select
           label="Variación"

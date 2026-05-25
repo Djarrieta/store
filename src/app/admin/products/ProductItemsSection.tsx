@@ -20,9 +20,14 @@ export default async function ProductItemsSection({ productId }: { productId: st
   ] = await Promise.all([
     supabase
       .from("products")
-      .select("customizable, customization_kind")
+      .select(
+        "customizable, customization_kind:customization_kind_id(*)",
+      )
       .eq("id", productId)
-      .single(),
+      .single<{
+        customizable: boolean;
+        customization_kind: CustomizationKind | null;
+      }>(),
     supabase
       .from("items")
       .select(
@@ -41,7 +46,7 @@ export default async function ProductItemsSection({ productId }: { productId: st
   const items = rawItems as ItemRow[] | null;
   const variantCategories = rawCategories as (Category & { parent: Pick<Category, "id" | "name"> | null })[] | null;
   const customizable = Boolean(product?.customizable);
-  const customizationKind = (product?.customization_kind ?? null) as CustomizationKind | null;
+  const customizationKind = product?.customization_kind ?? null;
 
   // Group variant values by parent dimension
   const dimensionMap = new Map<string, { id: string; name: string; values: { id: string; name: string }[] }>();

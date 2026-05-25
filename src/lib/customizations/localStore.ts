@@ -9,7 +9,7 @@
  *   4. Order created               → `deleteLocalCustomization()` + delete blob
  */
 
-import type { CustomizationKind, CustomizationTransform } from "@/types";
+import type { CustomizationTransform } from "@/types";
 
 import { deleteSource, listKeys } from "./indexedDb";
 
@@ -20,7 +20,7 @@ export interface LocalCustomization {
   localKey: string;
   itemId: string;
   productId: string;
-  kind: CustomizationKind;
+  kind: { slug: string; label: string };
   templateLabel: string;
   transform: CustomizationTransform;
   sourceWidth: number;
@@ -46,7 +46,10 @@ export function getLocalCustomization(localKey: string): LocalCustomization | nu
   try {
     const raw = localStorage.getItem(keyOf(localKey));
     if (!raw) return null;
-    return JSON.parse(raw) as LocalCustomization;
+    const parsed = JSON.parse(raw) as LocalCustomization;
+    // Drop legacy records that stored kind as a string union.
+    if (typeof parsed.kind === "string") return null;
+    return parsed;
   } catch {
     return null;
   }

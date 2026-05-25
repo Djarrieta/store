@@ -1,4 +1,4 @@
-import type { CustomizationKind, SafeArea } from "./print-template";
+import type { SafeArea } from "./print-template";
 
 /** Normalized 0..1 image transform; pivot = image top-left. Uniform scale. */
 export interface CustomizationTransform {
@@ -35,7 +35,10 @@ export type CreateCustomizationInput = Omit<
 export interface OrderCustomizationSnapshot {
   id: string;
   item_id: string;
-  template_kind: CustomizationKind;
+  template_kind: {
+    slug: string;
+    label: string;
+  };
   template_label: string;
   source_image_path: string;
   source_width_px: number;

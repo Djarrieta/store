@@ -2,7 +2,7 @@
 
 import type Konva from "konva";
 import { useEffect, useRef, useState } from "react";
-import { Group, Image as KonvaImage, Layer, Line, Rect, Stage } from "react-konva";
+import { Image as KonvaImage, Layer, Line, Rect, Stage } from "react-konva";
 
 import {
   computeEffectiveDpi,
@@ -72,11 +72,12 @@ const KonvaStage = function KonvaStage({
   onReady,
   hideStatus = false,
 }: Props) {
-  const { template, mockupUrl } = variant;
+  const { template, mockupUrl, maskUrl } = variant;
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [maxDim, setMaxDim] = useState<number>(MAX_STAGE);
   const stage = fitStage(template.width_mm, template.height_mm, maxDim);
   const mockup = useHtmlImage(mockupUrl);
+  const mask = useHtmlImage(maskUrl);
   const userImg = useHtmlImage(source?.url ?? null);
   const stageRef = useRef<Konva.Stage | null>(null);
 
@@ -112,6 +113,21 @@ const KonvaStage = function KonvaStage({
 
   const safe = template.safe_area;
 
+  // Letterbox the mask into the template rect (contain-fit, preserve aspect).
+  const maskFit = (() => {
+    if (!mask) return null;
+    const maskAspect = mask.width / mask.height;
+    const stageAspect = stage.width / stage.height;
+    if (maskAspect > stageAspect) {
+      const w = stage.width;
+      const h = w / maskAspect;
+      return { x: 0, y: (stage.height - h) / 2, width: w, height: h };
+    }
+    const h = stage.height;
+    const w = h * maskAspect;
+    return { x: (stage.width - w) / 2, y: 0, width: w, height: h };
+  })();
+
   return (
     <div className="space-y-3">
       <div ref={wrapperRef} className="w-full">
@@ -134,26 +150,35 @@ const KonvaStage = function KonvaStage({
           </Layer>
 
           <Layer>
-            <Group clipFunc={(ctx) => drawTshirtClip(ctx as unknown as CanvasRenderingContext2D, stage.width, stage.height)}>
-              {userImg && source && (
-                <KonvaImage
-                  image={userImg}
-                  x={transform.x * stage.width}
-                  y={transform.y * stage.height}
-                  width={drawnW}
-                  height={drawnH}
-                  rotation={(transform.rotation * 180) / Math.PI}
-                  draggable
-                  onDragEnd={(e) => {
-                    onTransformChange({
-                      ...transform,
-                      x: e.target.x() / stage.width,
-                      y: e.target.y() / stage.height,
-                    });
-                  }}
-                />
-              )}
-            </Group>
+            {userImg && source && (
+              <KonvaImage
+                image={userImg}
+                x={transform.x * stage.width}
+                y={transform.y * stage.height}
+                width={drawnW}
+                height={drawnH}
+                rotation={(transform.rotation * 180) / Math.PI}
+                draggable
+                onDragEnd={(e) => {
+                  onTransformChange({
+                    ...transform,
+                    x: e.target.x() / stage.width,
+                    y: e.target.y() / stage.height,
+                  });
+                }}
+              />
+            )}
+            {mask && maskFit && (
+              <KonvaImage
+                image={mask}
+                x={maskFit.x}
+                y={maskFit.y}
+                width={maskFit.width}
+                height={maskFit.height}
+                listening={false}
+                globalCompositeOperation="destination-in"
+              />
+            )}
           </Layer>
 
           <Layer listening={false}>
@@ -201,36 +226,6 @@ const KonvaStage = function KonvaStage({
 };
 
 export default KonvaStage;
-
-// T-shirt silhouette derived from supabase/seed/images/tshirt-blank.svg (viewBox 600x800).
-// Used as Konva clipFunc so the uploaded image only renders inside the shirt body.
-// v2: this will be driven by a per-template clip_path.
-function drawTshirtClip(
-  ctx: CanvasRenderingContext2D,
-  stageW: number,
-  stageH: number,
-) {
-  const sx = stageW / 600;
-  const sy = stageH / 800;
-  const X = (n: number) => n * sx;
-  const Y = (n: number) => n * sy;
-  ctx.beginPath();
-  ctx.moveTo(X(180), Y(120));
-  ctx.lineTo(X(110), Y(170));
-  ctx.lineTo(X(70), Y(280));
-  ctx.lineTo(X(150), Y(330));
-  ctx.lineTo(X(170), Y(270));
-  ctx.lineTo(X(170), Y(720));
-  ctx.lineTo(X(430), Y(720));
-  ctx.lineTo(X(430), Y(270));
-  ctx.lineTo(X(450), Y(330));
-  ctx.lineTo(X(530), Y(280));
-  ctx.lineTo(X(490), Y(170));
-  ctx.lineTo(X(420), Y(120));
-  ctx.bezierCurveTo(X(400), Y(170), X(360), Y(195), X(300), Y(195));
-  ctx.bezierCurveTo(X(240), Y(195), X(200), Y(170), X(180), Y(120));
-  ctx.closePath();
-}
 
 function Pill({
   tone,

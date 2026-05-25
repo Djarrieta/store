@@ -1,661 +1,323 @@
-# Product Personalization Plan (Print-on-Demand)
+# Plan — Kinds de personalización dinámicos (admin-editables)
 
-> Goal: let a customer customize **multiple kinds of products** (phone cases, t-shirts, mugs, …) by picking a variation, uploading or selecting an image, positioning + scaling it on a printable area, and have the **exact** print-ready specification travel through cart → order → admin for fulfillment.
->
-> Architecture is **kind-agnostic** at the data layer (one template row per customizable item, one customizations row per design) with `kind`-specific UI on top.
+## Decisiones tomadas
+
+| Tema | Decisión |
+|---|---|
+| Representación de geometría | **PNG máscara** (alpha = región imprimible). Sin paths SVG. Sin enum `render_mode`. |
+| Alcance de la geometría | **Per print_template** (como hoy). `mask_path` + `safe_area` viven en cada variante; el kind no lleva geometría. |
+| Aspect-ratio máscara vs template | **Letterboxing automático**: si el aspect del PNG difiere del rect (`width_mm/height_mm`), se centra "contain" sin distorsionar; el área fuera del contain queda como no-imprimible. |
+| `kind_id` en `print_templates` | **Eliminado**. El kind se deriva siempre vía `items.product_id → products.customization_kind_id`. Se elimina el trigger `print_templates_kind_match`. |
+| Evolución del `attribute_schema` | **Permitido con advertencia** (count separado de templates "huérfanas" y "incompletas"). |
+| Archivado de kind | **Bloqueado** mientras haya productos referenciándolo. |
+| Compatibilidad legacy | **Ninguna**. Datos sólo desde seed. |
+| Orden de migraciones | **Renumerar**: nueva `08_customization_kinds.sql`; las migraciones 08→18 actuales se renombran a 09→19. |
 
 ---
 
-## 0. Decisions baked into this plan
+## Modelo objetivo
 
-| # | Topic | Decision |
+### Nueva tabla `customization_kinds`
+
+Muy ligera — solo metadata semántica del tipo. Sin geometría.
+
+| Columna | Tipo | Notas |
 |---|---|---|
-| 1 | Template ownership | **1:1 with `items`** — each customizable variation carries its own template. Stock = existing `items.stock`. |
-| 2 | Customization persistence | **Client-only until checkout for everyone (logged-in and guest alike).** Source image lives in **IndexedDB** as a Blob; design metadata + preview dataURL live in `localStorage`. Nothing is uploaded or written to DB until the order is created. Single code path — no `createCustomization` while browsing. |
-| 3 | Kind change with existing data | **One-click confirm** — server deletes affected items + their templates and switches `customization_kind`. |
-| 4 | Disable `customizable` | Preserve `customization_kind` (greyed in UI). Items + templates remain. Re-enable restores everything. |
-| 5 | Print render on approval | **Server Action wraps the SP**: call `approve_order` → re-`select` the order → render print files (`@napi-rs/canvas`) → persist `print_path` on both row and snapshot. |
-| 6 | Rotation | **Arbitrary rotation** via `@napi-rs/canvas` (not `sharp`). Pivot = image **top-left** (`transform.x/y` are top-left coordinates). |
-| 7 | Source storage | Private bucket, store **object path**; signed URL generated on read. |
-| 8 | Re-edit from cart | **v1.** Cart line carries `customizationLocalKey` (always). Editing mutates the IndexedDB blob + localStorage entry. After order creation the cart line is discarded; re-editing a past order is not in v1. |
-| 9 | Moderation | None (rely on ToS); admin can flag/cancel orders manually. |
-| 10 | Pricing | **Flat** — uses the item's price; no per-template surcharge. |
-| 11 | Editor library | **`react-konva`** (Konva.js). |
-| 12 | Print format | PNG with alpha. |
-| 13 | Scale model | **Uniform only** — `transform.scale` is a single number; no skewing. |
-| 14 | Fit-to-template | **Contain** — whole image visible, may leave empty edges. |
-| 15 | Checkout auth | **v1: login required at checkout.** All customizations (guest or logged-in) are uploaded at order-creation time via `persistPendingCustomizations`, then snapshotted into the order. |
-| 16 | Storage policies | **Relaxed** — match existing `04_storage.sql` convention (`auth.uid() IS NOT NULL`). No per-user prefix enforcement in v1. |
-| 17 | Order snapshot | `OrderItem.customization` carries **everything needed to render** (transform + source path + full template fields). Renders survive item/template deletion. |
-| 18 | UI language | **Spanish** (matches existing storefront/admin). |
-| 19 | Storefront badge | "Personalizable" badge on product cards in `/products` and category lists, plus a filter chip. |
-| 20 | Preview file | **PNG**, max 1024 px on long edge, ≤ 500 KB. |
-| 21 | Stock model | `approve_order` SP is fixed to deduct by **`item_id`** (pre-existing bug surfaced by this feature). All new orders carry `item_id` per line. |
+| `id` | `uuid` PK | |
+| `slug` | `text` UNIQUE | identificador estable (snake_case). Inmutable. Persistido en `OrderCustomizationSnapshot.template_kind.slug` como ID para reportes/auditoría — **no se usa en URLs admin** (las rutas siguen siendo por `id`). |
+| `label` | `text` | nombre visible al admin (ej. "Funda de teléfono"). |
+| `picker_label` | `text` | copy visible al cliente en el paso 1 del flujo (ej. "Elige tu teléfono"). |
+| `attribute_schema` | `jsonb` | array de definiciones de campo (ver abajo). |
+| `sort_order` | `int` | orden en el select admin. |
+| `archived` | `bool` DEFAULT false | soft-hide del select admin. |
+| `created_at` / `updated_at` | `timestamptz` | trigger `set_updated_at()`. |
 
----
+**RLS**: lectura pública (la usa el storefront), escritura solo admin.
 
-## 1. How this is normally done (industry context)
+### Forma de `attribute_schema` (jsonb)
 
-Mainstream POD shops (Casetify, Printful, Caseapp, Gelato, Custom Ink) share these patterns; we adapt them to this codebase:
-
-1. **One variant per device/size carrying its own print template** — dimensions in mm, target DPI (typically 300), mockup PNG, safe area, optional alpha mask. We map this onto our existing `items` (variations) by attaching a 1:1 `print_templates` row.
-2. **Canvas-based editor** with serializable JSON state (Konva/Fabric). We use `react-konva`.
-3. **Design state is stored, not the rendered image.** The persisted blob is `{ source_image_path, transform }`. Previews are derived; the final print file is server-rendered from the same transform at print resolution.
-4. **Two artifacts per personalized line item:**
-   - **Preview** (≤ 1024 px PNG, ≤ 500 KB) — generated **client-side in v1**; cheap to recompute.
-   - **Print file** (PNG, alpha, full bleed at template DPI) — generated **server-side on order approval**.
-5. **Variation-level template, line-item-level design.** Template lives on the item (reusable across customers); design lives on the `customizations` row (one per cart line, then snapshot on the order line).
-6. **Validation** in the editor: file type/size, min source resolution, safe-area warning, low-effective-DPI warning.
-
-### Library choices
-
-| Concern | Library | Why |
-|---|---|---|
-| Editor | **`react-konva`** + `konva` | Declarative React, serializable transforms, touch support. |
-| Server render | **`@napi-rs/canvas`** | Arbitrary rotation, `drawImage` + `setTransform` + `globalCompositeOperation = 'destination-in'` for masks. Pure JS install. `sharp` is rejected because non-90° rotation + translate composition is fiddly. |
-| Source-image dimensions (server) | **`image-size`** | Read width/height from a Buffer server-side. |
-| Source-image dimensions (client) | **`new Image()` / `createImageBitmap`** | No `image-size` in the browser. |
-| Guest source blob storage | **IndexedDB** (`idb` wrapper) | LocalStorage is too small (5 MB) for 20 MB photos. |
-
----
-
-## 2. Data model changes
-
-### 2.1 `products` — module flag (edit `08_products.sql`)
-
-```sql
-ALTER TABLE products
-  ADD COLUMN customizable boolean NOT NULL DEFAULT false,
-  ADD COLUMN customization_kind text
-    CHECK (customization_kind IN ('phone_case', 'tshirt', 'mug')),
-  ADD CONSTRAINT products_customizable_requires_kind
-    CHECK (customizable = false OR customization_kind IS NOT NULL);
+```jsonc
+[
+  { "key": "brand", "label": "Marca", "type": "text", "required": true, "placeholder": "ej. Apple" },
+  { "key": "model", "label": "Modelo", "type": "text", "required": true, "placeholder": "ej. iPhone 15 Pro" },
+  { "key": "placement", "label": "Ubicación", "type": "select", "required": true,
+    "options": [{ "value": "front", "label": "Frente" }, { "value": "back", "label": "Espalda" }] }
+]
 ```
 
-`customization_kind` is preserved across `customizable` toggling (decision #4) and used by the kind-match trigger in §2.2.
+Tipos soportados v1: `text`, `number`, `select`.
 
-### 2.2 New table: `print_templates` — 1:1 with `items` (`16_print_templates.sql`)
+### Cambios en tablas existentes
 
-```sql
-DROP TABLE IF EXISTS public.print_templates CASCADE;
+**`products`** (en el archivo renumerado `09_products.sql`):
+- Reemplazar `customization_kind text CHECK (... IN (...))` por
+  `customization_kind_id uuid REFERENCES public.customization_kinds(id) ON DELETE RESTRICT`.
+- Reescribir constraint: `CHECK (customizable = false OR customization_kind_id IS NOT NULL)`.
 
-CREATE TABLE public.print_templates (
-  item_id      uuid PRIMARY KEY REFERENCES public.items(id) ON DELETE CASCADE,
-  kind         text NOT NULL CHECK (kind IN ('phone_case', 'tshirt', 'mug')),
-  label        text NOT NULL,        -- 'iPhone 15 Pro', 'Talla M — Frente', 'Mug 11oz'
-  attributes   jsonb NOT NULL DEFAULT '{}',
-                                     -- phone_case: { brand: string, model: string }   REQUIRED
-                                     -- tshirt:     { placement: 'front'|'back' }      REQUIRED
-                                     -- mug:        { wrap: 'full'|'partial' }         REQUIRED
-  width_mm     numeric NOT NULL,
-  height_mm    numeric NOT NULL,
-  print_dpi    integer NOT NULL DEFAULT 300,
-  mockup_path  text,                 -- object path in 'print-templates' bucket
-  mask_path    text,                 -- object path; optional
-  safe_area    jsonb,                -- { x, y, width, height } normalized 0..1
-  created_at   timestamptz NOT NULL DEFAULT now(),
-  updated_at   timestamptz NOT NULL DEFAULT now()
-);
+**`print_templates`** (en el archivo renumerado `17_print_templates.sql`):
+- **Eliminar** la columna `kind` y el `CHECK` asociado.
+- **Eliminar** el trigger `print_templates_kind_match` y su función (ya no hay nada que validar transversalmente).
+- Conservar tal cual: `item_id` (PK), `label`, `attributes`, `width_mm`, `height_mm`, `print_dpi`, `mockup_path`, `mask_path`, `safe_area`.
 
-CREATE TRIGGER print_templates_updated_at
-BEFORE UPDATE ON public.print_templates
-FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();
-```
+### Snapshot en órdenes
 
-Key points:
-- **PK is `item_id`** — strict 1:1 with the variation. Stock lives on `items.stock`.
-- `mockup_path` / `mask_path` store **object paths**, not URLs.
-- Per-kind required keys in `attributes` are enforced in the Server Action (not the DB) so the JSON stays flexible.
-- **Silhouette clipping (editor + render).** v2 will add a `clip_path text` column holding an SVG `d` string (in normalized 0..1 or template-mm coordinates) used by both the Konva editor (`clipFunc`) and the server renderer to keep the user image inside the product body. v1 sandbox hardcodes the t-shirt silhouette derived from the seed mockup.
-- **Kind-match trigger** (cross-table):
-  ```sql
-  CREATE FUNCTION public.print_templates_kind_match() RETURNS trigger AS $$
-  DECLARE pk text;
-  BEGIN
-    SELECT p.customization_kind INTO pk
-    FROM public.items i JOIN public.products p ON p.id = i.product_id
-    WHERE i.id = NEW.item_id;
-    IF pk IS NULL OR pk <> NEW.kind THEN
-      RAISE EXCEPTION 'print_templates.kind (%) must match parent product.customization_kind (%)', NEW.kind, pk;
-    END IF;
-    RETURN NEW;
-  END $$ LANGUAGE plpgsql;
-
-  CREATE TRIGGER print_templates_kind_match_trg
-  BEFORE INSERT OR UPDATE ON public.print_templates
-  FOR EACH ROW EXECUTE PROCEDURE public.print_templates_kind_match();
-  ```
-
-RLS:
-- `select`: public.
-- `insert/update/delete`: admin only (`is_admin(auth.uid())`).
-
-### 2.3 New table: `customizations` (`17_customizations.sql`)
-
-```sql
-DROP TABLE IF EXISTS public.customizations CASCADE;
-
-CREATE TABLE public.customizations (
-  id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id            uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  item_id            uuid NOT NULL REFERENCES public.items(id) ON DELETE RESTRICT,
-  source_image_path  text NOT NULL,        -- 'customizations-source' bucket
-  source_width_px    integer NOT NULL,
-  source_height_px   integer NOT NULL,
-  transform          jsonb NOT NULL,       -- { x, y, scale, rotation }  normalized 0..1; pivot = top-left
-  preview_path       text NOT NULL,        -- 'customizations-preview' bucket
-  print_path         text,                 -- 'customizations-print' bucket; filled on approval
-  created_at         timestamptz NOT NULL DEFAULT now(),
-  updated_at         timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TRIGGER customizations_updated_at
-BEFORE UPDATE ON public.customizations
-FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();
-
-CREATE INDEX customizations_user_idx ON public.customizations (user_id, created_at DESC);
-CREATE INDEX customizations_item_idx ON public.customizations (item_id);
-```
-
-Per decision #2 + #15: rows only exist for **logged-in users**. RLS:
-- `select`: `auth.uid() = user_id` OR admin.
-- `insert`: `auth.uid() = user_id`.
-- `update`/`delete`: `auth.uid() = user_id` OR admin.
-
-### 2.4 `approve_order` SP — fix stock deduction (edit `13_approve_order.sql`)
-
-Replace `WHERE product_id = …` with `WHERE id = …`:
-
-```sql
-FOR v_item IN SELECT value FROM jsonb_array_elements(v_order.items)
-LOOP
-  UPDATE public.items
-  SET stock = stock - (v_item->>'qty')::int
-  WHERE id = (v_item->>'item_id')::uuid
-    AND stock >= (v_item->>'qty')::int;
-
-  GET DIAGNOSTICS v_rows = ROW_COUNT;
-  IF v_rows = 0 THEN
-    RAISE EXCEPTION 'Insufficient stock for item %', v_item->>'item_id';
-  END IF;
-END LOOP;
-```
-
-SP signature stays `RETURNS void`. The wrapping Server Action `select`s the order after the RPC succeeds.
-
-> **Precondition for v1 personalization:** all order-create paths must include `item_id` per line. This affects non-customizable products too; the cart already needs `itemId` to know which variation to deduct.
-
-### 2.5 Cart and order changes
-
-`CartItem` (`src/lib/cart.tsx`):
+`OrderCustomizationSnapshot` ([src/types/customization.ts](src/types/customization.ts#L34)) cambia mínimamente:
 
 ```ts
-type CartItem = {
-  // existing
-  id: string;             // RULE BELOW
-  title: string;
-  price: number;
-  amountInCents: number;
-  quantity: number;
-  image?: string;
-
-  // new
-  itemId: string;                          // the variation (now required)
-  customizationLocalKey?: string;          // IndexedDB key (uuid) — always client-side until checkout
-  customizationPreviewDataUrl?: string;    // small dataURL for thumbnails
-};
+template_kind: { slug: string; label: string };  // antes: CustomizationKind enum string
+// template.{mask_path, safe_area, mockup_path, width_mm, height_mm, print_dpi} sin cambio
 ```
 
-**Cart line id rule** (replaces existing dedup-by-id):
-
-- Non-customized: `id = itemId`
-- Customized: `id = ${itemId}:${customizationLocalKey}`
-
-`ADD_ITEM` increments qty only when `id` matches exactly. Re-adding the same customization increments qty; adding a different customization on the same item creates a distinct line.
-
-Since customizations are not persisted to the DB while browsing, there is no `customizationId` on the cart line. The DB id only exists *after* order creation, where it lives inside `OrderItem.customization.id`.
-
-`OrderItem` (`src/types/order.ts` + persisted JSON in `orders.items`) — self-contained render-ready snapshot:
-
-```ts
-type OrderItem = {
-  // existing
-  product_id: string;
-  title: string;
-  qty: number;
-  unit_price: number;
-  sku: string | null;
-
-  // new
-  item_id: string;        // REQUIRED on all new orders (precondition above)
-
-  customization?: {
-    id: string;                          // customizations.id
-    item_id: string;
-    template_kind: 'phone_case' | 'tshirt' | 'mug';
-    template_label: string;
-    // source
-    source_image_path: string;
-    source_width_px: number;
-    source_height_px: number;
-    transform: { x: number; y: number; scale: number; rotation: number };
-    // template snapshot (decision #17) — render survives item/template deletion
-    template: {
-      width_mm: number;
-      height_mm: number;
-      print_dpi: number;
-      mockup_path: string | null;
-      mask_path: string | null;
-      safe_area: { x: number; y: number; width: number; height: number } | null;
-    };
-    // artifacts
-    preview_path: string;
-    print_path: string | null;            // filled on approval
-  };
-};
-```
-
-### 2.6 Storage buckets (`04_storage.sql`)
-
-| Bucket | Public? | Holds | Path stored in |
-|---|---|---|---|
-| `print-templates` | public | mockup + mask PNGs | `print_templates.mockup_path` / `mask_path` |
-| `customizations-source` | private | user uploads | `customizations.source_image_path` |
-| `customizations-preview` | private | client-rendered PNG previews | `customizations.preview_path` |
-| `customizations-print` | private | server-rendered print PNGs | `customizations.print_path` |
-
-Policies (decision #16 — relaxed):
-
-- `print-templates`: `select` public; `insert`/`delete` require `is_admin(auth.uid())`.
-- `customizations-source` / `customizations-preview`: `select`/`insert`/`delete` require `auth.uid() IS NOT NULL` (matches existing `item-images` policy).
-- `customizations-print`: `select` requires `is_admin(auth.uid())`; `insert` uses service role only (writes happen from the approval Server Action via `createServiceClient()`).
-
-Helpers in `src/lib/supabase/storage.ts`:
-
-```ts
-export async function signStoragePath(bucket: string, path: string, expiresIn?: number): Promise<string>
-```
+`template_kind` se construye haciendo JOIN del print_template al producto al kind, y se denormaliza en el snapshot.
 
 ---
 
-## 3. UX flow — customer
+## Renumeración de migraciones
 
-```
-Product detail page (customizable product)
-        │
-        ▼
-[ Paso 1 ] Elige tu variación   ──► items where product is customizable AND
-                                    a print_template exists (kind-aware picker)
-                                    (phone model / talla / mug variant)
-        │
-        ▼
-[ Paso 2 ] Sube tu imagen       ──► drag/drop or file picker
-                                    Client checks: type, ≤ 20 MB, ≥ 1000 × 1000 px
-                                    Always: store Blob in IndexedDB, key = uuid
-                                    (no upload to Supabase yet — logged-in or not)
-        │
-        ▼
-[ Paso 3 ] Editor (Konva canvas)
-        ├─ Background: mockup (public URL from print-templates bucket)
-        ├─ User image: drag, resize (uniform scale), arbitrary rotation
-        │              (pivot = image top-left → keep editor + renderer in lockstep)
-        │              Clipped to the product silhouette via Konva <Group clipFunc>
-        │              so the image never spills outside the shirt/case/mug body.
-        ├─ Overlay: dashed safe-area rectangle
-        ├─ Controls: zoom slider, rotación, Reiniciar, "Ajustar a la plantilla" (CONTAIN)
-        ├─ Live warning: DPI bajo (formula in §3.2) — yellow/red, never blocks
-        └─ Live warning: la imagen sale del área segura — warning only
-        │
-        ▼
-[ Paso 4 ] Confirmar + Añadir al carrito
-        ├─ Client renders preview PNG (Konva stage → toBlob; max 1024 px, ≤ 500 KB)
-        └─ Always client-side:
-             1. Write source Blob to IndexedDB under localKey = uuid().
-             2. Write entry to localStorage:
-                { localKey, itemId, productId, transform, sourceWidth, sourceHeight,
-                  previewDataUrl, kind, templateLabel, createdAt }
-             3. Cart line: { id: `${itemId}:${localKey}`, itemId,
-                             customizationLocalKey: localKey,
-                             customizationPreviewDataUrl }
-        │
-        ▼
-Checkout (login required — decision #15)
-        ├─ On "Comprar ahora", BEFORE calling createOrderAndCheckout:
-        │     persistPendingCustomizations(cartItems) iterates every line with
-        │     customizationLocalKey and, for each:
-        │       1. Read source Blob from IndexedDB.
-        │       2. Read metadata from localStorage.
-        │       3. Call createCustomization(formData) Server Action with the source,
-        │          preview, itemId, transform, source dims — returns customizationId
-        │          and the full snapshot for the order line.
-        │       4. Replace customizationLocalKey on the cart line with the snapshot
-        │          (held in memory only — the cart line itself is about to be cleared).
-        ├─ createOrderAndCheckout receives an enriched cart where customized lines
-        │   carry the full snapshot, and embeds it in OrderItem.customization (§2.5).
-        └─ On order success: cart is cleared. IndexedDB + localStorage entries for
-           localKeys included in the order are deleted (best-effort — the DB row
-           and order snapshot are the source of truth from here on).
-        │
-        ▼
-Order approval (admin)
-        └─ Server Action: rpc('approve_order') → re-select order → for each
-           line with .customization, render print PNG (@napi-rs/canvas) using
-           the SNAPSHOT (not a fresh table lookup) → upload to
-           'customizations-print' → write print_path back to the customization
-           row AND the order snapshot.
-```
+Estado actual: 01 → 18. Insertamos `08_customization_kinds.sql` y desplazamos:
 
-Notes:
-- **Re-edit from cart** opens the editor at `/products/[productId]?edit=local:<uuid>`; the editor hydrates the source Blob from IndexedDB. On confirm, the IndexedDB blob (if image changed) and the localStorage entry are rewritten in place. No DB writes.
-- **Cross-device / cleared-storage edge case.** If the user clears IndexedDB after adding to cart, the cart hydrator silently drops any line whose `customizationLocalKey` no longer resolves to an IndexedDB entry. Same applies if they switch device — the cart on the new device won't have these lines anyway (cart is localStorage).
-- **Guest TTL.** IndexedDB entries are swept after 7 days on app mount.
+| Antes | Después |
+|---|---|
+| `08_products.sql` | `09_products.sql` |
+| `09_items.sql` | `10_items.sql` |
+| `10_chat_messages.sql` | `11_chat_messages.sql` |
+| `11_orders.sql` | `12_orders.sql` |
+| `12_assistant_role.sql` | `13_assistant_role.sql` |
+| `13_approve_order.sql` | `14_approve_order.sql` |
+| `14_addresses.sql` | `15_addresses.sql` |
+| `15_ships.sql` | `16_ships.sql` |
+| `16_print_templates.sql` | `17_print_templates.sql` |
+| `17_customizations.sql` | `18_customizations.sql` |
+| `18_print_storage.sql` | `19_print_storage.sql` |
 
-### 3.1 Per-kind editor presets
+Acciones:
 
-| Kind | Step-1 label | Picker layout | Required `attributes` |
-|---|---|---|---|
-| `phone_case` | "Elige tu teléfono" | searchable grid grouped by `attributes.brand` | `brand`, `model` |
-| `tshirt` | "Elige talla" (placement is preset on the template) | size pills | `placement: 'front' \| 'back'` |
-| `mug` | "Elige el mug" | small grid | `wrap: 'full' \| 'partial'` |
+1. `git mv` de los 11 archivos.
+2. Crear `supabase/migrations/08_customization_kinds.sql`:
+   - `DROP TABLE IF EXISTS public.customization_kinds CASCADE`.
+   - `CREATE TABLE ...` con las columnas de arriba.
+   - Trigger `customization_kinds_updated_at`.
+   - RLS (lectura pública, escritura admin).
+3. Editar `09_products.sql` (renombrado): swap de columna + nuevo constraint.
+4. Editar `17_print_templates.sql` (renombrado): drop columna `kind` + drop trigger/función `print_templates_kind_match`.
+5. Confirmar que `19_print_storage.sql` (renombrado) sigue sirviendo sin cambios.
+6. Revisar que ningún script en `supabase/*.js` (`reset.js`, `seed-*.js`) referencie migraciones por número.
 
-Presets live in `src/app/products/[id]/customization/presets.ts` keyed by `customization_kind`.
+## Seeds
 
-### 3.2 DPI warning formula
+`supabase/seed/` (orden actual: `01_categories` → `02_products` → `03_items` → `04_admin` → `05_content` → `06_ships` → `07_addresses`). Como `02_products` ya necesita FK al kind, el nuevo seed debe correr primero:
 
-Given source `sw × sh` (px) and uniform `transform.scale` (normalized 0..1 where 1 = template width):
-
-```
-printable_width_px = (width_mm / 25.4) * print_dpi
-drawn_width_px     = scale * printable_width_px
-effective_dpi      = (sw / drawn_width_px) * print_dpi
-```
-
-- Warn (yellow) when `effective_dpi < 150`.
-- Warn (red) when `effective_dpi < 72`. **Never blocks add-to-cart** (decision: warnings only).
-
-### 3.3 Re-edit from cart
-
-`CartDrawer` renders an **"Editar diseño"** button on lines where `customizationLocalKey` is set. Click navigates to `/products/[productId]?edit=local:<uuid>`. The editor hydrates the source Blob + transform from IndexedDB / localStorage. On confirm:
-
-- The IndexedDB blob is rewritten only if the user replaced the source image.
-- The localStorage metadata (transform, preview dataURL) is always rewritten.
-- The cart line keeps the same `customizationLocalKey` and the same line id.
+1. **Nuevo** `00_customization_kinds.sql`:
+   ```sql
+   INSERT INTO public.customization_kinds (slug, label, picker_label, attribute_schema, sort_order)
+   VALUES
+     ('phone_case', 'Funda de teléfono', 'Elige tu teléfono',
+        '[
+          {"key":"brand","label":"Marca","type":"text","required":true,"placeholder":"ej. Apple"},
+          {"key":"model","label":"Modelo","type":"text","required":true,"placeholder":"ej. iPhone 15 Pro"}
+        ]'::jsonb, 1),
+     ('tshirt', 'Camiseta', 'Elige tu talla',
+        '[
+          {"key":"placement","label":"Ubicación","type":"select","required":true,
+           "options":[{"value":"front","label":"Frente"},{"value":"back","label":"Espalda"}]}
+        ]'::jsonb, 2),
+     ('mug', 'Mug', 'Elige el mug',
+        '[
+          {"key":"wrap","label":"Wrap","type":"select","required":true,
+           "options":[{"value":"full","label":"Completo"},{"value":"partial","label":"Parcial"}]}
+        ]'::jsonb, 3);
+   ```
+2. Convertir la silueta SVG actual de t-shirt (`supabase/seed/images/tshirt-blank.svg`, hoy renderizada por `drawTshirtClip`) en un PNG máscara. Subirla al bucket `print-templates` desde `seed-storage.js` y usar su path como `mask_path` en los `print_templates` semilla de variantes de camiseta.
+3. Editar `02_products.sql` y demás seeds que insertaban con string kind: usar subquery
+   `(SELECT id FROM public.customization_kinds WHERE slug = 'phone_case')`.
+4. `print_templates` semilla: ya no llevan columna `kind`.
 
 ---
 
-## 4. UX flow — admin
+## Tipos (`src/types/`)
 
-All admin UI for a customizable product lives on **one page**: `/admin/products/[id]/edit`. Templates live inside each item row, mirroring how stock & categories already live on items.
-
-```
-Admin → "Nuevo producto" → /admin/products/new
-        │
-        ▼
-[ Crear producto ]   título, precio, imágenes, categoría, etiquetas  → Guardar
-        │
-        ▼
-/admin/products/[id]/edit
-        │
-        ├──► <ProductForm> (existente) + bloque Personalización:
-        │       ├─ [ ✓ ] Personalizable
-        │       └─ Tipo: ( Funda de teléfono | Camiseta | Mug )
-        │            • Disabled while toggle is off.
-        │            • Changing tipo with existing items prompts:
-        │              "Esto borrará N variaciones y sus plantillas. ¿Continuar?"
-        │              On confirm, server deletes affected items (templates cascade)
-        │              and updates customization_kind.
-        │
-        └──► <ProductItemsSection> (existente) — extended:
-                Each item row in <ProductItemsAccordion> gains a
-                **"Plantilla de impresión"** subsection, ONLY when product.customizable = true.
-                │
-                ├─ Fila de variación (categorías, stock)
-                └─ Plantilla de impresión:
-                     • etiqueta (requerido)
-                     • atributos kind-aware via <PrintTemplateFields>
-                     • width_mm, height_mm, print_dpi (default 300)
-                     • subir mockup → uploadImage(file, 'print-templates')
-                     • subir máscara → uploadImage(file, 'print-templates')
-                     • safe_area x/y/w/h (numérico en v1)
-                     • [Guardar plantilla] / [Eliminar plantilla]
-                     • Píldora de estado: "Plantilla faltante — variación oculta"
-                       cuando product.customizable=true pero el item no tiene plantilla.
-```
-
-### Admin behaviors
-
-- **Personalización + tipo** live inside `<ProductForm>`. While off, per-item plantilla sub-forms hide.
-- **Validation before publish:** product cannot be saved with `customizable = true` and 0 items with templates. Server action returns inline error.
-- **Storefront filter:** customer-facing picker only shows items where the product is customizable AND has a `print_templates` row. Items without a template are silently hidden.
-- **Disabling personalizable:** preserves `customization_kind` (greyed), preserves all items/templates. Re-enabling restores intact.
-- **Changing tipo:** items have kind-specific templates (via trigger); the only safe path is delete-and-recreate. UI shows one-click confirm; server action does it transactionally.
-- **Historical orders:** never touched. `OrderItem.customization` snapshot keeps them rendering even if the underlying item/template is later deleted.
-
-### 4.1 Per-item plantilla subsection — concrete contract
-
-Implementation contract for step 4 (todo: *Per-item plantilla subsection + actions*). Soft validation in v1 — admin can save a `customizable=true` product with templateless items; those items are just hidden on the storefront. (Plan §4 "Validation before publish" downgraded to a UI hint to keep step 4 self-contained.)
-
-#### `PrintTemplateFields.tsx` (client component)
-
-Props: `{ kind: CustomizationKind, defaultValue: PrintTemplate | null }`. Renders:
-
-| Field | Input | Required |
-|---|---|---|
-| `label` | text | yes |
-| Attributes (kind-aware) | see below | yes |
-| `width_mm` / `height_mm` | number | yes |
-| `print_dpi` | number, default `300` | yes |
-| Mockup (`mockup_path`) | file → uploads to `print-templates` bucket, hidden input holds object path | optional |
-| Mask (`mask_path`) | file → same | optional |
-| `safe_area_{x,y,width,height}` | numbers 0..1 | optional (all four together) |
-
-Kind-aware attributes:
-
-- `phone_case` → `attr_brand` (text), `attr_model` (text) — both required.
-- `tshirt` → `attr_placement` (select: `front` / `back`) — required.
-- `mug` → `attr_wrap` (select: `full` / `partial`) — required.
-
-Upload pattern mirrors `ProductForm`: client `uploadImage(file, 'print-templates')` returns a public URL, but we store the **object path** (per §2.6). To get the path we add a sibling client helper `uploadStorageObject(file, bucket): Promise<{ path, publicUrl }>` in `src/lib/supabase/storage.ts` and use that here.
-
-#### Server actions (add to `src/app/admin/products/actions.ts`)
+Eliminar union `CustomizationKind`. Reemplazar:
 
 ```ts
-export async function upsertPrintTemplate(
-  productId: string,
-  itemId: string,
-  formData: FormData,
-): Promise<void>
-export async function deletePrintTemplate(
-  productId: string,
-  itemId: string,
-): Promise<void>
-```
+// print-template.ts
+export interface SafeArea { x: number; y: number; width: number; height: number }
 
-Behavior:
+export type KindAttributeField =
+  | { key: string; label: string; type: "text" | "number"; required: boolean; placeholder?: string }
+  | { key: string; label: string; type: "select"; required: boolean;
+      options: { value: string; label: string }[] };
 
-- `requireAdmin()`.
-- `upsertPrintTemplate` reads `products.customization_kind` for `productId` (single source of truth — never trust the client). Throws if null.
-- Builds `attributes` jsonb from per-kind form keys; validates required keys.
-- Parses `safe_area` into `{x,y,width,height}` only if all four are present and finite.
-- Upserts into `print_templates` with `item_id` as conflict target. The DB kind-match trigger from §2.2 provides the safety net.
-- `deletePrintTemplate` deletes the row by `item_id`.
-- Both `revalidatePath('/admin/products/<id>/edit')` and `revalidatePath('/products/<id>')`.
+export interface CustomizationKind {
+  id: string;
+  slug: string;
+  label: string;
+  picker_label: string;
+  attribute_schema: KindAttributeField[];
+  sort_order: number;
+  archived: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
-#### `ProductItemsSection.tsx` (server component) extensions
-
-- Also `select` `customizable, customization_kind` from `products` (already on the product, but pass explicitly to the accordion).
-- Join `print_templates` per item: extend the items query to `items(*, print_template:print_templates(*))`.
-- Pass `customizable`, `customizationKind`, and the joined `printTemplate` per item to `<ProductItemsAccordion>`.
-
-#### `ProductItemsAccordion.tsx` changes
-
-- New props: `customizable: boolean`, `customizationKind: CustomizationKind | null`, plus each item carries an optional `printTemplate`.
-- Header pill: if `customizable && customizationKind && !item.printTemplate` → render a "Plantilla faltante — variación oculta" red pill.
-- Inside the expanded body, when `customizable && customizationKind`, render a new bordered subsection titled **"Plantilla de impresión"** containing `<PrintTemplateFields>` inside a `Form` whose action is `upsertPrintTemplate.bind(null, productId, item.id)`. Below it, a separate `Form` with `deletePrintTemplate` and `confirm`, only when `item.printTemplate` exists.
-
-#### Edit page wiring
-
-`/admin/products/[id]/edit` already passes `hasItems`. Add `customizationKind` to the data it forwards to the section. No new fetches beyond what `ProductItemsSection` already does.
-
----
-
-### Storefront list pages (decision #19)
-
-- "Personalizable" badge on `ProductCard` when `product.customizable && product.customization_kind`.
-- Filter chip on `/products` and category pages: "Solo personalizables" (toggles a `?customizable=1` URL param).
-
----
-
-## 5. Server-side render pipeline (print files)
-
-Triggered by the order-approval Server Action (decision #5), not by a route handler.
-
-```ts
-// src/app/admin/orders/actions.ts
-export async function approveOrder(orderId: string) {
-  await requireAdmin();
-  const supabase = await createServiceClient();
-
-  // 1. Atomic stock deduction + status flip
-  const { error: rpcErr } = await supabase.rpc("approve_order", { p_order_id: orderId });
-  if (rpcErr) throw new Error(rpcErr.message);
-
-  // 2. Re-select the order (SP returns void)
-  const { data: order, error: selErr } = await supabase
-    .from("orders").select("*").eq("id", orderId).single();
-  if (selErr || !order) throw new Error(selErr?.message ?? "order not found");
-
-  // 3. Render each customized line from the SNAPSHOT (decision #17)
-  const items = order.items as OrderItem[];
-  let mutated = false;
-  for (let i = 0; i < items.length; i++) {
-    const c = items[i].customization;
-    if (!c || c.print_path) continue;
-    const printPath = await renderPrintFile(c, orderId, i);
-    c.print_path = printPath;
-    mutated = true;
-    await supabase.from("customizations").update({ print_path: printPath }).eq("id", c.id);
-  }
-  if (mutated) {
-    await supabase.from("orders").update({ items }).eq("id", orderId);
-  }
-  revalidatePath(`/admin/orders/${orderId}`);
+export interface PrintTemplate {
+  item_id: string;
+  label: string;
+  attributes: Record<string, string | number>;
+  width_mm: number;
+  height_mm: number;
+  print_dpi: number;
+  mockup_path: string | null;
+  mask_path: string | null;
+  safe_area: SafeArea | null;
+  created_at: string;
+  updated_at: string;
 }
 ```
 
-`renderPrintFile(snapshot, orderId, lineIndex)` lives in `src/lib/print/render.ts`:
+**Eliminar** `PhoneCaseAttributes`, `TshirtAttributes`, `MugAttributes`, `PrintTemplateAttributes`.
 
-1. From snapshot: `targetW = round((template.width_mm / 25.4) * template.print_dpi)`; same for `targetH`.
-2. Download source from `customizations-source` via signed URL into a `Buffer`.
-3. With `@napi-rs/canvas` (top-left pivot, uniform scale):
-   ```ts
-   const canvas = createCanvas(targetW, targetH);
-   const ctx = canvas.getContext("2d");
-   const img = await loadImage(sourceBuffer);
-   const drawnW = transform.scale * targetW;
-   const drawnH = (img.height / img.width) * drawnW;
+`Product` ([src/types/product.ts](src/types/product.ts)): reemplazar `customization_kind: CustomizationKind | null` por `customization_kind_id: string | null`. Exponer derivado `ProductWithKind = Product & { customization_kind: CustomizationKind | null }` para queries con JOIN.
 
-   ctx.save();
-   ctx.translate(transform.x * targetW, transform.y * targetH);
-   ctx.rotate(transform.rotation);                       // around top-left (decision #6)
-   ctx.drawImage(img, 0, 0, drawnW, drawnH);
-   ctx.restore();
-
-   if (template.mask_path) {
-     const mask = await loadImage(await fetchSigned(template.mask_path));
-     ctx.globalCompositeOperation = "destination-in";
-     ctx.drawImage(mask, 0, 0, targetW, targetH);
-   }
-   return canvas.encode("png");
-   ```
-4. Upload PNG to `customizations-print/<orderId>/<lineIndex>.png`; return the object path.
-
-A separate admin **"Regenerar archivo de impresión"** button on the order page calls `renderPrintFile()` for a single line — useful if the first render fails or for re-prints.
+`OrderCustomizationSnapshot` ([src/types/customization.ts](src/types/customization.ts#L34)): `template_kind` se vuelve `{ slug: string; label: string }`. El resto del bloque `template` queda igual.
 
 ---
 
-## 6. Admin surface — `/admin/orders/[id]`
+## Server actions
 
-For each `OrderItem.customization`:
+### Nuevo módulo: `src/app/admin/customization-kinds/actions.ts`
 
-- Badge de tipo + etiqueta de plantilla.
-- Miniatura de la imagen original (signed URL).
-- Vista previa (signed URL desde `customizations-preview`).
-- Botón **"Descargar archivo de impresión"** — signed URL a `customizations-print/<orderId>/<i>.png`. Si `print_path` es null, dice **"Generar archivo"** y llama la acción de §5 para esa línea.
+```ts
+"use server";
+// requireAdmin en todas
+- createKind(formData)
+- updateKind(id, formData)   // devuelve { orphaned: number; incomplete: number } para warning UI
+- archiveKind(id)            // throw si SELECT count(*) FROM products WHERE customization_kind_id = id > 0
+- unarchiveKind(id)
+- deleteKind(id)             // FK RESTRICT lo respalda; double-check antes
+```
 
----
+Validaciones:
+- `slug`: snake_case, único, inmutable después de crear.
+- `attribute_schema`: parsear JSON, validar shape (cada campo tiene `key` única dentro del array, `type` ∈ {text,number,select}, `select` requiere `options` no vacío).
+- En `updateKind`, calcular sobre `print_templates` cuyos productos usan este kind:
+  - `orphaned`: templates con keys en `attributes` que **ya no están** en el nuevo schema.
+  - `incomplete`: templates a las que les **falta** un campo `required` nuevo.
+  - Devolver ambos counts; no bloquea.
 
-## 7. File / module changes summary
+### Editar `src/app/admin/products/actions.ts`
 
-| File | Change |
-|---|---|
-| `supabase/migrations/08_products.sql` | Add `customizable`, `customization_kind` + CHECK |
-| `supabase/migrations/09_items.sql` | (no change — `items.stock` already covers stock) |
-| `supabase/migrations/13_approve_order.sql` | **Edit** — deduct stock by `item_id` instead of `product_id` |
-| `supabase/migrations/16_print_templates.sql` | **NEW** — 1:1 with `items`, kind-match trigger, RLS, `set_updated_at` trigger |
-| `supabase/migrations/17_customizations.sql` | **NEW** — table + indexes + RLS (auth-only) + `set_updated_at` trigger |
-| `supabase/migrations/04_storage.sql` | Add 3 buckets + relaxed policies (print bucket admin/service) |
-| `supabase/seed/08_print_templates.sql` | **NEW** — seed templates for seeded customizable items |
-| `src/types/product.ts` | Add `customizable`, `customization_kind` |
-| `src/types/item.ts` | Optional `print_template?: PrintTemplate` joined shape |
-| `src/types/print-template.ts` | **NEW** |
-| `src/types/customization.ts` | **NEW** — `Customization`, `CustomizationTransform`, snapshot type |
-| `src/types/order.ts` | Add `item_id` to `OrderItem`; add `customization` snapshot |
-| `src/lib/supabase/storage.ts` | Add `signStoragePath(bucket, path, expiresIn?)`; ensure `uploadImage` accepts a bucket param |
-| `src/lib/print/render.ts` | **NEW** — `renderPrintFile()` (`@napi-rs/canvas`, `image-size` server) |
-| `src/lib/cart.tsx` | Require `itemId`; add `customizationLocalKey` + `customizationPreviewDataUrl`; new line-id rule; hydrator drops lines whose localKey is missing from IndexedDB |
-| `src/lib/customizations/indexedDb.ts` | **NEW** — client blob store (`put`, `get`, `delete`, `list`, `sweepStale`) using `idb` |
-| `src/lib/customizations/localStore.ts` | **NEW** — localStorage wrapper for design metadata records (typed accessors + TTL sweep) |
-| `src/app/components/CartDrawer.tsx` | Show preview thumbnail + "Editar diseño" button on customized lines |
-| `src/app/components/ProductCard.tsx` | Show "Personalizable" badge when applicable |
-| `src/app/components/FilterableList.tsx` (or list pages) | Add "Solo personalizables" chip (URL param `customizable=1`) |
-| `src/app/admin/products/ProductForm.tsx` | Add personalización toggle + tipo select; one-click confirm on tipo change |
-| `src/app/admin/products/ProductItemsAccordion.tsx` | Add per-item plantilla subsection (visible when product is customizable) |
-| `src/app/admin/products/PrintTemplateFields.tsx` | **NEW** — kind-aware sub-form (validates `attributes` per kind) |
-| `src/app/admin/products/actions.ts` | Add template upsert/delete, tipo-change cleanup action, no-empty-templated-items validation |
-| `src/app/admin/orders/actions.ts` | **NEW** `approveOrder` Server Action (wraps SP + renders); `regeneratePrintFile(orderId, lineIndex)` |
-| `src/app/admin/orders/[id]/page.tsx` | Show customization info + download/generate buttons |
-| `src/app/components/customization/CustomizationEditor.tsx` | **NEW** — shared Konva-based editor (was inline in admin sandbox). Used by both `/admin/products/[id]/preview-editor` and the customer flow. |
-| `src/app/components/customization/KonvaStage.tsx` | **NEW** — moved from the admin sandbox folder so customer + admin reuse it. |
-| `src/app/admin/products/[id]/preview-editor/page.tsx` | Now thin — just renders the shared editor with seeded variants; no persistence. |
-| `src/app/products/[id]/page.tsx` | If `customizable`, render `<CustomizationFlow />`; otherwise existing flow |
-| `src/app/products/[id]/CustomizationFlow.tsx` | **NEW** — picker → upload → shared editor → confirm; supports `?edit=local:<id>`; writes IndexedDB + cart line on confirm |
-| `src/app/products/[id]/customization/presets.ts` | **NEW** — per-kind editor presets |
-| `src/app/actions/customizations.ts` | **NEW** — `createCustomization(formData)` Server Action (uploads source + preview, inserts row, returns snapshot). Called only at checkout via `persistPendingCustomizations`. |
-| `src/app/components/BuyNowButton.tsx` | Before `createOrderAndCheckout`, run `persistPendingCustomizations` to upload all customized lines and inject the snapshots into the cart payload. |
-| `src/app/actions/orders.ts` | Order create: include `item_id` and `customization` snapshot per line. The snapshot is passed in from the client (already created by `persistPendingCustomizations`). |
-| `package.json` | Add `react-konva`, `konva`, `@napi-rs/canvas`, `image-size`, `idb` |
+- Eliminar `VALID_KINDS` y `parseKind`. Leer `customization_kind_id` del form, SELECT contra `customization_kinds` para validar existencia y no-archivado.
+- **Preservar la lógica destructiva al cambiar de kind** (hoy borra items cuando cambia `customization_kind`): renombrar la variable a `customization_kind_id` y mantener el wipe. Sigue siendo necesario porque el `attribute_schema` cambia.
+- `upsertPrintTemplate`: cargar el kind del producto, iterar `attribute_schema` para validar `formData.get("attr_<key>")` (presencia si `required`, valor permitido si `select`). Eliminar las ramas `if (kind === "phone_case") …`. **Conservar** parsing de `mask_path` / `safe_area` (siguen siendo per-template).
+
+### Editar `src/app/actions/customizations.ts`
+
+- Eliminar `VALID_KINDS`. La carga del `print_template` ahora hace JOIN al producto al kind para obtener `slug` + `label` del kind y armar `template_kind` del snapshot. `mask_path`/`safe_area` se siguen leyendo del template directamente.
+
+Convención: `requireAdmin()` + `revalidatePath("/admin/customization-kinds")` + revalidar `/admin/products` y `/products/[id]` cuando afecte productos.
 
 ---
 
-## 8. Implementation order
+## Admin UI
 
-1. **Schema + types + seed**: migrations 08 (alter), 13 (SP fix), 16 (print_templates), 17 (customizations), 04 (buckets/policies); seed; `npm run db:reset`.
-2. **Order create path**: add `item_id` to every cart line + every `OrderItem`. Non-customizable orders must work after this.
-3. **Product form**: personalizable toggle + tipo select with one-click confirm on tipo change.
-4. **Per-item plantilla subsection** in `<ProductItemsAccordion>` + CRUD actions; storage helpers; per-kind `attributes` validation.
-5. **Konva editor sandbox** at `/admin/products/[id]/preview-editor` — validate UX. Includes silhouette clipping (hardcoded path for the seed mockup); the per-template `clip_path` field is deferred to v2.
-6. **Extract shared editor**: move the working Konva editor out of the admin sandbox into `src/app/components/customization/` so both admin and storefront render the exact same component. Sandbox becomes a thin host.
-7. **Customer flow** on product detail page (`<CustomizationFlow />`): wizard → shared editor → preview → IndexedDB write → cart line. Same code path for logged-in and guest users.
-8. **Cart integration**: extended `CartItem` shape (`customizationLocalKey` + preview dataURL); new line-id rule; thumbnail + "Editar diseño" button. Cart hydrator drops lines whose localKey is gone from IndexedDB.
-9. **Checkout persistence**: `createCustomization` Server Action + client-side `persistPendingCustomizations` invoked from `BuyNowButton` before `createOrderAndCheckout`. Order create accepts the snapshot in its payload and stores it in `OrderItem.customization`. IndexedDB + localStorage entries for the persisted lines are deleted on order success.
-10. **`approveOrder` Server Action** wrapping `approve_order` SP + print render; `regeneratePrintFile` action; admin order page UI.
-11. **Storefront polish**: "Personalizable" badge + filter chip; storage cleanup job (orphans + IndexedDB TTL sweep on app mount).
+### Nuevo módulo `/admin/customization-kinds`
+
+Patrón del skill `new-module`:
+
+- `page.tsx` — lista con columnas: `label`, `slug`, `# campos`, `# productos`, `archived`.
+- `new/page.tsx` — formulario de creación; `slug` editable.
+- `[id]/edit/page.tsx` — formulario de edición; `slug` deshabilitado.
+- `KindForm.tsx` — Client Component:
+  - `label`, `picker_label`, `sort_order`.
+  - **Schema editor** (sub-componente cliente): lista dinámica de campos con add/remove/reorder; cada fila tiene `key`, `label`, `type`, `required`, y según `type` muestra `placeholder` o sub-editor de `options`. Serializa todo a un `<input type="hidden" name="attribute_schema" />` JSON.
+  - Si está editando y el cambio rompe templates existentes, mostrar warning con los dos counts (`orphaned`, `incomplete`) calculados server-side y pasados como prop.
+- Botón "Archivar" en la lista: server action; si hay productos referenciando, error con count.
+- Link nuevo en [src/app/admin/AdminNav.tsx](src/app/admin/AdminNav.tsx).
+
+### Editar `ProductForm.tsx`
+
+- Eliminar `KIND_LABELS` hard-coded.
+- Recibir prop `kinds: CustomizationKind[]` desde el server component padre (no archivados; si el producto actual usa uno archivado, agregarlo deshabilitado al final).
+- El `<Select name="customization_kind_id">` itera `kinds`.
+
+### Editar `PrintTemplateFields.tsx`
+
+- Recibir `kind: CustomizationKind` (objeto completo).
+- Eliminar bloques `if (kind === "phone_case") …` y la función `kindPlaceholder`.
+- Generar inputs en loop sobre `kind.attribute_schema`:
+  - `text`/`number` → `<Input name="attr_<key>" type=... />`.
+  - `select` → `<Select name="attr_<key>">` con `options`.
+- Pre-poblar valores desde `defaultValue?.attributes?.[field.key]`.
+- Mostrar advertencia inline si `defaultValue.attributes` tiene keys huérfanas, o si faltan keys `required`.
+- **Conservar** los inputs de `mockup_path`, `mask_path`, `safe_area` y el uploader cliente con `uploadStorageObject` (patrón actual, sin nueva action de upload).
 
 ---
 
-## 9. Storage cleanup
+## Cliente — flujo de personalización
 
-- `customizations` rows created and never referenced by an order older than 30 days → delete row + source + preview (extend `supabase/remove-orphans.js`). In practice these are rare because rows are only inserted at order-creation time, but it covers the failure case where order insert fails after `createCustomization` succeeded.
-- IndexedDB + localStorage entries: client-side TTL of 7 days; sweep on app mount.
-- Print files for cancelled/rejected orders: kept 90 days, then purged.
+### `src/app/products/[id]/page.tsx`
+
+- Cambiar el gate: `product.customizable && product.customization_kind_id !== null`.
+- Cargar el kind (JOIN) y pasar el objeto completo a `CustomizationFlow`.
+
+### `CustomizationFlow.tsx`
+
+- Eliminar `KIND_PICKER_LABEL`. Usar `kind.picker_label`.
+- `EditorVariant` sigue llevando `template.mask_path` / `template.safe_area` desde el `print_template` (no cambia).
+
+### `KonvaStage.tsx` — letterboxing
+
+- **Eliminar `drawTshirtClip` y la dependencia de `tshirt-blank.svg`**. Sin código kind-specific.
+- Cargar `template.mask_path` como `Konva.Image` cuando exista; aplicar como clip por alpha usando `globalCompositeOperation = 'destination-in'`. Sin `mask_path` ⇒ clip rectangular completo (sin máscara).
+- **Letterboxing**: calcular `maskAspect = maskPx.w / maskPx.h` vs `templateAspect = width_mm / height_mm`. Centrar la máscara con estrategia "contain":
+  - Si `maskAspect > templateAspect` (máscara más ancha): escalar al ancho del rect; centrar vertical; las bandas top/bottom fuera del contain quedan transparentes ⇒ no imprimibles.
+  - Si `maskAspect < templateAspect`: escalar al alto; centrar horizontal; bandas izq/der no imprimibles.
+- El editor (drag/scale de la imagen del cliente) sigue operando en el rect completo del template; el clip por alpha de la máscara recorta el resultado al render. El `safe_area` (rect normalizado al template, no a la máscara) sigue dibujándose como guía.
+
+### `ProductCard.tsx` ([src/app/components/ProductCard.tsx](src/app/components/ProductCard.tsx#L39))
+
+- Cambiar `product.customizable && !!product.customization_kind` por `product.customizable && !!product.customization_kind_id`.
+
+### `localStore.ts` / `persist.ts`
+
+- `LocalCustomization.kind`: pasa de `CustomizationKind` (string union) a `{ slug: string; label: string }`. Suficiente para el carrito; al re-editar, el editor recarga el kind completo desde el server.
+- Sin compat: si al hidratar se detecta forma vieja (`typeof kind === "string"`), descartar la entrada silenciosamente. El sweep de 7 días limpia residuos.
 
 ---
 
-## 10. Open questions (remaining)
+## Validaciones y políticas RLS
 
-1. **Min source resolution.** Defaulting to 1000 × 1000 px. Confirm.
-2. **Max upload size.** Defaulting to 20 MB. Confirm.
-3. **Safe-area editor.** v1 numeric inputs; v2 visual rectangle drawer — confirm v1 is OK.
-4. **Multi-layer designs** (text, stickers, multi-image) — v2 stretch. v1 = single image.
-5. **Template duplication** ("Duplicar plantillas desde otro producto") — v2 nice-to-have for phone-case families.
+| Acción | Quién | Política |
+|---|---|---|
+| SELECT `customization_kinds` | público | RLS público |
+| INSERT/UPDATE/DELETE `customization_kinds` | admin | `is_admin(auth.uid())` |
+| Subir/borrar PNG máscara (cliente sube directo al bucket `print-templates`) | admin | ya cubierto por `19_print_storage.sql` (renombrado) |
+
+Reglas de negocio en server actions:
+- `archiveKind` / `deleteKind`: bloquear si `SELECT count(*) FROM products WHERE customization_kind_id = $1 > 0`.
+- `updateKind`: calcular `{ orphaned, incomplete }` y devolver para warning.
+- `upsertPrintTemplate`: validar `attributes` contra `attribute_schema` del kind del producto padre.
+- `updateProduct` con cambio de `customization_kind_id`: wipe de items (preservar lógica destructiva actual).
+
+---
+
+## Tareas (orden de implementación)
+
+1. **Migraciones**: `git mv` 08→09 … 18→19; crear `08_customization_kinds.sql`; editar `09_products.sql` (swap columna + constraint) y `17_print_templates.sql` (drop `kind` + drop trigger).
+2. **Seeds**: nuevo seed de kinds; convertir t-shirt SVG → PNG máscara y subirla en `seed-storage.js`; actualizar inserts de productos.
+3. **Tipos**: refactor de `src/types/print-template.ts`, `product.ts`, `customization.ts`.
+4. **Server actions**: nuevo `admin/customization-kinds/actions.ts`; refactor de `admin/products/actions.ts` y `actions/customizations.ts`.
+5. **UI admin**: módulo `/admin/customization-kinds` con schema editor; link en `AdminNav`.
+6. **UI admin productos**: refactor de `ProductForm.tsx` y `PrintTemplateFields.tsx`.
+7. **Storefront**: refactor de `products/[id]/page.tsx`, `CustomizationFlow.tsx`, `KonvaStage.tsx` (letterboxing), `ProductCard.tsx`, `localStore.ts`, `persist.ts`.
+8. **Verificación**: `npm run db:reset` + `npm run lint:check` + `npm run typecheck`. Flujo manual: crear kind nuevo, asignarlo a un producto, crear print_template con su máscara, comprar.
+9. **Docs (post-impl)**: agregar sección "Customization" a [TECH_SPEC.md](TECH_SPEC.md) describiendo `customization_kinds` + `print_templates` + flujo. Actualizar [supabase/seed/images/README.md](supabase/seed/images/README.md) con el nuevo PNG máscara de t-shirt. README.md raíz no requiere cambios.
+
+## Fuera de alcance v1
+
+- Tipos de campo extra (`color`, `file`, `multi-select`, `boolean`).
+- Validación condicional entre campos.
+- Versionado del `attribute_schema` por print_template (la decisión "permitir con warning" asume edición destructiva).
+- i18n de labels.
+- Editor visual de la máscara dentro del admin (se sube PNG ya generado).
+- Reuso de máscara entre templates (cada template referencia su propio path; cero deduplicación).

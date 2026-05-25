@@ -5,11 +5,12 @@ import { useRef, useState } from "react";
 import Button from "@/app/components/Button";
 import Input, { Select } from "@/app/components/Input";
 import { uploadStorageObject } from "@/lib/supabase/storage";
-import type { CustomizationKind, PrintTemplate, SafeArea } from "@/types";
-
-interface PhoneCaseAttrs { brand?: string; model?: string }
-interface TshirtAttrs   { placement?: "front" | "back" }
-interface MugAttrs      { wrap?: "full" | "partial" }
+import type {
+  CustomizationKind,
+  KindAttributeField,
+  PrintTemplate,
+  SafeArea,
+} from "@/types";
 
 interface Props {
   kind: CustomizationKind;
@@ -17,8 +18,7 @@ interface Props {
 }
 
 export default function PrintTemplateFields({ kind, defaultValue }: Props) {
-  const attrs = (defaultValue?.attributes ?? {}) as
-    PhoneCaseAttrs & TshirtAttrs & MugAttrs;
+  const attrs = (defaultValue?.attributes ?? {}) as Record<string, string | number>;
   const safeArea: SafeArea | null = defaultValue?.safe_area ?? null;
 
   const [mockupPath, setMockupPath] = useState<string>(defaultValue?.mockup_path ?? "");
@@ -48,53 +48,12 @@ export default function PrintTemplateFields({ kind, defaultValue }: Props) {
         name="label"
         required
         defaultValue={defaultValue?.label ?? ""}
-        placeholder={kindPlaceholder(kind)}
+        placeholder={`ej. ${kind.label}`}
       />
 
-      {kind === "phone_case" && (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Input
-            label="Marca"
-            name="attr_brand"
-            required
-            defaultValue={attrs.brand ?? ""}
-            placeholder="ej. Apple"
-          />
-          <Input
-            label="Modelo"
-            name="attr_model"
-            required
-            defaultValue={attrs.model ?? ""}
-            placeholder="ej. iPhone 15 Pro"
-          />
-        </div>
-      )}
-
-      {kind === "tshirt" && (
-        <Select
-          label="Ubicación del estampado"
-          name="attr_placement"
-          required
-          defaultValue={attrs.placement ?? ""}
-        >
-          <option value="">— Selecciona —</option>
-          <option value="front">Frente</option>
-          <option value="back">Espalda</option>
-        </Select>
-      )}
-
-      {kind === "mug" && (
-        <Select
-          label="Tipo de wrap"
-          name="attr_wrap"
-          required
-          defaultValue={attrs.wrap ?? ""}
-        >
-          <option value="">— Selecciona —</option>
-          <option value="full">Completo</option>
-          <option value="partial">Parcial</option>
-        </Select>
-      )}
+      {(kind.attribute_schema ?? []).map((field) => (
+        <AttributeField key={field.key} field={field} value={attrs[field.key]} />
+      ))}
 
       <div className="grid gap-3 sm:grid-cols-3">
         <Input
@@ -195,10 +154,41 @@ export default function PrintTemplateFields({ kind, defaultValue }: Props) {
   );
 }
 
-function kindPlaceholder(kind: CustomizationKind) {
-  if (kind === "phone_case") return "ej. iPhone 15 Pro";
-  if (kind === "tshirt") return "ej. Talla M — Frente";
-  return "ej. Mug 11oz";
+function AttributeField({
+  field,
+  value,
+}: {
+  field: KindAttributeField;
+  value: string | number | undefined;
+}) {
+  const name = `attr_${field.key}`;
+  if (field.type === "select") {
+    return (
+      <Select
+        label={field.label}
+        name={name}
+        required={field.required}
+        defaultValue={value !== undefined ? String(value) : ""}
+      >
+        <option value="">— Selecciona —</option>
+        {field.options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </Select>
+    );
+  }
+  return (
+    <Input
+      label={field.label}
+      name={name}
+      type={field.type === "number" ? "number" : "text"}
+      required={field.required}
+      defaultValue={value !== undefined ? String(value) : ""}
+      placeholder={field.placeholder}
+    />
+  );
 }
 
 function FileSlot({
