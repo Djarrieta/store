@@ -38,6 +38,12 @@ const runDir = (dir) => {
 
 loadEnvLocal();
 runDir("supabase/migrations");
+
+// Create (or refresh) a local dev user for email+password sign-in from the UI.
+// Must run BEFORE seeds so that seed data referencing the dev user's UUID succeeds.
+console.log("→ Running supabase/seed-dev-user.js...");
+execSync("node supabase/seed-dev-user.js", { stdio: "inherit" });
+
 runDir("supabase/seed");
 
 // Upload binary seed assets (mockups, gallery images) to Supabase Storage.
@@ -75,19 +81,4 @@ if (adminUserIds.length > 0) {
   console.log("✓ Admin users seeded.");
 } else {
   console.warn("⚠  ADMIN_USER_IDS not set or invalid — skipping. Add comma-separated UUIDs to .env.local and re-run db:reset.");
-}
-
-// Create (or refresh) a local dev user for email+password sign-in from the UI.
-console.log("→ Running supabase/seed-dev-user.js...");
-execSync("node supabase/seed-dev-user.js", { stdio: "inherit" });
-
-// Set assistant_bot password after the role has been created by migration 12
-const botPassword = process.env.ASSISTANT_BOT_PASSWORD;
-if (botPassword) {
-  console.log("→ Setting assistant_bot password...");
-  const escaped = botPassword.replace(/'/g, "''");
-  execSync(`npx supabase db query --linked "ALTER ROLE assistant_bot WITH PASSWORD '${escaped}'"`, { stdio: "inherit" });
-  console.log("✓ assistant_bot password set.");
-} else {
-  console.warn("⚠  ASSISTANT_BOT_PASSWORD not set — skipping. Add it to .env.local and re-run db:reset.");
 }

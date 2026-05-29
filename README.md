@@ -29,6 +29,12 @@ npm install
 cp .env.local.example .env.local
 # Edit .env.local with your dev Supabase URL and anon key
 
+# Link to your remote Supabase project (requires login)
+npm run db:link
+
+# Reset/seed the database
+npm run db:reset
+
 # Start dev server (runs on http://localhost:5000)
 npm run dev
 ```
