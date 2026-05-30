@@ -3,7 +3,7 @@ import { formatCurrency } from "@/lib/format";
 import { createServiceClient } from "@/lib/supabase/service";
 
 import { type ChatChannel, type ChatMessage, getHistory } from "./chatHistory";
-import { fetchStoreSnapshot } from "./contextTopics";
+import { fetchStoreSnapshot } from "./storeSnapshot";
 import { ASSISTANT_PROMPT } from "./prompt";
 
 const MAX_CART_ITEMS = 50;
@@ -18,7 +18,7 @@ export async function buildPrompt(
 
   const isGuest = channel !== "auth";
 
-  const [{ data: pinnedContent }, { data: onDemandKeys }, profileResult, addressesResult, history, contextTopics] =
+  const [{ data: pinnedContent }, { data: onDemandKeys }, profileResult, addressesResult, history, storeSnapshot] =
     await Promise.all([
       supabase.from("content").select("key, value").eq("pinned", true),
       supabase.from("content").select("key").eq("pinned", false).order("key"),
@@ -112,15 +112,20 @@ export async function buildPrompt(
     cartSummary = lines.join("\n");
   }
 
+  const userRefHint = isGuest
+    ? ""
+    : "(Cuando llames herramientas que requieran `user_ref`, usa el ID que aparece entre paréntesis arriba.)\n";
+
   return ASSISTANT_PROMPT
     .replace("{{date}}", new Date().toLocaleDateString("es-CO"))
     .replace("{{userInfo}}", userInfo)
+    .replace("{{userRefHint}}", userRefHint)
     .replace("{{userAddresses}}", userAddresses)
     .replace("{{assistantBehavior}}", assistantBehavior)
     .replace("{{assistantInstructions}}", assistantInstructions)
     .replace("{{pinnedContent}}", pinnedContext)
     .replace("{{availableContentKeys}}", availableContentKeys)
-    .replace("{{contextTopics}}", contextTopics)
+    .replace("{{storeSnapshot}}", storeSnapshot)
     .replace("{{conversationHistory}}", conversationHistory)
     .replace("{{cartSummary}}", cartSummary)
     .replace("{{guestInstructions}}", guestInstructions)
