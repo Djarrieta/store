@@ -4,7 +4,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 import { DeepSeekLLMProvider } from "./deepseekProvider";
 
-const SUMMARY_THRESHOLD = 20;
+const SUMMARY_THRESHOLD = 10;
 
 export type ChatChannel = "auth" | "web_guest" | "whatsapp";
 
@@ -39,7 +39,7 @@ export async function getHistory(userRef: string): Promise<ChatMessage[]> {
     ];
   }
 
-  // No summary — return last 20 messages
+  // No summary — return last messages
   const { data } = await supabase
     .from("chat_messages")
     .select("role, message")

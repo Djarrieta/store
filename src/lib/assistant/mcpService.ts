@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+// import fs from "fs";
+// import path from "path";
 
 import { type BaseMessage,HumanMessage, ToolMessage } from "@langchain/core/messages";
 
@@ -237,9 +237,9 @@ export async function generateResponse(prompt: string, channel: ChatChannel = "a
   if (!prompt?.trim()) throw new Error("Prompt is empty");
 
   // --- DEBUG: dump full prompt to file ---
-  const debugPath = path.resolve(process.cwd(), "debug-prompt.md");
-  fs.writeFileSync(debugPath, `# LLM Prompt Debug\n\n**Timestamp:** ${new Date().toISOString()}\n**Channel:** ${channel}\n\n---\n\n${prompt}\n`, "utf-8");
-  console.log(`[DEBUG] Prompt written to ${debugPath}`);
+  // const debugPath = path.resolve(process.cwd(), "debug-prompt.md");
+  // fs.writeFileSync(debugPath, `# LLM Prompt Debug\n\n**Timestamp:** ${new Date().toISOString()}\n**Channel:** ${channel}\n\n---\n\n${prompt}\n`, "utf-8");
+  // console.log(`[DEBUG] Prompt written to ${debugPath}`);
   // --- END DEBUG ---
 
   const GUEST_BLOCKED_TOOLS = new Set(["bot_create_order", "bot_get_my_orders", "bot_get_order_status"]);
