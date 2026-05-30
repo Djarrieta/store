@@ -2,6 +2,7 @@ import { type BaseMessage,HumanMessage, ToolMessage } from "@langchain/core/mess
 
 import { createServiceClient } from "@/lib/supabase/service";
 
+import type { ChatChannel } from "./chatHistory";
 import { DeepSeekLLMProvider } from "./deepseekProvider";
 
 const MAX_STEPS = 10;
@@ -229,7 +230,7 @@ const llmWithTools = new DeepSeekLLMProvider().getInstance().bindTools(TOOLS);
 // Public API
 // ---------------------------------------------------------------------------
 
-export async function generateResponse(prompt: string, userRef: string | null = null): Promise<string> {
+export async function generateResponse(prompt: string, channel: ChatChannel = "auth"): Promise<string> {
   if (!prompt?.trim()) throw new Error("Prompt is empty");
 
   const GUEST_BLOCKED_TOOLS = new Set(["bot_create_order", "bot_get_my_orders", "bot_get_order_status"]);
@@ -244,7 +245,7 @@ export async function generateResponse(prompt: string, userRef: string | null = 
 
     for (const toolCall of response.tool_calls) {
       let result: string;
-      if (userRef === null && GUEST_BLOCKED_TOOLS.has(toolCall.name)) {
+      if (channel !== "auth" && GUEST_BLOCKED_TOOLS.has(toolCall.name)) {
         result = JSON.stringify({ error: "Esta acción requiere que el usuario haya iniciado sesión." });
       } else {
         const handler = HANDLERS[toolCall.name];

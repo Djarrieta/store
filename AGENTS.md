@@ -75,7 +75,7 @@ export async function createFoo(formData: FormData) {
 
 ### Constants (`src/lib/constants.ts`)
 
-`PAGE_SIZE = 24` · `MAX_TITLE_LENGTH = 120` · `MAX_DESCRIPTION_LENGTH = 2000`
+`PAGE_SIZE = 24` · `MAX_TITLE_LENGTH = 120` · `MAX_DESCRIPTION_LENGTH = 2000` · `GUEST_CHAT_COOKIE = "guest_chat_id"` · `WA_REF_COOKIE = "wa_ref"`
 
 ---
 
@@ -99,6 +99,8 @@ export async function createFoo(formData: FormData) {
 5. **Tags normalization** — tags are always comma-split, trimmed, lowercased before storage.
 6. **Service client bypasses RLS** — `createServiceClient()` is for admin-only server code (e.g., order approval stored procedures). Never use in client-facing code.
 7. **`"use server"` in actions files, not in `src/lib/auth.ts`** — see above.
+8. **Chat guest ID validation** — always call `supabase.rpc('user_exists', { p_id: guestId })` before accepting a guest ID to prevent impersonation of authenticated users.
+9. **Chat messages use service client** — `chat_messages` has `USING (false)` RLS (no public access). All reads/writes go through `createServiceClient()` in `src/lib/assistant/chatHistory.ts`.
 
 ---
 
@@ -111,8 +113,33 @@ export async function createFoo(formData: FormData) {
 | `Breadcrumb` | Navigation breadcrumbs |
 | `ProductCard` | Card tile for product grid |
 | `AddToCartButton` | Client Component — adds item to cart context |
-| `CartDrawer` | Slide-out cart panel |
+| `CartDrawer` | Slide-out cart panel || `ChatMigration` | Client Component — migrates guest chat to authenticated user on login (rendered in root layout) |
 
+---
+
+## Chat / Assistant Architecture
+
+The AI assistant supports **multi-channel guest persistence** with automatic migration to authenticated accounts.
+
+### Key concepts
+
+- **`channel` column** on `chat_messages`: `'auth'` (authenticated), `'web_guest'` (browser guest), `'whatsapp'` (WhatsApp bot guest).
+- **Guest identity (web)**: client-generated UUID stored in `guest_chat_id` cookie (30-day, non-HttpOnly).
+- **Guest identity (WhatsApp)**: bot-generated UUID keyed by phone number.
+- **Migration**: on login, `migrateChatSession(guestRef, authUserId)` moves all guest messages to the auth user and logs the mapping in `chat_migration_log`.
+- **Lazy linkage (WhatsApp)**: API route checks `chat_migration_log` before processing a message; if the guest was migrated, returns `{ migrated: true, authUserId }` so the bot updates its mapping.
+
+### Files
+
+| File | Role |
+|------|------|
+| `src/lib/assistant/chatHistory.ts` | `getHistory`, `addMessage(channel)`, `migrateChatSession` |
+| `src/lib/assistant/buildPrompt.ts` | Builds LLM prompt — uses DB history for all channels |
+| `src/lib/assistant/mcpService.ts` | `generateResponse(prompt, channel)` — blocks order tools for guests |
+| `src/app/chat/actions.ts` | `sendMessage(msg, cart, guestId)`, `migrateGuestChat(guestId)` |
+| `src/app/actions/chat-migration.ts` | `setWaRefCookie()` — HttpOnly cookie for WhatsApp login flow |
+| `src/app/api/assistant/route.ts` | External API (WhatsApp bot) — accepts `channel`, detects migrations |
+| `src/app/components/ChatMigration.tsx` | Root-level migration trigger (reads cookie, calls migrate action) |
 ---
 
 ## AI Agent Skills

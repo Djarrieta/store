@@ -7,54 +7,54 @@ import Button from "@/app/components/Button";
 import { Form } from "@/app/components/FormCard";
 import Input from "@/app/components/Input";
 import { useCart } from "@/lib/cart";
-import { CHAT_STORAGE_KEY } from "@/lib/constants";
+import { GUEST_CHAT_COOKIE } from "@/lib/constants";
 
-import { migrateGuestChat,sendMessage } from "./actions";
+import { migrateGuestChat, sendMessage } from "./actions";
 
 interface Message {
   role: "user" | "assistant";
   text: string;
 }
 
-const STORAGE_KEY = CHAT_STORAGE_KEY;
+function getCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
 
-export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boolean }) {
+function setCookie(name: string, value: string, days: number) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+function deleteCookie(name: string) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+}
+
+export default function ChatWidget({
+  isAuthenticated,
+  initialMessages,
+}: {
+  isAuthenticated: boolean;
+  initialMessages: Message[];
+}) {
   const { items: cartItems } = useCart();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isPending, startTransition] = useTransition();
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const hasMigratedRef = useRef(false);
 
-  // Load persisted messages after hydration — must use effect to avoid SSR hydration mismatch
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (stored) setMessages(JSON.parse(stored) as Message[]);
-    } catch {}
-  }, []);
-
-  // Migrate guest localStorage history to DB on login
+  // Migrate guest session on login
   useEffect(() => {
     if (!isAuthenticated || hasMigratedRef.current) return;
     hasMigratedRef.current = true;
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) return;
-      const msgs = JSON.parse(stored) as Message[];
-      if (!msgs.length) return;
-      migrateGuestChat(msgs).then(() => {
-        localStorage.removeItem(STORAGE_KEY);
-      }).catch(() => {/* silent — history stays in localStorage */});
-    } catch {}
+    const guestId = getCookie(GUEST_CHAT_COOKIE);
+    if (!guestId) return;
+    migrateGuestChat(guestId)
+      .then(() => deleteCookie(GUEST_CHAT_COOKIE))
+      .catch(() => {/* retry on next page load */});
   }, [isAuthenticated]);
-
-  useEffect(() => {
-    if (messages.length === 0) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-  }, [messages]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -64,6 +64,15 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
     if (!isPending) inputRef.current?.focus();
   }, [isPending]);
 
+  function getOrCreateGuestId(): string {
+    let guestId = getCookie(GUEST_CHAT_COOKIE);
+    if (!guestId) {
+      guestId = crypto.randomUUID();
+      setCookie(GUEST_CHAT_COOKIE, guestId, 30);
+    }
+    return guestId;
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = input.trim();
@@ -72,9 +81,11 @@ export default function ChatWidget({ isAuthenticated }: { isAuthenticated: boole
     setInput("");
     setMessages((prev) => [...prev, { role: "user", text }]);
 
+    const guestId = isAuthenticated ? null : getOrCreateGuestId();
+
     startTransition(async () => {
       try {
-        const response = await sendMessage(text, cartItems, messages);
+        const response = await sendMessage(text, cartItems, guestId);
         setMessages((prev) => [...prev, { role: "assistant", text: response }]);
       } catch {
         setMessages((prev) => [

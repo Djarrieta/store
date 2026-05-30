@@ -8,9 +8,10 @@ INSERT INTO public.addresses (
   neighborhood,
   phone,
   is_default
-) VALUES (
+)
+SELECT
   'a0000000-0000-0000-0000-000000000001',
-  '7676fc0c-d1e2-4d47-b8cf-f6f5306a44c1',
+  id,
   'Dario Arrieta',
   'Antioquia',
   'Rionegro',
@@ -18,4 +19,6 @@ INSERT INTO public.addresses (
   'Urb. Manzanillos',
   '3008718217',
   true
-) ON CONFLICT (id) DO NOTHING;
+FROM auth.users
+LIMIT 1
+ON CONFLICT (id) DO NOTHING;

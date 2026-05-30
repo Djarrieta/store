@@ -2,25 +2,21 @@ import type { CartItem } from "@/lib/cart";
 import { formatCurrency } from "@/lib/format";
 import { createServiceClient } from "@/lib/supabase/service";
 
-import { type ChatMessage,getHistory } from "./chatHistory";
+import { type ChatChannel, type ChatMessage, getHistory } from "./chatHistory";
 import { fetchStoreSnapshot } from "./contextTopics";
 import { ASSISTANT_PROMPT } from "./prompt";
 
 const MAX_CART_ITEMS = 50;
 
-export type GuestMessage = { role: "user" | "assistant"; text: string };
-
-const MAX_GUEST_HISTORY = 20;
-
 export async function buildPrompt(
   userMessage: string,
-  userRef: string | null,
+  userRef: string,
   cartItems: CartItem[] = [],
-  guestHistory: GuestMessage[] = [],
+  channel: ChatChannel = "auth",
 ): Promise<string> {
   const supabase = createServiceClient();
 
-  const isGuest = userRef === null;
+  const isGuest = channel !== "auth";
 
   const [{ data: pinnedContent }, { data: onDemandKeys }, profileResult, addressesResult, history, contextTopics] =
     await Promise.all([
@@ -28,15 +24,15 @@ export async function buildPrompt(
       supabase.from("content").select("key").eq("pinned", false).order("key"),
       isGuest
         ? Promise.resolve({ data: null })
-        : supabase.from("profiles").select("display_name").eq("id", userRef!).single(),
+        : supabase.from("profiles").select("display_name").eq("id", userRef).single(),
       isGuest
         ? Promise.resolve({ data: null })
         : supabase
             .from("addresses")
             .select("recipient_name, department, city, address_line, neighborhood, phone, is_default")
-            .eq("user_id", userRef!)
+            .eq("user_id", userRef)
             .order("is_default", { ascending: false }),
-      isGuest ? Promise.resolve([]) : getHistory(userRef!),
+      getHistory(userRef),
       fetchStoreSnapshot(),
     ]);
 
@@ -93,9 +89,7 @@ export async function buildPrompt(
       : "";
 
   // Build conversation history block
-  const conversationHistory = isGuest
-    ? buildGuestHistoryBlock(guestHistory.slice(-MAX_GUEST_HISTORY))
-    : buildHistoryBlock(history as import("./chatHistory").ChatMessage[]);
+  const conversationHistory = buildHistoryBlock(history as ChatMessage[]);
 
   const guestInstructions = isGuest
     ? `> **USUARIO NO AUTENTICADO**: Puedes responder preguntas sobre productos, categorías, envíos y políticas. Si el usuario quiere comprar, hacer un pedido, ver sus pedidos o necesita datos de su cuenta, indícale que debe iniciar sesión y muéstrale el enlace: [Iniciar sesión](/login). No uses las herramientas \`bot_create_order\`, \`bot_get_my_orders\`, ni \`bot_get_order_status\`.`
@@ -151,12 +145,5 @@ function buildHistoryBlock(history: ChatMessage[]): string {
 
   return recentMessages
     .map((h) => `${h.role === "user" ? "Usuario" : "Asistente"}: ${h.message}`)
-    .join("\n");
-}
-
-function buildGuestHistoryBlock(history: GuestMessage[]): string {
-  if (history.length === 0) return "Sin historial previo.";
-  return history
-    .map((h) => `${h.role === "user" ? "Usuario" : "Asistente"}: ${h.text}`)
     .join("\n");
 }

@@ -1,5 +1,8 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+import { migrateChatSession } from "@/lib/assistant/chatHistory";
+import { WA_REF_COOKIE } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -33,6 +36,14 @@ export async function GET(request: Request) {
       },
       { onConflict: "id" },
     );
+
+    // Migrate WhatsApp guest session if wa_ref cookie is present
+    const cookieStore = await cookies();
+    const waRef = cookieStore.get(WA_REF_COOKIE)?.value;
+    if (waRef) {
+      await migrateChatSession(waRef, user.id);
+      cookieStore.delete(WA_REF_COOKIE);
+    }
   }
 
   return NextResponse.redirect(`${requestUrl.origin}${safeNext}`);

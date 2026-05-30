@@ -6,6 +6,8 @@ import { DeepSeekLLMProvider } from "./deepseekProvider";
 
 const SUMMARY_THRESHOLD = 20;
 
+export type ChatChannel = "auth" | "web_guest" | "whatsapp";
+
 export type ChatMessage = { role: "user" | "assistant" | "summary"; message: string };
 
 export async function getHistory(userRef: string): Promise<ChatMessage[]> {
@@ -53,13 +55,48 @@ export async function addMessage(
   userRef: string,
   message: string,
   role: "user" | "assistant",
+  channel: ChatChannel = "auth",
 ) {
   const supabase = createServiceClient();
-  await supabase.from("chat_messages").insert({ user_ref: userRef, message, role });
-  await summarizeIfNeeded(userRef);
+  await supabase.from("chat_messages").insert({ user_ref: userRef, message, role, channel });
+  await summarizeIfNeeded(userRef, channel);
 }
 
-async function summarizeIfNeeded(userRef: string): Promise<void> {
+export async function migrateChatSession(guestRef: string, authUserId: string): Promise<void> {
+  const supabase = createServiceClient();
+
+  // If the authenticated user already has a summary, delete the guest's summary rows
+  const { data: existingSummary } = await supabase
+    .from("chat_messages")
+    .select("id")
+    .eq("user_ref", authUserId)
+    .eq("role", "summary")
+    .limit(1)
+    .single();
+
+  if (existingSummary) {
+    await supabase
+      .from("chat_messages")
+      .delete()
+      .eq("user_ref", guestRef)
+      .eq("role", "summary");
+  }
+
+  // Move all guest messages to the authenticated user
+  await supabase
+    .from("chat_messages")
+    .update({ user_ref: authUserId, channel: "auth" })
+    .eq("user_ref", guestRef)
+    .neq("channel", "auth");
+
+  // Record the mapping for lazy lookups (idempotent)
+  await supabase
+    .from("chat_migration_log")
+    .insert({ guest_ref: guestRef, auth_user_id: authUserId, channel: "web_guest" })
+    .single();
+}
+
+async function summarizeIfNeeded(userRef: string, channel: ChatChannel): Promise<void> {
   const supabase = createServiceClient();
 
   // Count messages since the last summary (or all time if none)
@@ -98,6 +135,6 @@ async function summarizeIfNeeded(userRef: string): Promise<void> {
 
   await supabase
     .from("chat_messages")
-    .insert({ user_ref: userRef, message: summaryText.trim(), role: "summary" });
+    .insert({ user_ref: userRef, message: summaryText.trim(), role: "summary", channel });
 }
 

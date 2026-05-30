@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+import { setWaRefCookie } from "@/app/actions/chat-migration";
 import Button from "@/app/components/Button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -19,10 +20,21 @@ export default function LoginActions() {
   const router = useRouter();
 
   const next = searchParams.get("next") ?? "/";
+  const waRef = searchParams.get("wa_ref");
 
   const loginWithGoogle = async () => {
     setIsLoading(true);
     setError(null);
+
+    // If wa_ref is present, persist it as an HttpOnly cookie before OAuth redirect
+    if (waRef) {
+      try {
+        await setWaRefCookie(waRef);
+      } catch {
+        // non-fatal — proceed with login anyway
+      }
+    }
+
     const supabase = createClient();
 
     const origin = window.location.origin;

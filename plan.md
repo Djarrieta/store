@@ -1,323 +1,303 @@
-# Plan — Kinds de personalización dinámicos (admin-editables)
+# Plan: Server-side Guest Chat Persistence (Multi-Channel)
 
-## Decisiones tomadas
+## Goal
 
-| Tema | Decisión |
-|---|---|
-| Representación de geometría | **PNG máscara** (alpha = región imprimible). Sin paths SVG. Sin enum `render_mode`. |
-| Alcance de la geometría | **Per print_template** (como hoy). `mask_path` + `safe_area` viven en cada variante; el kind no lleva geometría. |
-| Aspect-ratio máscara vs template | **Letterboxing automático**: si el aspect del PNG difiere del rect (`width_mm/height_mm`), se centra "contain" sin distorsionar; el área fuera del contain queda como no-imprimible. |
-| `kind_id` en `print_templates` | **Eliminado**. El kind se deriva siempre vía `items.product_id → products.customization_kind_id`. Se elimina el trigger `print_templates_kind_match`. |
-| Evolución del `attribute_schema` | **Permitido con advertencia** (count separado de templates "huérfanas" y "incompletas"). |
-| Archivado de kind | **Bloqueado** mientras haya productos referenciándolo. |
-| Compatibilidad legacy | **Ninguna**. Datos sólo desde seed. |
-| Orden de migraciones | **Renumerar**: nueva `08_customization_kinds.sql`; las migraciones 08→18 actuales se renombran a 09→19. |
+Replace localStorage-based guest chat with server-persisted messages. Support **multiple channels** (web, WhatsApp, future) with a unified guest → authenticated user migration. Guests start chatting immediately; messages are saved to DB with summarization active. When they log in (via any channel), the conversation migrates to their authenticated account.
 
 ---
 
-## Modelo objetivo
+## Current Behavior
 
-### Nueva tabla `customization_kinds`
+- **Authenticated users**: messages stored in `chat_messages` table with `user_ref = user.id`.
+- **Web guests**: messages stored only in `localStorage` (key `chat_messages`). On login, `migrateGuestChat()` copies them to DB row-by-row.
+- **WhatsApp users**: `/api/assistant` route always persists to DB using `userRef` from the bot caller. No guest/auth distinction exists yet.
+- **Problems**:
+  - Web guest history is lost on device/browser change.
+  - Migration relies on the client sending the full history array (untrusted).
+  - WhatsApp users can't transition from guest → authenticated.
+  - No way to identify which channel a message came from.
 
-Muy ligera — solo metadata semántica del tipo. Sin geometría.
+---
 
-| Columna | Tipo | Notas |
-|---|---|---|
-| `id` | `uuid` PK | |
-| `slug` | `text` UNIQUE | identificador estable (snake_case). Inmutable. Persistido en `OrderCustomizationSnapshot.template_kind.slug` como ID para reportes/auditoría — **no se usa en URLs admin** (las rutas siguen siendo por `id`). |
-| `label` | `text` | nombre visible al admin (ej. "Funda de teléfono"). |
-| `picker_label` | `text` | copy visible al cliente en el paso 1 del flujo (ej. "Elige tu teléfono"). |
-| `attribute_schema` | `jsonb` | array de definiciones de campo (ver abajo). |
-| `sort_order` | `int` | orden en el select admin. |
-| `archived` | `bool` DEFAULT false | soft-hide del select admin. |
-| `created_at` / `updated_at` | `timestamptz` | trigger `set_updated_at()`. |
+## Design Decisions
 
-**RLS**: lectura pública (la usa el storefront), escritura solo admin.
+| Question | Decision |
+|----------|----------|
+| Guest vs. real user detection | `channel` column on `chat_messages`. If `channel != 'auth'`, the user_ref is a guest/temporary ID. |
+| Guest identity (web) | Client-generated UUID stored in a cookie. |
+| Guest identity (WhatsApp) | Bot generates a UUID on first contact and stores it in bot state (keyed by phone number). |
+| Migration trigger (web) | **Root layout** — migration runs on any authenticated page load, not just /chat. |
+| Migration trigger (WhatsApp) | Bot sends a login link (already exists for purchase flow). After login, callback endpoint triggers migration. |
+| Initial message loading | **Server-side pre-fetch** — `/chat/page.tsx` reads the cookie and passes messages as props (no client loading flash). |
+| Guest summarization | **Allowed** — summaries are created for guest sessions. On migration, summarization is NOT triggered; it fires on the next new message instead. |
+| Message persistence ordering | **Save after response** (current pattern). Only persist user+assistant messages after a successful LLM response. Avoids orphan user messages on failure. |
+| How server gets guestId (web) | **Client passes it as a parameter** to server actions. Cookie is managed client-side only (server reads it only for pre-fetch in page.tsx). |
+| guestId validation | **DB function** — `user_exists(p_id)` (SECURITY DEFINER) queries `auth.users`. Called via `supabase.rpc()` from the service client. |
+| WhatsApp login link (wa_ref survival) | **Server action sets HttpOnly cookie** — `LoginActions` calls a server action that sets the `wa_ref` cookie before triggering OAuth. Auth callback reads it post-redirect. |
+| Bot learns user is linked | **Lazy check via `chat_migration_log`** — on next message, API looks up the guest UUID in `chat_migration_log`. If found, returns `{ migrated: true, authUserId }`. Bot updates its phone→userRef mapping. |
+| Existing data / backfill | **Clean slate** — we are in dev; `db:reset` applies. Migration SQL includes `channel` from the start, no backfill script needed. |
+| Shared code | Share helpers (`buildPrompt`, `addMessage`, `getHistory`, `generateResponse`, `migrateChatSession`). Each channel keeps its own orchestration (server action vs. API route). |
 
-### Forma de `attribute_schema` (jsonb)
+---
 
-```jsonc
-[
-  { "key": "brand", "label": "Marca", "type": "text", "required": true, "placeholder": "ej. Apple" },
-  { "key": "model", "label": "Modelo", "type": "text", "required": true, "placeholder": "ej. iPhone 15 Pro" },
-  { "key": "placement", "label": "Ubicación", "type": "select", "required": true,
-    "options": [{ "value": "front", "label": "Frente" }, { "value": "back", "label": "Espalda" }] }
-]
+## Proposed Changes
+
+### 1. Schema change: add `channel` column + `chat_migration_log` table
+
+Update `supabase/migrations/11_chat_messages.sql`:
+
+```sql
+CREATE TABLE public.chat_messages (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_ref   text NOT NULL,
+  channel    text NOT NULL DEFAULT 'auth' CHECK (channel IN ('auth', 'web_guest', 'whatsapp')),
+  role       text NOT NULL CHECK (role IN ('user', 'assistant', 'summary')),
+  message    text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX chat_messages_user_ref_idx ON public.chat_messages (user_ref, created_at);
+
+ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "chat_messages: no public access"
+  ON public.chat_messages FOR ALL USING (false);
+
+-- Migration log: allows lazy lookups (bot asks "where did guest X go?")
+CREATE TABLE public.chat_migration_log (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  guest_ref    text NOT NULL,
+  auth_user_id text NOT NULL,
+  channel      text NOT NULL,
+  migrated_at  timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX chat_migration_log_guest_ref_idx ON public.chat_migration_log (guest_ref);
+CREATE UNIQUE INDEX chat_migration_log_guest_ref_uniq ON public.chat_migration_log (guest_ref);
+
+ALTER TABLE public.chat_migration_log ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "chat_migration_log: no public access"
+  ON public.chat_migration_log FOR ALL USING (false);
+
+-- DB function: check if a UUID exists in auth.users (used for guestId validation)
+CREATE OR REPLACE FUNCTION public.user_exists(p_id uuid)
+RETURNS boolean
+LANGUAGE sql SECURITY DEFINER STABLE
+AS $$ SELECT EXISTS (SELECT 1 FROM auth.users WHERE id = p_id); $$;
 ```
 
-Tipos soportados v1: `text`, `number`, `select`.
+- `channel = 'auth'` → `user_ref` is a Supabase Auth user ID (authenticated).
+- `channel = 'web_guest'` → `user_ref` is a client-generated UUID (browser guest).
+- `channel = 'whatsapp'` → `user_ref` is a bot-generated UUID (WhatsApp guest).
 
-### Cambios en tablas existentes
+Guest detection: `channel != 'auth'` (no prefix parsing needed).
 
-**`products`** (en el archivo renumerado `09_products.sql`):
-- Reemplazar `customization_kind text CHECK (... IN (...))` por
-  `customization_kind_id uuid REFERENCES public.customization_kinds(id) ON DELETE RESTRICT`.
-- Reescribir constraint: `CHECK (customizable = false OR customization_kind_id IS NOT NULL)`.
+`chat_migration_log` enables the lazy linkage pattern: when the bot sends a message for a migrated guest UUID, the API looks up `chat_migration_log` to find the new `auth_user_id`.
 
-**`print_templates`** (en el archivo renumerado `17_print_templates.sql`):
-- **Eliminar** la columna `kind` y el `CHECK` asociado.
-- **Eliminar** el trigger `print_templates_kind_match` y su función (ya no hay nada que validar transversalmente).
-- Conservar tal cual: `item_id` (PK), `label`, `attributes`, `width_mm`, `height_mm`, `print_dpi`, `mockup_path`, `mask_path`, `safe_area`.
-
-### Snapshot en órdenes
-
-`OrderCustomizationSnapshot` ([src/types/customization.ts](src/types/customization.ts#L34)) cambia mínimamente:
+### 2. Shared helper: `addMessage()` update
 
 ```ts
-template_kind: { slug: string; label: string };  // antes: CustomizationKind enum string
-// template.{mask_path, safe_area, mockup_path, width_mm, height_mm, print_dpi} sin cambio
+addMessage(userRef: string, message: string, role: string, channel: 'auth' | 'web_guest' | 'whatsapp')
 ```
 
-`template_kind` se construye haciendo JOIN del print_template al producto al kind, y se denormaliza en el snapshot.
+All callers (web sendMessage, API route) pass the channel explicitly.
 
----
+`addMessage` propagates `channel` to `summarizeIfNeeded(userRef, channel)` so that summary rows are inserted with the correct channel value.
 
-## Renumeración de migraciones
+### 3. Shared helper: `migrateChatSession()`
 
-Estado actual: 01 → 18. Insertamos `08_customization_kinds.sql` y desplazamos:
-
-| Antes | Después |
-|---|---|
-| `08_products.sql` | `09_products.sql` |
-| `09_items.sql` | `10_items.sql` |
-| `10_chat_messages.sql` | `11_chat_messages.sql` |
-| `11_orders.sql` | `12_orders.sql` |
-| `12_assistant_role.sql` | `13_assistant_role.sql` |
-| `13_approve_order.sql` | `14_approve_order.sql` |
-| `14_addresses.sql` | `15_addresses.sql` |
-| `15_ships.sql` | `16_ships.sql` |
-| `16_print_templates.sql` | `17_print_templates.sql` |
-| `17_customizations.sql` | `18_customizations.sql` |
-| `18_print_storage.sql` | `19_print_storage.sql` |
-
-Acciones:
-
-1. `git mv` de los 11 archivos.
-2. Crear `supabase/migrations/08_customization_kinds.sql`:
-   - `DROP TABLE IF EXISTS public.customization_kinds CASCADE`.
-   - `CREATE TABLE ...` con las columnas de arriba.
-   - Trigger `customization_kinds_updated_at`.
-   - RLS (lectura pública, escritura admin).
-3. Editar `09_products.sql` (renombrado): swap de columna + nuevo constraint.
-4. Editar `17_print_templates.sql` (renombrado): drop columna `kind` + drop trigger/función `print_templates_kind_match`.
-5. Confirmar que `19_print_storage.sql` (renombrado) sigue sirviendo sin cambios.
-6. Revisar que ningún script en `supabase/*.js` (`reset.js`, `seed-*.js`) referencie migraciones por número.
-
-## Seeds
-
-`supabase/seed/` (orden actual: `01_categories` → `02_products` → `03_items` → `04_admin` → `05_content` → `06_ships` → `07_addresses`). Como `02_products` ya necesita FK al kind, el nuevo seed debe correr primero:
-
-1. **Nuevo** `00_customization_kinds.sql`:
-   ```sql
-   INSERT INTO public.customization_kinds (slug, label, picker_label, attribute_schema, sort_order)
-   VALUES
-     ('phone_case', 'Funda de teléfono', 'Elige tu teléfono',
-        '[
-          {"key":"brand","label":"Marca","type":"text","required":true,"placeholder":"ej. Apple"},
-          {"key":"model","label":"Modelo","type":"text","required":true,"placeholder":"ej. iPhone 15 Pro"}
-        ]'::jsonb, 1),
-     ('tshirt', 'Camiseta', 'Elige tu talla',
-        '[
-          {"key":"placement","label":"Ubicación","type":"select","required":true,
-           "options":[{"value":"front","label":"Frente"},{"value":"back","label":"Espalda"}]}
-        ]'::jsonb, 2),
-     ('mug', 'Mug', 'Elige el mug',
-        '[
-          {"key":"wrap","label":"Wrap","type":"select","required":true,
-           "options":[{"value":"full","label":"Completo"},{"value":"partial","label":"Parcial"}]}
-        ]'::jsonb, 3);
-   ```
-2. Convertir la silueta SVG actual de t-shirt (`supabase/seed/images/tshirt-blank.svg`, hoy renderizada por `drawTshirtClip`) en un PNG máscara. Subirla al bucket `print-templates` desde `seed-storage.js` y usar su path como `mask_path` en los `print_templates` semilla de variantes de camiseta.
-3. Editar `02_products.sql` y demás seeds que insertaban con string kind: usar subquery
-   `(SELECT id FROM public.customization_kinds WHERE slug = 'phone_case')`.
-4. `print_templates` semilla: ya no llevan columna `kind`.
-
----
-
-## Tipos (`src/types/`)
-
-Eliminar union `CustomizationKind`. Reemplazar:
+New function in `src/lib/assistant/chatHistory.ts`:
 
 ```ts
-// print-template.ts
-export interface SafeArea { x: number; y: number; width: number; height: number }
-
-export type KindAttributeField =
-  | { key: string; label: string; type: "text" | "number"; required: boolean; placeholder?: string }
-  | { key: string; label: string; type: "select"; required: boolean;
-      options: { value: string; label: string }[] };
-
-export interface CustomizationKind {
-  id: string;
-  slug: string;
-  label: string;
-  picker_label: string;
-  attribute_schema: KindAttributeField[];
-  sort_order: number;
-  archived: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PrintTemplate {
-  item_id: string;
-  label: string;
-  attributes: Record<string, string | number>;
-  width_mm: number;
-  height_mm: number;
-  print_dpi: number;
-  mockup_path: string | null;
-  mask_path: string | null;
-  safe_area: SafeArea | null;
-  created_at: string;
-  updated_at: string;
-}
+export async function migrateChatSession(guestRef: string, authUserId: string): Promise<void>
 ```
 
-**Eliminar** `PhoneCaseAttributes`, `TshirtAttributes`, `MugAttributes`, `PrintTemplateAttributes`.
+Logic:
+1. If `authUserId` already has a summary row, delete the guest's summary row(s).
+2. `UPDATE chat_messages SET user_ref = authUserId, channel = 'auth' WHERE user_ref = guestRef AND channel != 'auth'`.
+3. `INSERT INTO chat_migration_log (guest_ref, auth_user_id, channel) ... ON CONFLICT (guest_ref) DO NOTHING` — record the mapping for lazy lookups; idempotent on retry.
+4. **Do NOT call `summarizeIfNeeded`** here — summarization fires naturally on the next new message.
+5. Atomic — safe to retry (migration_log INSERT is idempotent by guest_ref+auth_user_id).
 
-`Product` ([src/types/product.ts](src/types/product.ts)): reemplazar `customization_kind: CustomizationKind | null` por `customization_kind_id: string | null`. Exponer derivado `ProductWithKind = Product & { customization_kind: CustomizationKind | null }` para queries con JOIN.
+Used by both the web migration trigger and the WhatsApp login callback.
 
-`OrderCustomizationSnapshot` ([src/types/customization.ts](src/types/customization.ts#L34)): `template_kind` se vuelve `{ slug: string; label: string }`. El resto del bloque `template` queda igual.
+### 4. Generate a guest session ID (web — client-side)
+
+- On first chat interaction, if the user is NOT authenticated, generate a UUID v4 and persist it in a **cookie** (`guest_chat_id`, non-HttpOnly, SameSite=Lax, 30-day expiry, path=/).
+- If the cookie already exists, reuse it.
+- Pass this raw UUID as `guestId` to `sendMessage()`.
+
+### 5. Update `sendMessage()` server action (web)
+
+- New signature: `sendMessage(message: string, cartItems: CartItem[], guestId: string | null)`.
+- Remove the `guestHistory` parameter entirely.
+- Determine `userRef` + `channel`:
+  - If authenticated → `user.id`, `channel = 'auth'`.
+  - Else if `guestId` provided → validate UUID format AND call `supabase.rpc('user_exists', { p_id: guestId })` (reject if true) → `guestId`, `channel = 'web_guest'`.
+  - Else → throw error.
+- **Save after response** (current pattern): `buildPrompt` → `generateResponse` → `addMessage(user)` → `addMessage(assistant)`. If LLM fails, nothing is persisted; widget shows error and user can retry.
+
+### 6. Update `/api/assistant/route.ts` (WhatsApp / external)
+
+- Accepts `userRef` from bot (bot-generated UUID for guests, or an auth user ID for linked users).
+- New optional field in body: `channel: 'whatsapp' | 'auth'` (defaults to `'whatsapp'`).
+- Bot tracks a mapping: phone number → generated UUID. First contact generates a new UUID.
+- **Lazy linkage detection**: on each message, if bot sends `channel = 'whatsapp'`, first check `chat_migration_log` for `guest_ref = userRef`. If found → return `{ migrated: true, authUserId }`. Bot updates its mapping and re-sends with the auth user ID + `channel = 'auth'`.
+- Persistence ordering: **save after response** (unified with web). If LLM fails, bot can retry; message loss risk accepted.
+
+### 7. Update `buildPrompt.ts`
+
+- Remove `guestHistory` parameter.
+- Accept `channel` parameter (or detect guest from `channel != 'auth'`).
+- For guests (any channel): skip profile/address queries, but **fetch DB history** via `getHistory(userRef)`.
+- Guest instructions and tool restrictions keyed off `isGuest = channel !== 'auth'`.
+
+### 8. Update `generateResponse()` / MCP tools
+
+- New signature: `generateResponse(prompt: string, channel: 'auth' | 'web_guest' | 'whatsapp')` (replaces `userRef: string | null`).
+- Tools that require authentication (`bot_create_order`, `bot_get_my_orders`, `bot_get_order_status`) deny access when `channel !== 'auth'`.
+- Error message prompts login (includes link for WhatsApp users).
+
+### 9. Update `ChatWidget.tsx`
+
+- Remove all `localStorage` read/write logic for messages.
+- Keep `isAuthenticated` prop (used to decide whether to generate/use guest cookie and to show login hint).
+- Receive `initialMessages` as a prop (pre-fetched server-side).
+- Manage the `guest_chat_id` cookie client-side (generate if missing when user sends first message AND `isAuthenticated === false`).
+- Pass `guestId` (from cookie) to `sendMessage()`.
+
+### 10. Update `/chat/page.tsx` (server component)
+
+- Read `guest_chat_id` from `cookies()`.
+- If authenticated: fetch history via `getHistory(user.id)`.
+- If guest cookie exists: fetch history via `getHistory(cookieValue)`.
+- Pass result as `initialMessages` prop to `ChatWidget`.
+
+### 11. Migration trigger: web (root layout)
+
+- Root layout already calls `getUser()` (confirmed). Pass `isAuthenticated` as a prop to a **`ChatMigration`** client component rendered in the layout.
+- `ChatMigration` detects: `isAuthenticated === true` AND `guest_chat_id` cookie exists (read client-side).
+- Calls `migrateGuestChat(guestId)` server action → internally calls `migrateChatSession(guestId, user.id)`.
+- Clears cookie on success.
+- Race condition mitigation: atomic UPDATE; cookie only cleared on success; retry on next page load catches stragglers.
+
+### 12. Migration trigger: WhatsApp (login link callback)
+
+- Bot sends a login link: `https://store.example/login?wa_ref=UUID`.
+- `/login` page (or `LoginActions.tsx`) detects `wa_ref` query param and calls a **server action** (`setWaRefCookie(waRef)`) that sets an **HttpOnly cookie** (`wa_ref`, SameSite=Lax, max-age=600, path=/auth). This avoids the client needing to set HttpOnly cookies directly.
+- **Important**: `await setWaRefCookie(waRef)` must complete before triggering `signInWithOAuth()`. The login button handler should await the cookie-set action first when `wa_ref` is present.
+- OAuth flow proceeds normally.
+- After OAuth completes, `/auth/callback` reads the `wa_ref` cookie. If present, calls `migrateChatSession(waRefValue, newlyAuthenticatedUserId)` and clears the cookie.
+- Bot learns lazily on next message (see step 6 — checks `chat_migration_log`).
+
+### 13. Cleanup: expired guest messages
+
+- Utility script:
+  ```sql
+  DELETE FROM chat_messages
+  WHERE channel != 'auth'
+    AND created_at < now() - interval '30 days';
+
+  DELETE FROM chat_migration_log
+  WHERE migrated_at < now() - interval '30 days';
+  ```
+- Run via cron or manually.
 
 ---
 
-## Server actions
+## Files to Modify
 
-### Nuevo módulo: `src/app/admin/customization-kinds/actions.ts`
+| File | Change |
+|------|--------|
+| `supabase/migrations/11_chat_messages.sql` | Add `channel` column, `chat_migration_log` table, `user_exists()` function |
+| `src/lib/assistant/chatHistory.ts` | Update `addMessage` signature (add channel), add `migrateChatSession()` (with migration_log insert), skip summarize in migration |
+| `src/lib/assistant/mcpService.ts` | Change `generateResponse` signature to accept `channel`, update tool-blocking logic |
+| `src/lib/assistant/buildPrompt.ts` | Remove `guestHistory` param, accept `channel`, use DB history for all |
+| `src/app/chat/ChatWidget.tsx` | Remove localStorage, accept `initialMessages` prop, manage cookie, pass `guestId` param |
+| `src/app/chat/actions.ts` | Rewrite `sendMessage` (new sig, save-after, validate guestId via `user_exists()` RPC), rewrite `migrateGuestChat` (calls `migrateChatSession`) |
+| `src/app/actions/chat-migration.ts` | New: `setWaRefCookie()` server action (sets HttpOnly cookie for WhatsApp login flow) |
+| `src/app/chat/page.tsx` | Read cookie, pre-fetch messages, pass as props |
+| `src/app/api/assistant/route.ts` | Accept `channel` in body, pass to helpers, add migration-detection response, unify save-after |
+| `src/app/layout.tsx` | Add client component that triggers web guest migration |
+| `src/app/login/page.tsx` (or `LoginActions.tsx`) | Detect `wa_ref` query param, store in cookie before OAuth redirect |
+| `src/app/auth/callback/route.ts` | Read `wa_ref` cookie, call `migrateChatSession()`, clear cookie |
+| `src/lib/constants.ts` | Replace `CHAT_STORAGE_KEY` with `GUEST_CHAT_COOKIE` / `WA_REF_COOKIE` constants |
+| `supabase/remove-guest-messages.js` | New cleanup script (uses `channel != 'auth'`) |
 
-```ts
-"use server";
-// requireAdmin en todas
-- createKind(formData)
-- updateKind(id, formData)   // devuelve { orphaned: number; incomplete: number } para warning UI
-- archiveKind(id)            // throw si SELECT count(*) FROM products WHERE customization_kind_id = id > 0
-- unarchiveKind(id)
-- deleteKind(id)             // FK RESTRICT lo respalda; double-check antes
+---
+
+## Migration Path
+
+1. We are in dev — `npm run db:reset` applies the new schema cleanly (includes `channel` column from the start).
+2. **No localStorage backwards-compatibility needed** — simply delete all localStorage chat code. No transitional migration logic.
+3. WhatsApp bot update: start generating UUIDs for new contacts, persist via API route with `channel = 'whatsapp'`.
+
+---
+
+## Edge Cases
+
+- **Multiple tabs (web)**: cookie is shared → consistent guestId across tabs.
+- **Cookie cleared manually**: guest loses web history (acceptable).
+- **User logs out after migration**: new guest session gets a fresh UUID. Previous messages stay under the authenticated user.
+- **Same guest logs into different accounts**: migration moves messages to whichever account they log into first. Cookie/bot-state is cleared, so logging into a second account won't re-migrate.
+- **Summary conflict on migration**: if the authenticated user already has a summary and the guest also has one, the guest summary is deleted (user's existing summary is more authoritative). Recent guest messages are still moved.
+- **Concurrent message + migration**: UPDATE is atomic; cookie only cleared on success, so a retry on next page load catches stragglers.
+- **WhatsApp user already linked**: bot stores the auth user ID after first migration. Future messages go directly with `channel = 'auth'`.
+- **Cross-channel same user**: a user may have both a web guest session and a WhatsApp guest session. Each migrates independently when login happens on that channel. Both end up under the same `user.id` with `channel = 'auth'`.
+
+---
+
+## Sequence Diagrams
+
+### Web Guest → Login
+
+```
+Browser                     Server                      DB
+  │ (first message)
+  │──cookie: guest_chat_id = UUID──►│
+  │──sendMessage(msg, [], UUID)────►│
+  │                                 │──buildPrompt + generateResponse──►│
+  │                                 │──INSERT(user msg, channel='web_guest')───►│
+  │                                 │──INSERT(assistant response)──────►│
+  │◄─────response──────────────────│
+  │                                 │
+  │ (user clicks login)
+  │──auth flow────────────────────►│
+  │ (page loads, root layout)       │
+  │──migrateGuestChat(UUID)───────►│
+  │                                 │──UPDATE SET user_ref=userId, channel='auth' WHERE user_ref=UUID──►│
+  │                                 │──INSERT migration_log(UUID, userId)──►│
+  │ (clear cookie)                  │
 ```
 
-Validaciones:
-- `slug`: snake_case, único, inmutable después de crear.
-- `attribute_schema`: parsear JSON, validar shape (cada campo tiene `key` única dentro del array, `type` ∈ {text,number,select}, `select` requiere `options` no vacío).
-- En `updateKind`, calcular sobre `print_templates` cuyos productos usan este kind:
-  - `orphaned`: templates con keys en `attributes` que **ya no están** en el nuevo schema.
-  - `incomplete`: templates a las que les **falta** un campo `required` nuevo.
-  - Devolver ambos counts; no bloquea.
+### WhatsApp Guest → Login
 
-### Editar `src/app/admin/products/actions.ts`
-
-- Eliminar `VALID_KINDS` y `parseKind`. Leer `customization_kind_id` del form, SELECT contra `customization_kinds` para validar existencia y no-archivado.
-- **Preservar la lógica destructiva al cambiar de kind** (hoy borra items cuando cambia `customization_kind`): renombrar la variable a `customization_kind_id` y mantener el wipe. Sigue siendo necesario porque el `attribute_schema` cambia.
-- `upsertPrintTemplate`: cargar el kind del producto, iterar `attribute_schema` para validar `formData.get("attr_<key>")` (presencia si `required`, valor permitido si `select`). Eliminar las ramas `if (kind === "phone_case") …`. **Conservar** parsing de `mask_path` / `safe_area` (siguen siendo per-template).
-
-### Editar `src/app/actions/customizations.ts`
-
-- Eliminar `VALID_KINDS`. La carga del `print_template` ahora hace JOIN al producto al kind para obtener `slug` + `label` del kind y armar `template_kind` del snapshot. `mask_path`/`safe_area` se siguen leyendo del template directamente.
-
-Convención: `requireAdmin()` + `revalidatePath("/admin/customization-kinds")` + revalidar `/admin/products` y `/products/[id]` cuando afecte productos.
-
----
-
-## Admin UI
-
-### Nuevo módulo `/admin/customization-kinds`
-
-Patrón del skill `new-module`:
-
-- `page.tsx` — lista con columnas: `label`, `slug`, `# campos`, `# productos`, `archived`.
-- `new/page.tsx` — formulario de creación; `slug` editable.
-- `[id]/edit/page.tsx` — formulario de edición; `slug` deshabilitado.
-- `KindForm.tsx` — Client Component:
-  - `label`, `picker_label`, `sort_order`.
-  - **Schema editor** (sub-componente cliente): lista dinámica de campos con add/remove/reorder; cada fila tiene `key`, `label`, `type`, `required`, y según `type` muestra `placeholder` o sub-editor de `options`. Serializa todo a un `<input type="hidden" name="attribute_schema" />` JSON.
-  - Si está editando y el cambio rompe templates existentes, mostrar warning con los dos counts (`orphaned`, `incomplete`) calculados server-side y pasados como prop.
-- Botón "Archivar" en la lista: server action; si hay productos referenciando, error con count.
-- Link nuevo en [src/app/admin/AdminNav.tsx](src/app/admin/AdminNav.tsx).
-
-### Editar `ProductForm.tsx`
-
-- Eliminar `KIND_LABELS` hard-coded.
-- Recibir prop `kinds: CustomizationKind[]` desde el server component padre (no archivados; si el producto actual usa uno archivado, agregarlo deshabilitado al final).
-- El `<Select name="customization_kind_id">` itera `kinds`.
-
-### Editar `PrintTemplateFields.tsx`
-
-- Recibir `kind: CustomizationKind` (objeto completo).
-- Eliminar bloques `if (kind === "phone_case") …` y la función `kindPlaceholder`.
-- Generar inputs en loop sobre `kind.attribute_schema`:
-  - `text`/`number` → `<Input name="attr_<key>" type=... />`.
-  - `select` → `<Select name="attr_<key>">` con `options`.
-- Pre-poblar valores desde `defaultValue?.attributes?.[field.key]`.
-- Mostrar advertencia inline si `defaultValue.attributes` tiene keys huérfanas, o si faltan keys `required`.
-- **Conservar** los inputs de `mockup_path`, `mask_path`, `safe_area` y el uploader cliente con `uploadStorageObject` (patrón actual, sin nueva action de upload).
-
----
-
-## Cliente — flujo de personalización
-
-### `src/app/products/[id]/page.tsx`
-
-- Cambiar el gate: `product.customizable && product.customization_kind_id !== null`.
-- Cargar el kind (JOIN) y pasar el objeto completo a `CustomizationFlow`.
-
-### `CustomizationFlow.tsx`
-
-- Eliminar `KIND_PICKER_LABEL`. Usar `kind.picker_label`.
-- `EditorVariant` sigue llevando `template.mask_path` / `template.safe_area` desde el `print_template` (no cambia).
-
-### `KonvaStage.tsx` — letterboxing
-
-- **Eliminar `drawTshirtClip` y la dependencia de `tshirt-blank.svg`**. Sin código kind-specific.
-- Cargar `template.mask_path` como `Konva.Image` cuando exista; aplicar como clip por alpha usando `globalCompositeOperation = 'destination-in'`. Sin `mask_path` ⇒ clip rectangular completo (sin máscara).
-- **Letterboxing**: calcular `maskAspect = maskPx.w / maskPx.h` vs `templateAspect = width_mm / height_mm`. Centrar la máscara con estrategia "contain":
-  - Si `maskAspect > templateAspect` (máscara más ancha): escalar al ancho del rect; centrar vertical; las bandas top/bottom fuera del contain quedan transparentes ⇒ no imprimibles.
-  - Si `maskAspect < templateAspect`: escalar al alto; centrar horizontal; bandas izq/der no imprimibles.
-- El editor (drag/scale de la imagen del cliente) sigue operando en el rect completo del template; el clip por alpha de la máscara recorta el resultado al render. El `safe_area` (rect normalizado al template, no a la máscara) sigue dibujándose como guía.
-
-### `ProductCard.tsx` ([src/app/components/ProductCard.tsx](src/app/components/ProductCard.tsx#L39))
-
-- Cambiar `product.customizable && !!product.customization_kind` por `product.customizable && !!product.customization_kind_id`.
-
-### `localStore.ts` / `persist.ts`
-
-- `LocalCustomization.kind`: pasa de `CustomizationKind` (string union) a `{ slug: string; label: string }`. Suficiente para el carrito; al re-editar, el editor recarga el kind completo desde el server.
-- Sin compat: si al hidratar se detecta forma vieja (`typeof kind === "string"`), descartar la entrada silenciosamente. El sweep de 7 días limpia residuos.
-
----
-
-## Validaciones y políticas RLS
-
-| Acción | Quién | Política |
-|---|---|---|
-| SELECT `customization_kinds` | público | RLS público |
-| INSERT/UPDATE/DELETE `customization_kinds` | admin | `is_admin(auth.uid())` |
-| Subir/borrar PNG máscara (cliente sube directo al bucket `print-templates`) | admin | ya cubierto por `19_print_storage.sql` (renombrado) |
-
-Reglas de negocio en server actions:
-- `archiveKind` / `deleteKind`: bloquear si `SELECT count(*) FROM products WHERE customization_kind_id = $1 > 0`.
-- `updateKind`: calcular `{ orphaned, incomplete }` y devolver para warning.
-- `upsertPrintTemplate`: validar `attributes` contra `attribute_schema` del kind del producto padre.
-- `updateProduct` con cambio de `customization_kind_id`: wipe de items (preservar lógica destructiva actual).
-
----
-
-## Tareas (orden de implementación)
-
-1. **Migraciones**: `git mv` 08→09 … 18→19; crear `08_customization_kinds.sql`; editar `09_products.sql` (swap columna + constraint) y `17_print_templates.sql` (drop `kind` + drop trigger).
-2. **Seeds**: nuevo seed de kinds; convertir t-shirt SVG → PNG máscara y subirla en `seed-storage.js`; actualizar inserts de productos.
-3. **Tipos**: refactor de `src/types/print-template.ts`, `product.ts`, `customization.ts`.
-4. **Server actions**: nuevo `admin/customization-kinds/actions.ts`; refactor de `admin/products/actions.ts` y `actions/customizations.ts`.
-5. **UI admin**: módulo `/admin/customization-kinds` con schema editor; link en `AdminNav`.
-6. **UI admin productos**: refactor de `ProductForm.tsx` y `PrintTemplateFields.tsx`.
-7. **Storefront**: refactor de `products/[id]/page.tsx`, `CustomizationFlow.tsx`, `KonvaStage.tsx` (letterboxing), `ProductCard.tsx`, `localStore.ts`, `persist.ts`.
-8. **Verificación**: `npm run db:reset` + `npm run lint:check` + `npm run typecheck`. Flujo manual: crear kind nuevo, asignarlo a un producto, crear print_template con su máscara, comprar.
-9. **Docs (post-impl)**: agregar sección "Customization" a [TECH_SPEC.md](TECH_SPEC.md) describiendo `customization_kinds` + `print_templates` + flujo. Actualizar [supabase/seed/images/README.md](supabase/seed/images/README.md) con el nuevo PNG máscara de t-shirt. README.md raíz no requiere cambios.
-
-## Fuera de alcance v1
-
-- Tipos de campo extra (`color`, `file`, `multi-select`, `boolean`).
-- Validación condicional entre campos.
-- Versionado del `attribute_schema` por print_template (la decisión "permitir con warning" asume edición destructiva).
-- i18n de labels.
-- Editor visual de la máscara dentro del admin (se sube PNG ya generado).
-- Reuso de máscara entre templates (cada template referencia su propio path; cero deduplicación).
+```
+WhatsApp Bot                API Route                   DB
+  │ (first message from +57...)
+  │──POST /api/assistant {userRef: newUUID, channel:'whatsapp'}──►│
+  │                                 │──buildPrompt + generateResponse──►│
+  │                                 │──INSERT(user_ref=UUID, channel='whatsapp', role='user')──►│
+  │                                 │──INSERT(assistant response)──────►│
+  │◄─────response──────────────────│
+  │                                 │
+  │ (user tries to buy → bot sends login link: /login?wa_ref=UUID)
+  │                                 │
+  │         Browser                 │
+  │─────────────────────────────────│──GET /login?wa_ref=UUID──►│
+  │                                 │──set cookie: wa_ref=UUID (max-age=600)──►│
+  │                                 │──redirect to OAuth provider──►│
+  │                                 │──OAuth callback──►│
+  │                                 │──GET /auth/callback (reads wa_ref cookie)──►│
+  │                                 │──migrateChatSession(UUID, userId)──►│
+  │                                 │──UPDATE SET user_ref=userId, channel='auth'──►│
+  │                                 │──clear wa_ref cookie──►│
+  │                                 │
+  │ (next message from +57...)
+  │──POST /api/assistant {userRef: UUID, channel:'whatsapp'}──►│
+  │                                 │──(checks chat_migration_log for UUID → found: authUserId)──►│
+  │                                 │──returns {migrated:true, authUserId}──►│
+  │ (bot updates mapping: phone→authUserId)
+  │──POST /api/assistant {userRef: authUserId, channel:'auth'}──►│ (retries with correct ref)
+```

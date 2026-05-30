@@ -79,15 +79,17 @@ SUPABASE_AUTH_GOOGLE_SECRET=<from Google Cloud Console>
 ```
 src/
 ├── app/
-│   ├── layout.tsx          # Root layout (nav, fonts, user menu)
+│   ├── layout.tsx          # Root layout (nav, fonts, user menu, chat migration)
 │   ├── page.tsx            # Homepage (latest items grid)
 │   ├── login/page.tsx      # Login (Google OAuth + dev login)
 │   ├── auth/callback/       # OAuth callback handler
+│   ├── chat/               # AI assistant (multi-channel, guest + auth)
 │   ├── components/          # Shared UI components
 │   └── items/               # Items module (list, detail, form, actions)
 ├── lib/
 │   ├── auth.ts              # getUser(), requireAuth(), ensureProfile()
-│   ├── constants.ts         # PAGE_SIZE (24), MAX_TITLE_LENGTH (120), MAX_DESCRIPTION_LENGTH (2000)
+│   ├── constants.ts         # PAGE_SIZE, MAX_TITLE_LENGTH, MAX_DESCRIPTION_LENGTH, cookie names
+│   ├── assistant/           # AI assistant helpers (chat history, prompt builder, MCP tools)
 │   └── supabase/            # Client, server, and storage helpers
 └── types/                   # TypeScript types (Item, Profile, etc.)
 
@@ -123,8 +125,17 @@ The `items` table includes: `id`, `user_id`, `title`, `description`, `tags`, `im
 |---------|-------------|
 | `npm run dev` | Start dev server |
 | `npm run build` | Production build |
-| `npm run lint` | Run ESLint |
+| `npm run lint:check` | Run ESLint (zero warnings) |
 | `npm run typecheck` | Run TypeScript type checking |
+| `npm run db:reset` | Reset and seed the database |
+
+## AI Assistant / Chat
+
+The store includes a multi-channel AI assistant (web + WhatsApp) with server-persisted chat history:
+
+- **Guests** can chat immediately — messages are stored in the DB with a `channel` flag (`web_guest` / `whatsapp`).
+- **Migration on login** — guest messages are automatically moved to the authenticated user's account via `migrateChatSession()`.
+- **WhatsApp integration** — external bot communicates via `/api/assistant` with a shared secret; lazy linkage detects when a guest migrates.
 
 ## Documentation
 

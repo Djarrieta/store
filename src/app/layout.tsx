@@ -7,6 +7,7 @@ import Link from "next/link";
 import CartDrawer from "@/app/components/CartDrawer";
 import CartIcon from "@/app/components/CartIcon";
 import ChatFAB from "@/app/components/ChatFAB";
+import ChatMigration from "@/app/components/ChatMigration";
 import NavLinks from "@/app/components/NavLinks";
 import UserMenu from "@/app/components/UserMenu";
 import { getUser, isAdmin } from "@/lib/auth";
@@ -79,6 +80,7 @@ export default async function RootLayout({
           </div>
           <CartDrawer />
           <ChatFAB />
+          <ChatMigration isAuthenticated={Boolean(user)} />
         </CartProvider>
       </body>
     </html>

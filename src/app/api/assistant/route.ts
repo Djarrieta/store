@@ -1,6 +1,7 @@
 import { buildPrompt } from "@/lib/assistant/buildPrompt";
-import { addMessage } from "@/lib/assistant/chatHistory";
+import { addMessage,type ChatChannel } from "@/lib/assistant/chatHistory";
 import { generateResponse } from "@/lib/assistant/mcpService";
+import { createServiceClient } from "@/lib/supabase/service";
 
 export async function POST(req: Request): Promise<Response> {
   try {
@@ -14,6 +15,7 @@ export async function POST(req: Request): Promise<Response> {
       message?: string;
       userRef?: string;
       name?: string;
+      channel?: "whatsapp" | "auth";
     };
 
     if (!body.message?.trim()) {
@@ -25,12 +27,27 @@ export async function POST(req: Request): Promise<Response> {
 
     const userRef = body.userRef.trim();
     const message = body.message.trim().slice(0, 2000);
+    const channel: ChatChannel = body.channel ?? "whatsapp";
 
-    const prompt = await buildPrompt(message, userRef);
+    // Lazy linkage detection: check if this guest has been migrated
+    if (channel === "whatsapp") {
+      const supabase = createServiceClient();
+      const { data: migrationEntry } = await supabase
+        .from("chat_migration_log")
+        .select("auth_user_id")
+        .eq("guest_ref", userRef)
+        .single();
 
-    await addMessage(userRef, message, "user");
-    const response = await generateResponse(prompt);
-    await addMessage(userRef, response, "assistant");
+      if (migrationEntry) {
+        return Response.json({ migrated: true, authUserId: migrationEntry.auth_user_id });
+      }
+    }
+
+    const prompt = await buildPrompt(message, userRef, [], channel);
+    const response = await generateResponse(prompt, channel);
+
+    await addMessage(userRef, message, "user", channel);
+    await addMessage(userRef, response, "assistant", channel);
 
     return Response.json({ response });
   } catch (error) {
