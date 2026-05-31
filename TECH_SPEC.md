@@ -26,6 +26,10 @@
 18. [Scripts & DB Reset](#18-scripts--db-reset)
 19. [Join Tables & Nested Modules](#19-join-tables--nested-modules)
 20. [API Routes (import/export)](#20-api-routes-importexport)
+21. [Feature Flags](#21-feature-flags)
+22. [Payments (Wompi)](#22-payments-wompi)
+23. [Customization Pipeline](#23-customization-pipeline)
+24. [AI Assistant / Chat](#24-ai-assistant--chat)
 
 ---
 
@@ -36,9 +40,11 @@
 | Framework         | **Next.js** (App Router)                         | 16.x         |
 | Language          | **TypeScript**                                   | 5.x          |
 | React             | **React**                                        | 19.x         |
-| Styling           | **RetroUI** (NeoBrutalism, shadcn-based) + Tailwind CSS | per RetroUI  |
+| Styling           | **RetroUI** (NeoBrutalism, shadcn-based) + Tailwind CSS 4 | per RetroUI  |
 | Backend / DB      | **Supabase** (Postgres + Auth + Storage + RLS)   | —            |
 | Supabase Client   | `@supabase/supabase-js` + `@supabase/ssr`        | 2.x / 0.10.x |
+| Payments          | **Wompi** (Widget Checkout, COP)                 | —            |
+| AI Assistant      | **DeepSeek** (via MCP tools)                     | —            |
 | Linter            | **ESLint** (eslint-config-next)                  | 9.x          |
 | Package Manager   | **npm**                                          | —            |
 
@@ -1459,3 +1465,151 @@ This allows users to share entities as JSON files that can be imported into othe
 - [ ] (Optional) Join table migration if module has child entities
 - [ ] (Optional) API routes for import/export (with `.slice()` truncation on text fields)
 - [ ] (Optional) Seed data in `supabase/seed/`
+
+---
+
+## 21. Feature Flags
+
+### Database (`20_feature_flags.sql`)
+
+```sql
+CREATE TABLE public.feature_flags (
+    key         text PRIMARY KEY,
+    enabled     boolean NOT NULL DEFAULT false,
+    description text,
+    updated_at  timestamptz NOT NULL DEFAULT now()
+);
+```
+
+RLS: public read (anon + authenticated), write restricted to admins.
+
+### Helper (`src/lib/flags.ts`)
+
+```ts
+import { createClient } from "@/lib/supabase/server";
+
+export async function isFeatureEnabled(key: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("feature_flags")
+    .select("enabled")
+    .eq("key", key)
+    .single();
+  return data?.enabled ?? false;
+}
+```
+
+### Usage Pattern
+
+Check flag in Server Components and pass as prop to Client Components. No direct DB call from client.
+
+```tsx
+// Server Component
+const customizable = await isFeatureEnabled("customizable_products");
+return <ProductCard customizable={customizable} />;
+```
+
+### Current Flags
+
+| Key | Purpose |
+|-----|---------|
+| `customizable_products` | Gates the entire customization pipeline (editor, cart previews, admin customization-kinds) |
+
+---
+
+## 22. Payments (Wompi)
+
+[Wompi](https://docs.wompi.co/) is the payment gateway (Colombia, COP currency). The integration uses the **Widget Checkout** flow.
+
+### Server-Side Integrity Signature (`src/lib/wompi.ts`)
+
+```ts
+import { createHash } from "crypto";
+
+export function generateWompiSignature(
+  reference: string,
+  amountInCents: number,
+  currency: string,
+): string {
+  const secret = process.env.WOMPI_INTEGRITY_SECRET;
+  if (!secret) throw new Error("WOMPI_INTEGRITY_SECRET is not set");
+  const payload = `${reference}${amountInCents}${currency}${secret}`;
+  return createHash("sha256").update(payload).digest("hex");
+}
+```
+
+### Server Action (`src/app/actions/wompi.ts`)
+
+Creates a checkout session with a unique reference and integrity hash. The client uses these to open the Wompi widget.
+
+### Environment Variables
+
+```env
+NEXT_PUBLIC_WOMPI_PUBLIC_KEY=<public key>
+WOMPI_INTEGRITY_SECRET=<integrity secret>
+```
+
+---
+
+## 23. Customization Pipeline
+
+Products can have customizable variants. The full pipeline:
+
+1. **Admin defines customization kinds** (`/admin/customization-kinds`) — JSON schema for allowed transforms
+2. **Product links to a print template** with a customization kind
+3. **User edits in `CustomizationFlow`** (`/products/[id]`) using a Konva canvas editor
+4. **Local persistence**: source image in IndexedDB (`store-customizations` DB), metadata + preview in localStorage (7-day TTL)
+5. **On order creation**: `persistPendingCustomizations()` uploads assets to Supabase Storage
+6. **Saved as `customizations` table** entries linked to order lines
+
+### Key Files
+
+| File | Role |
+|------|------|
+| `src/app/products/[id]/CustomizationFlow.tsx` | Editor UI (Konva canvas) |
+| `src/lib/customizations/indexedDb.ts` | Blob storage (source images) |
+| `src/lib/customizations/localStore.ts` | Metadata store (transforms, preview) |
+| `src/lib/customizations/persist.ts` | Upload to server on order |
+| `src/app/actions/customizations.ts` | Server action for file upload |
+| `src/app/components/customization/` | Shared editor components (`CustomizationEditor`, `KonvaStage`, types) |
+
+### Feature-Gated
+
+The entire customization pipeline is gated by the `customizable_products` feature flag. When disabled, products render as non-customizable with standard Add-to-Cart behavior.
+
+---
+
+## 24. AI Assistant / Chat
+
+Multi-channel AI assistant powered by DeepSeek with MCP (Model Context Protocol) tools.
+
+### Channels
+
+| Channel | Identity | Storage |
+|---------|----------|---------|
+| `auth` | Supabase user ID | `chat_messages` table |
+| `web_guest` | Client-generated UUID in `guest_chat_id` cookie (30-day) | `chat_messages` table |
+| `whatsapp` | Bot-generated UUID keyed by phone number | `chat_messages` table |
+
+### Migration on Login
+
+When a guest logs in, `migrateChatSession(guestRef, authUserId)` moves all guest messages to the authenticated user and logs the mapping in `chat_migration_log`.
+
+### Key Files
+
+| File | Role |
+|------|------|
+| `src/lib/assistant/chatHistory.ts` | `getHistory`, `addMessage(channel)`, `migrateChatSession` |
+| `src/lib/assistant/buildPrompt.ts` | Builds LLM prompt with DB history |
+| `src/lib/assistant/mcpService.ts` | `generateResponse(prompt, channel)` — blocks order tools for guests |
+| `src/lib/assistant/deepseekProvider.ts` | DeepSeek LLM provider |
+| `src/lib/assistant/storeSnapshot.ts` | Store state snapshot for LLM context |
+| `src/app/chat/actions.ts` | `sendMessage(msg, cart, guestId)`, `migrateGuestChat(guestId)` |
+| `src/app/api/assistant/route.ts` | External API (WhatsApp bot) |
+| `src/app/components/ChatMigration.tsx` | Root-level migration trigger |
+
+### Security
+
+- `chat_messages` has `USING (false)` RLS — no public access. All reads/writes go through `createServiceClient()`.
+- Guest ID validation: `supabase.rpc('user_exists', { p_id: guestId })` prevents impersonation.
+- Order tools are blocked for guest channels.

@@ -1,6 +1,6 @@
 # Store
 
-A full-stack store application built with **Next.js 16**, **Supabase**, and **RetroUI** (NeoBrutalism).
+A full-stack e-commerce application built with **Next.js 16**, **Supabase**, and **RetroUI** (NeoBrutalism). Features product catalogs with customizable variants, AI shopping assistant (multi-channel), Wompi payments, and admin back-office.
 
 ## Tech Stack
 
@@ -8,8 +8,10 @@ A full-stack store application built with **Next.js 16**, **Supabase**, and **Re
 |-------|-----------|
 | Framework | Next.js 16 (App Router) |
 | Language | TypeScript 5.x |
-| UI | React 19 · RetroUI (NeoBrutalism, shadcn-based) + Tailwind CSS |
+| UI | React 19 · RetroUI (NeoBrutalism, shadcn-based) + Tailwind CSS 4 |
 | Backend | Supabase (Postgres + Auth + Storage + RLS) |
+| Payments | Wompi |
+| AI Assistant | DeepSeek (via MCP tools) |
 | Linter | ESLint (eslint-config-next) |
 
 ## Getting Started
@@ -38,6 +40,15 @@ npm run db:reset
 # Start dev server (runs on http://localhost:5000)
 npm run dev
 ```
+
+### Commands
+
+| Task | Command |
+|------|---------|
+| Dev server (port 5000) | `npm run dev` |
+| Lint (zero warnings) | `npm run lint:check` |
+| Type check | `npm run typecheck` |
+| Reset local DB | `npm run db:reset` |
 
 ### Supabase Environments
 
@@ -79,24 +90,36 @@ SUPABASE_AUTH_GOOGLE_SECRET=<from Google Cloud Console>
 ```
 src/
 ├── app/
-│   ├── layout.tsx          # Root layout (nav, fonts, user menu, chat migration)
-│   ├── page.tsx            # Homepage (latest items grid)
-│   ├── login/page.tsx      # Login (Google OAuth + dev login)
-│   ├── auth/callback/       # OAuth callback handler
-│   ├── chat/               # AI assistant (multi-channel, guest + auth)
-│   ├── components/          # Shared UI components
-│   └── items/               # Items module (list, detail, form, actions)
+│   ├── layout.tsx            # Root layout (nav, fonts, user menu, chat migration)
+│   ├── page.tsx              # Homepage (product grid)
+│   ├── login/page.tsx        # Login (Google OAuth + dev login)
+│   ├── auth/callback/        # OAuth callback handler
+│   ├── about/                # About page
+│   ├── chat/                 # AI assistant (multi-channel, guest + auth)
+│   ├── products/             # Product catalog (list, detail, customization flow)
+│   ├── perfil/               # User profile (addresses, order history)
+│   ├── admin/                # Admin back-office (products, items, orders, categories, ships, content, customization-kinds)
+│   ├── actions/              # Cross-cutting server actions (orders, payments, shipping, customizations)
+│   ├── api/                  # API routes (WhatsApp bot endpoint)
+│   ├── components/           # Shared UI components
+│   └── themes/               # CSS theme variants
 ├── lib/
-│   ├── auth.ts              # getUser(), requireAuth(), ensureProfile()
-│   ├── constants.ts         # PAGE_SIZE, MAX_TITLE_LENGTH, MAX_DESCRIPTION_LENGTH, cookie names
-│   ├── assistant/           # AI assistant helpers (chat history, prompt builder, MCP tools)
-│   └── supabase/            # Client, server, and storage helpers
-└── types/                   # TypeScript types (Item, Profile, etc.)
+│   ├── auth.ts               # getUser(), requireAuth(), requireAdmin()
+│   ├── constants.ts          # PAGE_SIZE, MAX_TITLE_LENGTH, cookie names
+│   ├── flags.ts              # Feature flag helper (isFeatureEnabled)
+│   ├── cart.tsx              # Cart context (client-side)
+│   ├── format.ts            # Utility formatters
+│   ├── wompi.ts             # Wompi payment helpers
+│   ├── assistant/            # AI assistant (chat history, prompt, MCP tools, DeepSeek provider)
+│   ├── customizations/       # Client-side customization persistence (IndexedDB + localStorage)
+│   ├── print/                # Print rendering
+│   └── supabase/             # Client, server, service, and storage helpers
+└── types/                    # TypeScript types (Product, Item, Order, etc.)
 
 supabase/
-├── migrations/              # Numbered SQL migrations (NN_module.sql)
-├── seed/                    # Seed data (~6 items across 2-3 categories)
-└── seed.sql                 # Main seed entry point
+├── migrations/               # 20 numbered SQL migrations (NN_module.sql)
+├── seed/                     # Seed data (categories, products, items, admin, content, ships)
+└── *.js                      # Utility scripts (reset, seed-storage, remove-orphans)
 ```
 
 ## Key Patterns

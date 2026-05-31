@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Store — Agent Guide
 
-**Stack**: Next.js 16 (App Router) · React 19 · TypeScript 5 · Supabase (Postgres + Auth + Storage + RLS) · RetroUI/NeoBrutalism + Tailwind CSS 4
+**Stack**: Next.js 16 (App Router) · React 19 · TypeScript 5 · Supabase (Postgres + Auth + Storage + RLS) · RetroUI/NeoBrutalism + Tailwind CSS 4 · Wompi (payments) · DeepSeek (AI assistant)
 
 Full technical spec: [TECH_SPEC.md](./TECH_SPEC.md)
 
@@ -75,7 +75,16 @@ export async function createFoo(formData: FormData) {
 
 ### Constants (`src/lib/constants.ts`)
 
-`PAGE_SIZE = 24` · `MAX_TITLE_LENGTH = 120` · `MAX_DESCRIPTION_LENGTH = 2000` · `GUEST_CHAT_COOKIE = "guest_chat_id"` · `WA_REF_COOKIE = "wa_ref"`
+`PAGE_SIZE = 24` · `MAX_TITLE_LENGTH = 120` · `MAX_DESCRIPTION_LENGTH = 2000` · `CART_STORAGE_KEY = "store:cart"` · `GUEST_CHAT_COOKIE = "guest_chat_id"` · `WA_REF_COOKIE = "wa_ref"`
+
+### Feature Flags (`src/lib/flags.ts`)
+
+`isFeatureEnabled(key)` checks the `feature_flags` table. Returns `false` if the key doesn't exist. Server-side only.
+
+Current flags:
+- `customizable_products` — gates the entire customization pipeline (editor, cart previews, admin customization-kinds)
+
+Pass the flag value from Server Components as a prop to Client Components. No direct DB call from the client.
 
 ---
 
@@ -112,8 +121,40 @@ export async function createFoo(formData: FormData) {
 | `PageHeader` | Page title + action button (e.g. "New item") |
 | `Breadcrumb` | Navigation breadcrumbs |
 | `ProductCard` | Card tile for product grid |
+| `ProductImageCarousel` | Image carousel for product detail |
+| `VariantSelector` | Item variant selector with customization support |
 | `AddToCartButton` | Client Component — adds item to cart context |
-| `CartDrawer` | Slide-out cart panel || `ChatMigration` | Client Component — migrates guest chat to authenticated user on login (rendered in root layout) |
+| `BuyNowButton` | Client Component — direct purchase flow |
+| `CartDrawer` | Slide-out cart panel |
+| `CartIcon` | Cart icon with item count badge |
+| `ChatFAB` | Floating action button to open chat |
+| `ChatMigration` | Client Component — migrates guest chat to authenticated user on login (rendered in root layout) |
+| `AddressModal` | Address form modal for checkout |
+| `customization/` | Subfolder: `CustomizationEditor`, `KonvaStage`, types |
+
+---
+
+## Customization Architecture
+
+Products can have customizable variants. The pipeline:
+
+1. **Admin defines customization kinds** (`/admin/customization-kinds`) — schema-driven (JSON schema for transforms)
+2. **Product links to a print template** with customization kind
+3. **User edits in `CustomizationFlow`** (`/products/[id]`) using a Konva canvas editor
+4. **Local persistence**: source image in IndexedDB, metadata in localStorage (7-day TTL)
+5. **On order creation**: `persistPendingCustomizations()` uploads assets to Supabase Storage
+6. **Saved as `customizations` table** entries linked to order lines
+
+### Key files
+
+| File | Role |
+|------|------|
+| `src/app/products/[id]/CustomizationFlow.tsx` | Editor UI (Konva canvas) |
+| `src/lib/customizations/indexedDb.ts` | Blob storage (source images) |
+| `src/lib/customizations/localStore.ts` | Metadata store (transforms, preview) |
+| `src/lib/customizations/persist.ts` | Upload to server on order |
+| `src/app/actions/customizations.ts` | Server action for file upload |
+| `src/app/components/customization/` | Shared editor components |
 
 ---
 
