@@ -2,6 +2,7 @@ import FilterableList from "@/app/components/FilterableList";
 import PageHeader from "@/app/components/PageHeader";
 import ProductCard from "@/app/components/ProductCard";
 import { PAGE_SIZE } from "@/lib/constants";
+import { isFeatureEnabled } from "@/lib/flags";
 import { createClient } from "@/lib/supabase/server";
 import type { ItemWithCategories, ProductWithCategory } from "@/types";
 
@@ -16,7 +17,8 @@ export default async function Home({
   }>;
 }) {
   const { q, tags: tagsParam, page: pageStr, customizable } = await searchParams;
-  const onlyCustomizable = customizable === "1";
+  const customizableFlag = await isFeatureEnabled("customizable_products");
+  const onlyCustomizable = customizableFlag && customizable === "1";
 
   const page = Math.max(1, parseInt(pageStr ?? "1", 10) || 1);
   const from = (page - 1) * PAGE_SIZE;
@@ -51,6 +53,8 @@ export default async function Home({
 
   if (onlyCustomizable) {
     query = query.eq("customizable", true);
+  } else if (!customizableFlag) {
+    query = query.eq("customizable", false);
   }
 
   const { data: rawProducts, count } = await query.range(from, to);
@@ -86,10 +90,11 @@ export default async function Home({
         total={total}
         pageSize={PAGE_SIZE}
         customizable={onlyCustomizable}
+        customizableEnabled={customizableFlag}
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(products ?? []).map((product) => (
-            <ProductCard key={product.id} product={product} items={itemsByProduct.get(product.id) ?? []} compact />
+            <ProductCard key={product.id} product={product} items={itemsByProduct.get(product.id) ?? []} compact customizableEnabled={customizableFlag} />
           ))}
         </div>
       </FilterableList>

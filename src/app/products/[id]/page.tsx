@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import type { EditorVariant } from "@/app/components/customization/types";
 import ProductCard from "@/app/components/ProductCard";
+import { isFeatureEnabled } from "@/lib/flags";
 import { createClient } from "@/lib/supabase/server";
 import type {
   CustomizationKind,
@@ -57,8 +58,10 @@ export default async function ProductDetailPage({
   const itemList = items ?? [];
   const isPurchasable = itemList.some((i) => i.stock > 0);
 
+  const customizableFlag = await isFeatureEnabled("customizable_products");
+  if (!customizableFlag && product.customizable) notFound();
   const isCustomizable =
-    product.customizable && product.customization_kind !== null;
+    customizableFlag && product.customizable && product.customization_kind !== null;
   const customizationVariants: EditorVariant[] = isCustomizable
     ? itemList
         .filter((item): item is ItemWithCategories & { print_template: PrintTemplate } => {
@@ -98,7 +101,7 @@ export default async function ProductDetailPage({
           { label: product.title },
         ]}
       />
-      <ProductCard product={product} items={itemList} />
+      <ProductCard product={product} items={itemList} customizableEnabled={customizableFlag} />
 
       {isPurchasable && isCustomizable && (
         <section className="rounded-2xl border-4 border-[var(--border)] bg-[var(--surface)] p-5 shadow-[6px_6px_0_0_var(--shadow)]">

@@ -14,6 +14,7 @@ interface FilterableListProps {
   total: number;
   pageSize: number;
   customizable?: boolean;
+  customizableEnabled?: boolean;
   children: React.ReactNode;
 }
 
@@ -42,6 +43,7 @@ export default function FilterableList({
   total,
   pageSize,
   customizable = false,
+  customizableEnabled = false,
   children,
 }: FilterableListProps) {
   const hasFilters = Boolean(q || tags || customizable);
@@ -115,14 +117,16 @@ export default function FilterableList({
               defaultValue={tags ?? ""}
               placeholder="tag1,tag2"
             />
-            <label className="flex items-center gap-2 text-sm font-semibold sm:col-span-3">
-              <Checkbox
-                name="customizable"
-                value="1"
-                defaultChecked={customizable}
-              />
-              Solo personalizables
-            </label>
+            {customizableEnabled && (
+              <label className="flex items-center gap-2 text-sm font-semibold sm:col-span-3">
+                <Checkbox
+                  name="customizable"
+                  value="1"
+                  defaultChecked={customizable}
+                />
+                Solo personalizables
+              </label>
+            )}
             <div className="flex gap-2 sm:col-span-3">
               <Button variant="primary" size="md" type="submit" className="flex-1">
                 Aplicar filtros

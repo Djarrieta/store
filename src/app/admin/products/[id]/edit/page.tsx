@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { isFeatureEnabled } from "@/lib/flags";
 import { createClient } from "@/lib/supabase/server";
 import type { CustomizationKind, Product } from "@/types";
 
@@ -50,12 +51,13 @@ export default async function EditProductPage({
   }
 
   const updateWithId = updateProduct.bind(null, id);
+  const customizableFlag = await isFeatureEnabled("customizable_products");
 
   return (
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-3xl font-bold">Editar producto</h1>
-        {product.customizable && product.customization_kind_id && (
+        {customizableFlag && product.customizable && product.customization_kind_id && (
           <a
             href={`/admin/products/${id}/preview-editor`}
             className="rounded-md border-2 border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm font-semibold shadow-[2px_2px_0_0_var(--shadow)] hover:bg-[var(--bg)]"
@@ -69,6 +71,7 @@ export default async function EditProductPage({
         defaultValues={product}
         hasItems={(itemsCount ?? 0) > 0}
         kinds={kinds}
+        customizableEnabled={customizableFlag}
       />
       <ProductItemsSection productId={id} />
     </section>

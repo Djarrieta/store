@@ -2,6 +2,7 @@ import Button from "@/app/components/Button";
 import FilterableList from "@/app/components/FilterableList";
 import PageHeader from "@/app/components/PageHeader";
 import { PAGE_SIZE } from "@/lib/constants";
+import { isFeatureEnabled } from "@/lib/flags";
 import { formatCurrency } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { ProductWithCategory } from "@/types";
@@ -38,6 +39,11 @@ export default async function AdminProductsPage({
 
   if (activeTags.length > 0) {
     query = query.contains("tags", activeTags);
+  }
+
+  const customizableFlag = await isFeatureEnabled("customizable_products");
+  if (!customizableFlag) {
+    query = query.eq("customizable", false);
   }
 
   const { data: rawProducts, count } = await query.range(from, to);

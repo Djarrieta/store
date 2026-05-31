@@ -31,7 +31,7 @@ function isUUID(segment: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment);
 }
 
-export default function AdminNav() {
+export default function AdminNav({ hiddenLinks = [] }: { hiddenLinks?: string[] }) {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
 
@@ -41,7 +41,7 @@ export default function AdminNav() {
   if (isTopLevel) {
     return (
       <nav className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:flex-wrap">
-        {NAV_LINKS.filter(({ href }) => !pathname.startsWith(href)).map(({ href, label }) => (
+        {NAV_LINKS.filter(({ href }) => !pathname.startsWith(href) && !hiddenLinks.includes(href)).map(({ href, label }) => (
           <Button key={href} href={href} variant="secondary" size="md" shadow fullWidth className="sm:w-auto justify-center">
             {label}
           </Button>

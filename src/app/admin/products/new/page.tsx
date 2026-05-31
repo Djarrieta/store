@@ -1,4 +1,5 @@
 import { requireAdmin } from "@/lib/auth";
+import { isFeatureEnabled } from "@/lib/flags";
 import { createClient } from "@/lib/supabase/server";
 import type { CustomizationKind } from "@/types";
 
@@ -19,7 +20,7 @@ export default async function NewProductPage() {
     <section className="space-y-4">
       <h1 className="font-display text-3xl font-bold">Nuevo producto</h1>
       <p className="text-sm text-[var(--muted)]">Después de guardar podrás agregar variantes e inventario.</p>
-      <ProductForm action={createProduct} kinds={kinds ?? []} />
+      <ProductForm action={createProduct} kinds={kinds ?? []} customizableEnabled={await isFeatureEnabled("customizable_products")} />
     </section>
   );
 }

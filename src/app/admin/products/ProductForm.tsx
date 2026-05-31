@@ -16,6 +16,8 @@ interface ProductFormProps {
   hasItems?: boolean;
   /** Available customization kinds (active + the currently-selected archived one, if any). */
   kinds: CustomizationKind[];
+  /** Whether the customizable_products feature flag is on. Hides the section when false. */
+  customizableEnabled?: boolean;
 }
 
 export default function ProductForm({
@@ -23,6 +25,7 @@ export default function ProductForm({
   defaultValues,
   hasItems = false,
   kinds,
+  customizableEnabled = false,
 }: ProductFormProps) {
   const [imagesText, setImagesText] = useState(
     (defaultValues?.images ?? []).map((img: ProductImage) => img.url).join(", "),
@@ -187,7 +190,7 @@ export default function ProductForm({
         <span className="text-sm font-semibold">Ocultar producto (no visible al público)</span>
       </label>
 
-      <fieldset className="space-y-3 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[2px_2px_0_0_var(--shadow)]">
+      {customizableEnabled && <fieldset className="space-y-3 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[2px_2px_0_0_var(--shadow)]">
         <legend className="px-1 text-sm font-bold uppercase tracking-wide">
           Personalización
         </legend>
@@ -236,7 +239,7 @@ export default function ProductForm({
             Selecciona un tipo para poder guardar.
           </p>
         )}
-      </fieldset>
+      </fieldset>}
 
       <FormActions>
         <Button variant="primary" size="lg" type="submit" disabled={uploading}>
