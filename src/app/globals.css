@@ -2,6 +2,7 @@
 @import "./themes/default.css";
 @import "./themes/ten-lemmon.css";
 @import "./themes/3d-cases.css";
+@import "./themes/clean-slate.css";
 
 @theme inline {
   --color-background: var(--bg);

@@ -1,0 +1,45 @@
+/* ── clean-slate theme ────────────────────────────────────── */
+/* Minimal, understated aesthetic. Pure white background,        */
+/* neutral gray accents, standard rounded corners, and nearly    */
+/* invisible shadows. Designed to stay out of the way.           */
+[data-theme="clean-slate"] {
+  /* ── Palette ──────────────────────────────────────────── */
+  --bg: #fafafa;
+  --fg: #1f2937;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #6b7280;
+  --accent-foreground: #ffffff;
+  --gradient-1: #fafafa;
+  --gradient-2: #f5f5f5;
+  /* ── Structural ───────────────────────────────────────── */
+  --border: #e5e7eb;
+  --shadow: #d1d5db;
+  --surface: #ffffff;
+  --border-disabled: #f3f4f6;
+  /* ── Semantic: interactive states ─────────────────────── */
+  --danger: #fca5a5;
+  --success: #86efac;
+  --warning: #fde68a;
+  /* ── Semantic: feedback messages ──────────────────────── */
+  --error-bg: #fef2f2;
+  --error-border: #dc2626;
+  --error-text: #b91c1c;
+  --ok-bg: #f0fdf4;
+  --ok-border: #16a34a;
+  --ok-text: #15803d;
+  /* ── Border radii (standard rounded) ──────────────────── */
+  --radius-btn-sm: 0.375rem;
+  --radius-btn-md: 0.5rem;
+  --radius-btn-lg: 0.5rem;
+  --radius-btn-xl: 0.75rem;
+  --radius-btn-icon: 0.375rem;
+  --radius-card: 0.5rem;
+  /* ── Offset shadow sizes (nearly flat) ────────────────── */
+  --shadow-btn-sm: 0px;
+  --shadow-btn-md: 1px;
+  --shadow-btn-lg: 1px;
+  --shadow-btn-xl: 1px;
+  --shadow-btn-icon: 0px;
+  --shadow-card: 1px;
+}
