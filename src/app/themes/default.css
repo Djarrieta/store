@@ -1,48 +1,53 @@
-/* ── Default theme ───────────────────────────────────────── */
-/* Applied to :root as a fallback for any document without an  */
-/* explicit [data-theme] attribute. Other theme files may       */
-/* either reuse these values verbatim (see ten-lemmon.css) or   */
-/* override them (see 3d-cases.css).                            */
+/* ── CRISTA default theme ─────────────────────────────────── */
+/* The single brand theme, applied to :root. Formal, natural    */
+/* and editorial: ivory canvas, burgundy accent, warm browns,   */
+/* hairline borders and soft (blurred) shadows.                 */
+/* Palette + typography come from public/default-theme-patterns */
 :root {
   /* ── Palette ──────────────────────────────────────────── */
-  --bg: #f5f0e7;
-  --fg: #111111;
-  --card: #fff9ee;
-  --muted: #5c564d;
-  --accent: #ffca3a;
-  --accent-foreground: var(--border);
-  --gradient-1: #fff2c6;
-  --gradient-2: #ffd7ce;
-  /* ── Structural (NeoBrutalism ink) ────────────────────── */
-  --border: #000000;
-  --shadow: #111111;
-  --surface: #ffffff;
-  --border-disabled: #888888;
+  --bg: #f8f5f0;            /* ivory / off-white */
+  --fg: #3f2f27;            /* deep warm brown (readable body text) */
+  --card: #efe7dc;          /* sand panel */
+  --muted: #8b7565;         /* muted brown (secondary text) */
+  --accent: #7b1e2e;        /* burgundy / wine */
+  --accent-foreground: #f8f5f0; /* ivory text on burgundy */
+  --gradient-1: transparent;
+  --gradient-2: transparent;
+  /* ── Brand extras (from the board palette) ────────────── */
+  --sage: #aab7a0;
+  --terracotta: #c47d5a;
+  --gold: #8b6f4d;
+  --accent-hover: #651825;  /* darker burgundy */
+  /* ── Structural (hairlines + soft ink) ────────────────── */
+  --border: #d8ccbb;        /* botanical hairline */
+  --border-strong: #c9b9a4; /* slightly stronger hairline */
+  --shadow: rgba(107, 86, 72, 0.16); /* soft translucent brown */
+  --surface: #fffdfa;       /* near-white card surface */
+  --border-disabled: #cbc3b8;
   /* ── Semantic: interactive states ─────────────────────── */
-  --danger: #fca5a5;
-  --success: #86efac;
-  --warning: #fde047;
+  --danger: #d9a7a2;
+  --success: #aab7a0;       /* sage */
+  --warning: #d8b46a;
   /* ── Semantic: feedback messages ──────────────────────── */
-  --error-bg: #fee2e2;
-  --error-border: #dc2626;
-  --error-text: #dc2626;
-  --ok-bg: #f0fdf4;
-  --ok-border: #15803d;
-  --ok-text: #15803d;
-  /* ── Border radii ─────────────────────────────────────── */
-  --radius-btn-sm: 0.375rem;   /* rounded-md */
-  --radius-btn-md: 0.375rem;   /* rounded-md */
-  --radius-btn-lg: 0.5rem;     /* rounded-lg */
-  --radius-btn-xl: 0.75rem;    /* rounded-xl */
-  --radius-btn-icon: 0.25rem;  /* rounded */
-  --radius-card: 0.75rem;      /* rounded-xl */
-  /* ── Offset shadow sizes (NeoBrutalism) ───────────────── */
-  /* Each value is the X/Y offset used in shadow-[X_Y_0_0_var(--shadow)]
-     and the matching hover translate distance. */
-  --shadow-btn-sm: 2px;
-  --shadow-btn-md: 2px;
-  --shadow-btn-lg: 3px;
-  --shadow-btn-xl: 4px;
-  --shadow-btn-icon: 2px;
-  --shadow-card: 4px;
+  --error-bg: #f7ebe9;
+  --error-border: #9b3b2c;
+  --error-text: #9b3b2c;
+  --ok-bg: #eef1ea;
+  --ok-border: #6f7d61;
+  --ok-text: #5c6a4e;
+  /* ── Border radii (modest, editorial) ─────────────────── */
+  --radius-btn-sm: 0.125rem;
+  --radius-btn-md: 0.125rem;
+  --radius-btn-lg: 0.125rem;
+  --radius-btn-xl: 0.125rem;   /* rectangular CTA per board */
+  --radius-btn-icon: 0.25rem;
+  --radius-card: 0.375rem;
+  /* ── Soft (blurred) shadows ───────────────────────────── */
+  /* Full box-shadow strings so components can use            */
+  /* shadow-[var(--shadow-soft)] instead of hard offsets.     */
+  --shadow-soft-sm: 0 1px 3px rgba(107, 86, 72, 0.10);
+  --shadow-soft: 0 2px 10px rgba(107, 86, 72, 0.12);
+  --shadow-soft-lg: 0 8px 28px rgba(107, 86, 72, 0.16);
+  --shadow-card: var(--shadow-soft);
 }
+
