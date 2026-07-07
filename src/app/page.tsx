@@ -1,4 +1,5 @@
 import FilterableList from "@/app/components/FilterableList";
+import Hero from "@/app/components/Hero";
 import PageHeader from "@/app/components/PageHeader";
 import ProductCard from "@/app/components/ProductCard";
 import { PAGE_SIZE } from "@/lib/constants";
@@ -78,26 +79,29 @@ export default async function Home({
   const total = count ?? 0;
 
   return (
-    <PageHeader
-      title="Productos"
-      isEmpty={total === 0 && !q && activeTags.length === 0 && !onlyCustomizable}
-      emptyText="Aún no hay productos."
-    >
-      <FilterableList
-        q={q}
-        tags={tagsParam}
-        page={page}
-        total={total}
-        pageSize={PAGE_SIZE}
-        customizable={onlyCustomizable}
-        customizableEnabled={customizableFlag}
+    <>
+      <Hero />
+      <PageHeader
+        title="Productos"
+        isEmpty={total === 0 && !q && activeTags.length === 0 && !onlyCustomizable}
+        emptyText="Aún no hay productos."
       >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {(products ?? []).map((product) => (
-            <ProductCard key={product.id} product={product} items={itemsByProduct.get(product.id) ?? []} compact customizableEnabled={customizableFlag} />
-          ))}
-        </div>
-      </FilterableList>
-    </PageHeader>
+        <FilterableList
+          q={q}
+          tags={tagsParam}
+          page={page}
+          total={total}
+          pageSize={PAGE_SIZE}
+          customizable={onlyCustomizable}
+          customizableEnabled={customizableFlag}
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {(products ?? []).map((product) => (
+              <ProductCard key={product.id} product={product} items={itemsByProduct.get(product.id) ?? []} compact customizableEnabled={customizableFlag} />
+            ))}
+          </div>
+        </FilterableList>
+      </PageHeader>
+    </>
   );
 }

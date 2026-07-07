@@ -51,3 +51,49 @@ export async function deleteContent(key: string) {
   revalidatePath("/about");
   revalidatePath("/admin/content");
 }
+
+export async function updateHero(formData: FormData) {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const title = ((formData.get("title") as string) ?? "").trim();
+  const subtitle = ((formData.get("subtitle") as string) ?? "").trim();
+  const description = ((formData.get("description") as string) ?? "").trim();
+  const ctaLabel = ((formData.get("cta_label") as string) ?? "").trim();
+  const ctaHref = ((formData.get("cta_href") as string) ?? "").trim();
+
+  let images: { url: string }[] = [];
+  const rawImages = (formData.get("images") as string) ?? "[]";
+  try {
+    const parsed = JSON.parse(rawImages) as unknown;
+    if (Array.isArray(parsed)) {
+      images = parsed
+        .map((img) =>
+          img && typeof (img as { url?: unknown }).url === "string"
+            ? { url: (img as { url: string }).url }
+            : null,
+        )
+        .filter((img): img is { url: string } => img !== null);
+    }
+  } catch {
+    images = [];
+  }
+
+  const value = JSON.stringify({
+    title,
+    subtitle,
+    description,
+    cta_label: ctaLabel,
+    cta_href: ctaHref,
+    images,
+  });
+
+  const { error } = await supabase
+    .from("content")
+    .upsert({ key: "home_hero", value, pinned: true }, { onConflict: "key" });
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/");
+  revalidatePath("/admin/content");
+  redirect("/admin/content");
+}

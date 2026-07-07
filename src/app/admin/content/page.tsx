@@ -14,6 +14,7 @@ export default async function AdminContentPage() {
     .select("*")
     .order("key");
   const entries = rawEntries as Content[] | null;
+  const listEntries = (entries ?? []).filter((entry) => entry.key !== "home_hero");
 
   return (
     <PageHeader
@@ -23,10 +24,21 @@ export default async function AdminContentPage() {
       isEmpty={false}
     >
       <div className="space-y-3">
-        {(entries ?? []).map((entry) => (
+        <div className="flex items-center justify-between rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)]">
+          <div className="min-w-0">
+            <p className="font-medium">Sección principal (Hero)</p>
+            <p className="mt-1 text-xs text-[var(--muted)]">
+              Título, texto e imágenes destacadas de la página de inicio.
+            </p>
+          </div>
+          <Button href="/admin/content/hero" variant="primary" size="sm" shadow className="shrink-0">
+            Editar hero
+          </Button>
+        </div>
+        {listEntries.map((entry) => (
           <div
             key={entry.key}
-            className="flex items-center justify-between rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-4 shadow-[3px_3px_0_0_var(--shadow)]"
+            className="flex items-center justify-between rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-soft)]"
           >
             <div className="min-w-0">
               <div className="flex items-center gap-2">
