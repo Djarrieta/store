@@ -51,27 +51,27 @@ function omitShared<T extends ButtonProps>(props: T): Omit<T, keyof SharedProps>
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-[var(--accent)] border-2 border-[var(--border)] text-[var(--accent-foreground)]",
-  secondary: "bg-[var(--surface)] border-2 border-[var(--border)] hover:bg-[var(--bg)]",
-  ghost: "text-[var(--muted)] underline hover:text-[var(--fg)]",
-  danger: "bg-[var(--danger)] border-2 border-[var(--border)] text-black",
-  success: "bg-[var(--success)] border-2 border-[var(--border)] text-black",
+  primary: "bg-[var(--accent)] border border-[var(--accent)] text-[var(--accent-foreground)] hover:bg-[var(--accent-hover)] hover:border-[var(--accent-hover)]",
+  secondary: "bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]",
+  ghost: "text-[var(--muted)] underline underline-offset-4 hover:text-[var(--accent)]",
+  danger: "bg-[var(--danger)] border border-[var(--danger)] text-[var(--fg)] hover:brightness-95",
+  success: "bg-[var(--success)] border border-[var(--success)] text-[var(--fg)] hover:brightness-95",
 };
 
 const sizeClasses: Record<Exclude<ButtonSize, "none">, string> = {
-  sm: "px-2 py-1 text-xs rounded-[var(--radius-btn-sm)] font-semibold",
-  md: "px-3 py-2 text-sm rounded-[var(--radius-btn-md)] font-semibold",
-  lg: "px-4 py-2 text-sm rounded-[var(--radius-btn-lg)] font-bold",
-  xl: "px-6 py-3 rounded-[var(--radius-btn-xl)] font-bold",
-  icon: "h-6 w-6 flex items-center justify-center rounded-[var(--radius-btn-icon)] font-bold text-sm",
+  sm: "px-3 py-1 text-xs rounded-[var(--radius-btn-sm)] font-medium tracking-wide",
+  md: "px-4 py-2 text-sm rounded-[var(--radius-btn-md)] font-medium tracking-wide",
+  lg: "px-5 py-2.5 text-sm rounded-[var(--radius-btn-lg)] font-medium uppercase tracking-[0.12em]",
+  xl: "px-7 py-3 rounded-[var(--radius-btn-xl)] font-medium uppercase tracking-[0.16em]",
+  icon: "h-7 w-7 flex items-center justify-center rounded-[var(--radius-btn-icon)] font-medium text-sm",
 };
 
 const shadowClasses: Record<Exclude<ButtonSize, "none">, string> = {
-  sm: "shadow-[var(--shadow-btn-sm)_var(--shadow-btn-sm)_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[var(--shadow-btn-sm)] hover:translate-y-[var(--shadow-btn-sm)] transition-all",
-  md: "shadow-[var(--shadow-btn-md)_var(--shadow-btn-md)_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[var(--shadow-btn-md)] hover:translate-y-[var(--shadow-btn-md)] transition-all",
-  lg: "shadow-[var(--shadow-btn-lg)_var(--shadow-btn-lg)_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[var(--shadow-btn-lg)] hover:translate-y-[var(--shadow-btn-lg)] transition-all",
-  xl: "shadow-[var(--shadow-btn-xl)_var(--shadow-btn-xl)_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[var(--shadow-btn-xl)] hover:translate-y-[var(--shadow-btn-xl)] transition-all",
-  icon: "shadow-[var(--shadow-btn-icon)_var(--shadow-btn-icon)_0_0_var(--shadow)] hover:shadow-none hover:translate-x-[var(--shadow-btn-icon)] hover:translate-y-[var(--shadow-btn-icon)] transition-all",
+  sm: "shadow-[var(--shadow-soft-sm)] hover:shadow-[var(--shadow-soft)] transition-all",
+  md: "shadow-[var(--shadow-soft-sm)] hover:shadow-[var(--shadow-soft)] transition-all",
+  lg: "shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-soft-lg)] transition-all",
+  xl: "shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-soft-lg)] transition-all",
+  icon: "shadow-[var(--shadow-soft-sm)] hover:shadow-[var(--shadow-soft)] transition-all",
 };
 
 export default function Button(props: ButtonProps) {

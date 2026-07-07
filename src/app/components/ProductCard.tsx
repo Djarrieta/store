@@ -41,8 +41,8 @@ export default function ProductCard({
   const isCustomizable = customizableEnabled && product.customizable && !!product.customization_kind_id;
 
   const containerClass = compact
-    ? "flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border-2 border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)_var(--shadow-card)_0_0_var(--shadow)]"
-    : "flex flex-col overflow-hidden rounded-2xl border-4 border-[var(--border)] bg-[var(--surface)] shadow-[6px_6px_0_0_var(--shadow)]";
+    ? "flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-soft-sm)] transition-shadow hover:shadow-[var(--shadow-soft)]"
+    : "flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-soft)]";
 
   const bodyClass = compact
     ? "flex flex-1 flex-col gap-2 p-4"
@@ -67,7 +67,7 @@ export default function ProductCard({
       ) : (
         <Link
           href={`/products/${product.id}`}
-          className="block w-full rounded-[var(--radius-btn-xl)] border-2 border-[var(--border)] bg-[var(--accent)] px-4 py-2 text-center text-sm font-bold text-[var(--accent-foreground)] shadow-[var(--shadow-btn-xl)_var(--shadow-btn-xl)_0_0_var(--shadow)] transition-all hover:translate-x-[var(--shadow-btn-xl)] hover:translate-y-[var(--shadow-btn-xl)] hover:shadow-none"
+          className="block w-full rounded-[var(--radius-btn-xl)] border border-[var(--accent)] bg-[var(--accent)] px-4 py-2.5 text-center text-sm font-medium uppercase tracking-[0.14em] text-[var(--accent-foreground)] shadow-[var(--shadow-soft)] transition-all hover:bg-[var(--accent-hover)] hover:shadow-[var(--shadow-soft-lg)]"
         >
           Personalizar
         </Link>
@@ -111,7 +111,7 @@ export default function ProductCard({
             <div className="flex items-start justify-between gap-2">
               <Link
                 href={`/products/${product.id}`}
-                className="line-clamp-1 text-base font-bold hover:underline"
+                className="font-display line-clamp-1 text-lg font-medium hover:text-[var(--accent)]"
               >
                 {product.title}
               </Link>
@@ -140,7 +140,7 @@ export default function ProductCard({
           </>
         ) : (
           <>
-            <h1 className="font-display text-3xl font-bold">{product.title}</h1>
+            <h1 className="font-display text-3xl font-medium tracking-tight">{product.title}</h1>
             {product.description && (
               <p className="text-sm text-[var(--muted)]">{product.description}</p>
             )}

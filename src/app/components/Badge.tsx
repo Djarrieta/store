@@ -13,24 +13,24 @@ export type BadgeProps = {
 };
 
 const variantClasses: Record<BadgeVariant, string> = {
-  primary: "bg-[var(--accent)] border-2 border-[var(--border)] text-[var(--accent-foreground)]",
-  secondary: "bg-[var(--surface)] border-2 border-[var(--border)] text-[var(--fg)]",
-  danger: "bg-[var(--danger)] border-2 border-[var(--border)] text-black",
-  success: "bg-[var(--success)] border-2 border-[var(--border)] text-black",
-  warning: "bg-[var(--warning)] border-2 border-[var(--border)] text-black",
-  muted: "bg-[var(--bg)] border-2 border-[var(--border)] text-[var(--muted)]",
+  primary: "bg-[var(--accent)] border border-[var(--accent)] text-[var(--accent-foreground)]",
+  secondary: "bg-[var(--surface)] border border-[var(--border)] text-[var(--fg)]",
+  danger: "bg-[var(--danger)] border border-[var(--danger)] text-[var(--fg)]",
+  success: "bg-[var(--success)] border border-[var(--success)] text-[var(--fg)]",
+  warning: "bg-[var(--warning)] border border-[var(--warning)] text-[var(--fg)]",
+  muted: "bg-[var(--card)] border border-[var(--border)] text-[var(--muted)]",
 };
 
 const sizeClasses: Record<BadgeSize, string> = {
-  sm: "px-1.5 py-0.5 text-xs rounded font-semibold",
-  md: "px-2 py-1 text-xs rounded-md font-semibold",
-  lg: "px-3 py-1.5 text-sm rounded-md font-bold",
+  sm: "px-2 py-0.5 text-xs rounded-[var(--radius-btn-sm)] font-medium tracking-wide",
+  md: "px-2.5 py-1 text-xs rounded-[var(--radius-btn-md)] font-medium tracking-wide",
+  lg: "px-3 py-1.5 text-sm rounded-[var(--radius-btn-md)] font-medium tracking-wide",
 };
 
 const shadowClasses: Record<BadgeSize, string> = {
-  sm: "shadow-[2px_2px_0_0_var(--shadow)]",
-  md: "shadow-[2px_2px_0_0_var(--shadow)]",
-  lg: "shadow-[3px_3px_0_0_var(--shadow)]",
+  sm: "shadow-[var(--shadow-soft-sm)]",
+  md: "shadow-[var(--shadow-soft-sm)]",
+  lg: "shadow-[var(--shadow-soft)]",
 };
 
 export default function Badge({

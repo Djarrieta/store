@@ -116,7 +116,7 @@ const CustomizationEditor = forwardRef<CustomizationEditorHandle, Props>(
                   input.value = "";
                 }}
               />
-              <div className="flex flex-wrap items-center gap-2 rounded-md border-2 border-[var(--border)] bg-[var(--card)] px-3 py-2">
+              <div className="flex flex-wrap items-center gap-2 rounded-[var(--radius-btn-md)] border border-[var(--border)] bg-[var(--card)] px-3 py-2">
                 <Button
                   variant="primary"
                   size="sm"
@@ -138,7 +138,7 @@ const CustomizationEditor = forwardRef<CustomizationEditorHandle, Props>(
           )}
 
           {source && (
-            <div className="space-y-3 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-4 shadow-[2px_2px_0_0_var(--shadow)]">
+            <div className="space-y-3 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-soft-sm)]">
               <RangeField
                 label={`Escala: ${(transform.scale * 100).toFixed(0)}%`}
                 min={0.05}
@@ -179,7 +179,7 @@ const CustomizationEditor = forwardRef<CustomizationEditorHandle, Props>(
           )}
         </aside>
 
-        <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-4 shadow-[2px_2px_0_0_var(--shadow)]">
+        <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-soft-sm)]">
           <KonvaStage
             variant={variant}
             source={source}

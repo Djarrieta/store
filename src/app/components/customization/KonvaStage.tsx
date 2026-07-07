@@ -132,7 +132,7 @@ const KonvaStage = function KonvaStage({
     <div className="space-y-3">
       <div ref={wrapperRef} className="w-full">
         <div
-          className="mx-auto overflow-hidden rounded-xl border-2 border-[var(--border)] bg-[var(--surface)]"
+          className="mx-auto overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)]"
           style={{ width: stage.width, height: stage.height }}
         >
         <Stage ref={stageRef} width={stage.width} height={stage.height}>
@@ -244,7 +244,7 @@ function Pill({
           : "border-[var(--border)] text-[var(--muted)]";
   return (
     <span
-      className={`rounded-full border-2 bg-[var(--card)] px-2 py-0.5 font-semibold ${cls}`}
+      className={`rounded-full border bg-[var(--card)] px-2 py-0.5 font-medium ${cls}`}
     >
       {children}
     </span>

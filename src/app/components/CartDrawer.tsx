@@ -59,13 +59,13 @@ export default function CartDrawer() {
       {/* Drawer */}
       <aside
         aria-label="Carrito de compras"
-        className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col border-l-4 border-[var(--border)] bg-[var(--card)] shadow-[-6px_0_0_0_var(--shadow)] transition-transform duration-300 ${
+        className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col border-l border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft-lg)] transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b-4 border-[var(--border)] p-4">
-          <h2 className="font-display text-xl font-bold">Carrito</h2>
+        <div className="flex items-center justify-between border-b border-[var(--border)] p-4">
+          <h2 className="font-display text-xl font-medium tracking-tight">Carrito</h2>
           <Button
             variant="secondary"
             size="none"
@@ -81,7 +81,7 @@ export default function CartDrawer() {
           <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
             <p className="text-sm text-[var(--muted)]">Tu carrito está vacío.</p>
             {freeShippingAbove != null && (
-              <p className="rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--bg)] px-4 py-3 text-xs font-semibold">
+              <p className="rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--bg)] px-4 py-3 text-xs font-medium">
                 Compra más de {formatCurrency(freeShippingAbove)} y el envío es gratis
               </p>
             )}
@@ -89,7 +89,7 @@ export default function CartDrawer() {
         ) : (
           <>
             {/* Items list */}
-            <ul className="flex-1 divide-y-2 divide-black overflow-y-auto">
+            <ul className="flex-1 divide-y divide-[var(--border)] overflow-y-auto">
               {items.map((item) => {
                 const thumb = item.customizationPreviewDataUrl ?? item.image;
                 return (
@@ -101,11 +101,11 @@ export default function CartDrawer() {
                         width={64}
                         height={64}
                         unoptimized
-                        className="h-16 w-16 shrink-0 rounded-lg border-2 border-[var(--border)] object-cover"
+                        className="h-16 w-16 shrink-0 rounded-[var(--radius-btn-md)] border border-[var(--border)] object-cover"
                       />
                     )}
                     <div className="flex flex-1 flex-col gap-1">
-                      <p className="line-clamp-2 text-sm font-bold leading-tight">
+                      <p className="line-clamp-2 text-sm font-medium leading-tight">
                         {item.title}
                       </p>
                       <p className="text-xs text-[var(--muted)]">
@@ -156,9 +156,9 @@ export default function CartDrawer() {
 
             {/* Free-shipping progress */}
             {freeShippingAbove != null && progressPct != null && (
-              <div className="border-t-2 border-[var(--border)] px-4 pt-3 pb-1">
+              <div className="border-t border-[var(--border)] px-4 pt-3 pb-1">
                 {missingCOP === 0 ? (
-                  <p className="rounded-xl border-2 border-[var(--ok-border)] bg-[var(--ok-bg)] px-3 py-2 text-center text-xs font-bold text-[var(--ok-text)]">
+                  <p className="rounded-[var(--radius-btn-md)] border border-[var(--ok-border)] bg-[var(--ok-bg)] px-3 py-2 text-center text-xs font-medium text-[var(--ok-text)]">
                     ¡Envío gratis en tu pedido!
                   </p>
                 ) : (
@@ -170,7 +170,7 @@ export default function CartDrawer() {
                       </span>{" "}
                       para envío gratis
                     </p>
-                    <div className="h-2.5 w-full overflow-hidden rounded-full border-2 border-[var(--border)] bg-[var(--bg)]">
+                    <div className="h-2.5 w-full overflow-hidden rounded-full border border-[var(--border)] bg-[var(--bg)]">
                       <div
                         className="h-full rounded-full bg-[var(--accent)] transition-all duration-300"
                         style={{ width: `${progressPct}%` }}
@@ -182,13 +182,13 @@ export default function CartDrawer() {
             )}
 
             {/* Footer */}
-            <div className="space-y-3 border-t-4 border-[var(--border)] p-4 pb-8">
+            <div className="space-y-3 border-t border-[var(--border)] p-4 pb-8">
               {/* Address section — authenticated users only */}
               {isAuthenticated && (
-                <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--bg)] p-3">
+                <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg)] p-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+                      <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted)]">
                         Dirección de envío
                       </p>
                       {selectedAddress ? (
@@ -263,7 +263,7 @@ export default function CartDrawer() {
                     {shippingInfo.estimated_days !== 1 ? "s" : ""} hábiles
                   </p>
                 )}
-                <div className="flex justify-between border-t-2 border-[var(--border)] pt-2 font-bold">
+                <div className="flex justify-between border-t border-[var(--border)] pt-2 font-medium">
                   <span>Total</span>
                   <span>{formatCurrency(totalAmountInCents / 100)}</span>
                 </div>

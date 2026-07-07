@@ -67,7 +67,7 @@ export default function ProductImageCarousel({
 
   if (images.length === 1) {
     return (
-      <div className="relative mx-auto mb-5 aspect-[4/3] w-full max-w-[min(100%,80vh)] overflow-hidden rounded-xl border-2 border-[var(--border)] bg-[var(--bg)]">
+      <div className="relative mx-auto mb-5 aspect-[4/3] w-full max-w-[min(100%,80vh)] overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg)]">
         <Image
           src={images[0].url}
           alt={images[0].description ?? title}
@@ -82,7 +82,7 @@ export default function ProductImageCarousel({
   }
 
   const arrowBtnClass =
-    "absolute top-1/2 z-10 h-8 w-8 -translate-y-1/2 rounded-full p-0 shadow-[2px_2px_0_0_var(--shadow)] transition-all hover:shadow-none active:translate-y-[calc(-50%+2px)]";
+    "absolute top-1/2 z-10 h-8 w-8 -translate-y-1/2 rounded-full p-0 shadow-[var(--shadow-soft)] transition-all hover:shadow-[var(--shadow-soft-lg)]";
   const arrowIconProps = {
     width: 14,
     height: 14,
@@ -108,7 +108,7 @@ export default function ProductImageCarousel({
         {/* Scroll-snap track (swipeable) */}
         <div
           ref={scrollerRef}
-          className="flex aspect-[4/3] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden rounded-xl border-2 border-[var(--border)] bg-[var(--bg)] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex aspect-[4/3] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--bg)] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {images.map((img, i) => (
             <div
@@ -160,7 +160,7 @@ export default function ProductImageCarousel({
 
       {/* Slide counter */}
       {!compact && (
-        <p className="mt-2 text-center text-xs font-semibold text-[var(--muted)]">
+        <p className="mt-2 text-center text-xs font-medium text-[var(--muted)]">
           {current + 1} / {images.length}
         </p>
       )}
@@ -174,10 +174,10 @@ export default function ProductImageCarousel({
               onClick={() => scrollToIndex(i)}
               aria-label={img.description ?? `Imagen ${i + 1}`}
               aria-current={i === current}
-              className={`relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
+              className={`relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-[var(--radius-btn-md)] border transition-all ${
                 i === current
-                  ? "border-[var(--border)] shadow-[2px_2px_0_0_var(--shadow)]"
-                  : "border-[var(--border)]/30 opacity-60 hover:opacity-100"
+                  ? "border-[var(--accent)] shadow-[var(--shadow-soft-sm)]"
+                  : "border-[var(--border)]/40 opacity-60 hover:opacity-100"
               }`}
             >
               <Image

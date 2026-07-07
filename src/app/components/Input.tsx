@@ -1,11 +1,11 @@
 import clsx from "clsx";
 import { forwardRef, type InputHTMLAttributes, type ReactNode,type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 
-// ── Shared base ───────────────────────────────────────────────────────────────
+// ── Shared base ─────────────────────────────────────────────────
 const BASE =
-  "rounded-md border-2 border-[var(--border)] px-3 py-2 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:opacity-50 placeholder:text-[var(--muted)]";
+  "rounded-[var(--radius-btn-md)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-base md:text-sm focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] disabled:opacity-50 placeholder:text-[var(--muted)] transition-colors";
 const SHADOW =
-  "shadow-[2px_2px_0_0_var(--shadow)] focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px] transition-all";
+  "shadow-[var(--shadow-soft-sm)] focus:shadow-[var(--shadow-soft)] transition-all";
 
 // ── Field label wrapper ───────────────────────────────────────────────────────
 function FieldWrap({ label, children }: { label: ReactNode; children: ReactNode }) {
@@ -83,7 +83,7 @@ export function Checkbox({ className, ...props }: CheckboxProps) {
   return (
     <input
       type="checkbox"
-      className={clsx("h-4 w-4 cursor-pointer rounded border-2 border-[var(--border)] accent-[var(--accent)]", className)}
+      className={clsx("h-4 w-4 cursor-pointer rounded-[var(--radius-btn-icon)] border border-[var(--border)] accent-[var(--accent)]", className)}
       {...props}
     />
   );
