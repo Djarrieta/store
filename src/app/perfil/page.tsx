@@ -50,7 +50,7 @@ export default async function PerfilPage() {
         </div>
 
         {allAddresses.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--card)] p-8 text-center">
+          <div className="flex flex-col items-center gap-4 rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--card)] p-8 text-center">
             <p className="text-[var(--muted)]">Aún no tienes direcciones guardadas.</p>
             <Button href="/perfil/addresses/new" variant="primary" size="lg" shadow>
               Agregar mi primera dirección
@@ -61,7 +61,7 @@ export default async function PerfilPage() {
             {allAddresses.map((addr) => (
               <div
                 key={addr.id}
-                className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-4 shadow-[3px_3px_0_0_var(--shadow)]"
+                className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-soft)]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -142,7 +142,7 @@ export default async function PerfilPage() {
         <h2 className="font-display text-xl font-bold">Mis pedidos</h2>
 
         {allOrders.length === 0 ? (
-          <div className="rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--card)] p-8 text-center">
+          <div className="rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--card)] p-8 text-center">
             <p className="text-[var(--muted)]">Aún no tienes pedidos.</p>
           </div>
         ) : (

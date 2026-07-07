@@ -104,7 +104,7 @@ export default async function ProductDetailPage({
       <ProductCard product={product} items={itemList} customizableEnabled={customizableFlag} />
 
       {isPurchasable && isCustomizable && (
-        <section className="rounded-2xl border-4 border-[var(--border)] bg-[var(--surface)] p-5 shadow-[6px_6px_0_0_var(--shadow)]">
+        <section className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-soft)]">
           <h2 className="font-display text-xl font-bold">Diseña tu producto</h2>
           <Suspense fallback={null}>
             <CustomizationFlow

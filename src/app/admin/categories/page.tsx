@@ -32,7 +32,7 @@ export default async function AdminCategoriesPage() {
         {topLevel.map((parent) => (
           <div
             key={parent.id}
-            className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)]"
+            className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)]"
           >
             <div className="flex items-center justify-between p-4">
               <div>
@@ -58,7 +58,7 @@ export default async function AdminCategoriesPage() {
             </div>
 
             {byParent(parent.id).length > 0 && (
-              <ul className="border-t-2 border-[var(--border)] divide-y-2 divide-[var(--border)]">
+              <ul className="border-t border-[var(--border)] divide-y divide-[var(--border)]">
                 {byParent(parent.id).map((sub) => (
                   <li key={sub.id} className="flex items-center justify-between px-6 py-3">
                     <div>

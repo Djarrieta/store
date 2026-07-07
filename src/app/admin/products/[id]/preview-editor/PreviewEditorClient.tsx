@@ -31,7 +31,7 @@ export default function PreviewEditorClient({ kind, variants }: Props) {
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-[200px_1fr] sm:items-end">
-        <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-3 shadow-[2px_2px_0_0_var(--shadow)]">
+        <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] p-3 shadow-[var(--shadow-soft-sm)]">
           <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
             Tipo
           </p>

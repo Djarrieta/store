@@ -156,7 +156,7 @@ export default function CustomizationFlow({
 
   if (variants.length === 0) {
     return (
-      <p className="mt-4 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--bg)] p-4 text-sm text-[var(--muted)]">
+      <p className="mt-4 rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--bg)] p-4 text-sm text-[var(--muted)]">
         Aún no hay variaciones disponibles para personalizar.
       </p>
     );
@@ -167,7 +167,7 @@ export default function CustomizationFlow({
       <StepIndicator current={step} />
 
       {editError && (
-        <p className="rounded-lg border-2 border-[var(--error-text)] bg-[var(--error-bg,#fee2e2)] px-3 py-2 text-sm text-[var(--error-text)]">
+        <p className="rounded-[var(--radius-btn-md)] border border-[var(--error-text)] bg-[var(--error-bg,#fee2e2)] px-3 py-2 text-sm text-[var(--error-text)]">
           {editError}
         </p>
       )}
@@ -240,7 +240,7 @@ export default function CustomizationFlow({
             showFileInput={false}
           />
           {confirmMsg ? (
-            <p className="rounded-lg border-2 border-[var(--ok-border)] bg-[var(--ok-bg)] px-3 py-2 text-sm font-semibold text-[var(--ok-text)]">
+            <p className="rounded-[var(--radius-btn-md)] border border-[var(--ok-border)] bg-[var(--ok-bg)] px-3 py-2 text-sm font-medium text-[var(--ok-text)]">
               {confirmMsg}
             </p>
           ) : (
@@ -273,11 +273,11 @@ function StepIndicator({ current }: { current: Step }) {
     4: "Confirmar",
   };
   return (
-    <ol className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+    <ol className="flex flex-wrap items-center gap-2 text-xs font-medium">
       {([1, 2, 3, 4] as Step[]).map((n) => (
         <li
           key={n}
-          className={`rounded-full border-2 px-3 py-1 ${
+          className={`rounded-full border px-3 py-1 ${
             n === current
               ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
               : n < current
@@ -467,7 +467,7 @@ function UploadStep({
           input.value = "";
         }}
       />
-      <div className="flex flex-wrap items-center gap-2 rounded-md border-2 border-[var(--border)] bg-[var(--card)] px-3 py-2">
+      <div className="flex flex-wrap items-center gap-2 rounded-[var(--radius-btn-md)] border border-[var(--border)] bg-[var(--card)] px-3 py-2">
         <Button
           variant="primary"
           size="sm"

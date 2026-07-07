@@ -39,7 +39,7 @@ export function OrderAccordion({ orders }: Props) {
         return (
           <div
             key={order.id}
-            className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] overflow-hidden"
+            className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)] overflow-hidden"
           >
             {/* Header row — click to toggle */}
             <Button
@@ -75,7 +75,7 @@ export function OrderAccordion({ orders }: Props) {
 
             {/* Expandable items list */}
             {isOpen && (
-              <div className="border-t-2 border-[var(--border)] px-4 pb-4 pt-3">
+              <div className="border-t border-[var(--border)] px-4 pb-4 pt-3">
                 <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
                   Productos
                 </p>

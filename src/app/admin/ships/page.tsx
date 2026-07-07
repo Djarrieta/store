@@ -39,15 +39,15 @@ export default async function AdminShipsPage() {
       <div className="space-y-8">
         {/* Ships table */}
         {allShips.length === 0 ? (
-          <div className="rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--card)] p-8 text-center">
+          <div className="rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--card)] p-8 text-center">
             <p className="text-[var(--muted)]">
               Aún no hay tarifas de envío configuradas.
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)]">
+          <div className="overflow-x-auto rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)]">
             <table className="w-full min-w-[500px] text-sm">
-              <thead className="border-b-2 border-[var(--border)] bg-[var(--accent)] text-[var(--accent-foreground)]">
+              <thead className="border-b border-[var(--border)] bg-[var(--accent)] text-[var(--accent-foreground)]">
                 <tr>
                   <th className="p-3 text-left font-bold">Departamento</th>
                   <th className="p-3 text-left font-bold">Ciudad</th>
@@ -94,7 +94,7 @@ export default async function AdminShipsPage() {
         )}
 
         {/* Shipping config */}
-        <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-5 shadow-[3px_3px_0_0_var(--shadow)]">
+        <section className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-soft)]">
           <h2 className="mb-4 font-display text-lg font-bold">
             Configuración de envío gratis
           </h2>

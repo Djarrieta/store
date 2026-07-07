@@ -30,7 +30,7 @@ export default async function NewAddressPage() {
 
       <Form
         action={createAndRedirect}
-        className="space-y-4 rounded-2xl border-2 border-[var(--border)] bg-[var(--card)] p-6 shadow-[4px_4px_0_0_var(--shadow)]"
+        className="space-y-4 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-soft)]"
       >
         <Input
           label="Nombre del destinatario"

@@ -165,7 +165,7 @@ export default function ProductForm({
             {imageUrls.map((url, i) => (
               <li
                 key={`${url}-${i}`}
-                className="flex items-center gap-2 rounded border-2 border-[var(--border)] bg-[var(--card)] p-2 text-xs"
+                className="flex items-center gap-2 rounded border border-[var(--border)] bg-[var(--card)] p-2 text-xs"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -182,16 +182,16 @@ export default function ProductForm({
 
       <input type="hidden" name="images" value={serializedImages} />
 
-      <label className="flex items-center gap-3 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[2px_2px_0_0_var(--shadow)] cursor-pointer">
+      <label className="flex items-center gap-3 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[var(--shadow-soft-sm)] cursor-pointer">
         <Checkbox
           name="ocultar"
           defaultChecked={defaultValues?.ocultar ?? false}
         />
-        <span className="text-sm font-semibold">Ocultar producto (no visible al público)</span>
+        <span className="text-sm font-medium">Ocultar producto (no visible al público)</span>
       </label>
 
-      {customizableEnabled && <fieldset className="space-y-3 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[2px_2px_0_0_var(--shadow)]">
-        <legend className="px-1 text-sm font-bold uppercase tracking-wide">
+      {customizableEnabled && <fieldset className="space-y-3 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[var(--shadow-soft-sm)]">
+        <legend className="px-1 text-sm font-medium uppercase tracking-wide">
           Personalización
         </legend>
 

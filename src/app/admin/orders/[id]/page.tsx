@@ -56,11 +56,11 @@ export default async function OrderDetailPage({
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="font-display text-2xl font-bold">Pedido</h1>
+        <h1 className="font-display text-2xl font-medium tracking-tight">Pedido</h1>
         <p className="text-xs text-[var(--muted)] font-mono mt-1">{order.id}</p>
       </div>
 
-      <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-3">
+      <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)] p-5 space-y-3">
         <div className="flex justify-between text-sm">
           <span className="text-[var(--muted)]">Cliente</span>
           <span className="font-semibold">{order.user_name ?? order.user_ref}</span>
@@ -87,7 +87,7 @@ export default async function OrderDetailPage({
 
       {/* Shipping */}
       {order.shipping_address && (
-        <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-3">
+        <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)] p-5 space-y-3">
           <h2 className="font-bold">Dirección de envío</h2>
           <div className="flex justify-between text-sm">
             <span className="text-[var(--muted)]">Destinatario</span>
@@ -124,7 +124,7 @@ export default async function OrderDetailPage({
       )}
 
       {/* Tracking */}
-      <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-3">
+      <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)] p-5 space-y-3">
         <h2 className="font-bold">Seguimiento de envío</h2>
         <Form
           action={async (fd: FormData) => {
@@ -153,9 +153,9 @@ export default async function OrderDetailPage({
       </div>
 
       {/* Line items */}
-      <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] overflow-hidden">
+      <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="border-b-2 border-[var(--border)] bg-[var(--accent)] text-[var(--accent-foreground)]">
+          <thead className="border-b border-[var(--border)] bg-[var(--accent)] text-[var(--accent-foreground)]">
             <tr>
               <th className="p-3 text-left font-bold">Producto</th>
               <th className="p-3 text-right font-bold">Cant.</th>
@@ -175,9 +175,9 @@ export default async function OrderDetailPage({
                       <p className="text-xs text-[var(--muted)]">SKU: {item.sku}</p>
                     )}
                     {snap && urls && (
-                      <div className="mt-2 rounded-lg border-2 border-[var(--border)] bg-[var(--bg)] p-3 text-xs space-y-2">
+                      <div className="mt-2 rounded-[var(--radius-btn-md)] border border-[var(--border)] bg-[var(--bg)] p-3 text-xs space-y-2">
                         <div className="flex items-center gap-2 font-bold uppercase tracking-wide">
-                          <span className="rounded-full border-2 border-[var(--accent)] bg-[var(--accent)] px-2 py-0.5 text-[var(--accent-foreground)]">
+                          <span className="rounded-full border border-[var(--accent)] bg-[var(--accent)] px-2 py-0.5 text-[var(--accent-foreground)]">
                             Personalizado
                           </span>
                           <span className="text-[var(--muted)]">{snap.template_label}</span>
@@ -191,7 +191,7 @@ export default async function OrderDetailPage({
                                 width={80}
                                 height={80}
                                 unoptimized
-                                className="h-20 w-20 rounded border-2 border-[var(--border)] object-cover"
+                                className="h-20 w-20 rounded border border-[var(--border)] object-cover"
                               />
                               <p className="mt-1 text-center text-[10px] text-[var(--muted)]">Original</p>
                             </a>
@@ -204,7 +204,7 @@ export default async function OrderDetailPage({
                                 width={80}
                                 height={80}
                                 unoptimized
-                                className="h-20 w-20 rounded border-2 border-[var(--border)] object-cover"
+                                className="h-20 w-20 rounded border border-[var(--border)] object-cover"
                               />
                               <p className="mt-1 text-center text-[10px] text-[var(--muted)]">Previa</p>
                             </a>
@@ -223,7 +223,7 @@ export default async function OrderDetailPage({
                               href={urls.print}
                               target="_blank"
                               rel="noreferrer"
-                              className="rounded-lg border-2 border-[var(--border)] bg-[var(--card)] px-3 py-1 text-xs font-semibold shadow-[2px_2px_0_0_var(--shadow)] hover:-translate-y-0.5 transition-transform"
+                              className="rounded-[var(--radius-btn-md)] border border-[var(--border)] bg-[var(--card)] px-3 py-1 text-xs font-medium shadow-[var(--shadow-soft-sm)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
                             >
                               Descargar PNG de impresión
                             </a>
@@ -250,7 +250,7 @@ export default async function OrderDetailPage({
               );
             })}
           </tbody>
-          <tfoot className="border-t-2 border-[var(--border)]">
+          <tfoot className="border-t border-[var(--border)]">
             {order.shipping_cost > 0 && (
               <tr>
                 <td colSpan={3} className="p-3 text-right text-sm text-[var(--muted)]">

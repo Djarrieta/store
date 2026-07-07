@@ -60,7 +60,7 @@ export default async function EditProductPage({
         {customizableFlag && product.customizable && product.customization_kind_id && (
           <a
             href={`/admin/products/${id}/preview-editor`}
-            className="rounded-md border-2 border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm font-semibold shadow-[2px_2px_0_0_var(--shadow)] hover:bg-[var(--bg)]"
+            className="rounded-[var(--radius-btn-md)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm font-medium shadow-[var(--shadow-soft-sm)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
           >
             Probar editor (sandbox)
           </a>

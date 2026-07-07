@@ -112,7 +112,7 @@ export default function ProductItemsAccordion({
         const templateMissing = showTemplateBlock && !item.print_template;
 
         return (
-          <div key={item.id} className="overflow-hidden rounded-xl border-2 border-[var(--border)] shadow-[2px_2px_0_0_var(--shadow)]">
+          <div key={item.id} className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] shadow-[var(--shadow-soft-sm)]">
             {/* Header row */}
             <Button
               onClick={() => setOpenItemId(isOpen ? null : item.id)}
@@ -121,7 +121,7 @@ export default function ProductItemsAccordion({
               <span className="flex items-center gap-2 text-sm font-semibold">
                 {label}
                 {templateMissing && (
-                  <span className="rounded-full border-2 border-[var(--error-text)] bg-[var(--error-bg,transparent)] px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--error-text)]">
+                  <span className="rounded-full border border-[var(--error-text)] bg-[var(--error-bg,transparent)] px-2 py-0.5 text-[10px] font-medium uppercase text-[var(--error-text)]">
                     Plantilla faltante — variación oculta
                   </span>
                 )}
@@ -134,7 +134,7 @@ export default function ProductItemsAccordion({
 
             {/* Expanded body */}
             {isOpen && (
-              <div className="space-y-4 border-t-2 border-[var(--border)] bg-[var(--surface)] p-4">
+              <div className="space-y-4 border-t border-[var(--border)] bg-[var(--surface)] p-4">
                 <Form action={updateAction} className="space-y-3">
                   <VariantSelects dimensions={dimensions} selectedIds={selectedIds} />
 
@@ -154,15 +154,15 @@ export default function ProductItemsAccordion({
                   </Button>
                 </Form>
 
-                <Form action={deleteAction} className="border-t-2 border-dashed border-[var(--border)] pt-3">
+                <Form action={deleteAction} className="border-t border-dashed border-[var(--border)] pt-3">
                 <Button variant="secondary" size="md" shadow type="submit" confirm>
                   Eliminar variante
                 </Button>
                 </Form>
 
                 {showTemplateBlock && customizationKind && (
-                  <div className="space-y-3 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-4 shadow-[2px_2px_0_0_var(--shadow)]">
-                    <h3 className="text-sm font-bold uppercase tracking-wide">
+                  <div className="space-y-3 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-soft-sm)]">
+                    <h3 className="text-sm font-medium uppercase tracking-wide">
                       Plantilla de impresión
                     </h3>
                     <Form action={upsertTemplateAction} className="space-y-3">
@@ -193,16 +193,16 @@ export default function ProductItemsAccordion({
       {!showAddForm ? (
         <Button
           onClick={() => setShowAddForm(true)}
-          className="mt-1 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold transition hover:bg-[var(--bg)]"
+          className="mt-1 rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-medium transition hover:bg-[var(--bg)]"
         >
           + Agregar variante
         </Button>
       ) : (
         <Form
           action={createAction}
-          className="space-y-4 rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] p-4 shadow-[2px_2px_0_0_var(--shadow)]"
+          className="space-y-4 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft-sm)]"
         >
-          <p className="font-semibold text-sm">Nueva variante</p>
+          <p className="font-medium text-sm">Nueva variante</p>
 
           <VariantSelects dimensions={dimensions} selectedIds={new Set()} />
 

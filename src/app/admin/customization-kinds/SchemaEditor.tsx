@@ -137,7 +137,7 @@ export default function SchemaEditor({
       {fields.map((field, idx) => (
         <div
           key={idx}
-          className="space-y-3 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-4 shadow-[3px_3px_0_0_var(--shadow)]"
+          className="space-y-3 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-soft)]"
         >
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Input
@@ -170,7 +170,7 @@ export default function SchemaEditor({
                         : undefined,
                   })
                 }
-                className="rounded-lg border-2 border-[var(--border)] bg-[var(--background)] p-2"
+                className="rounded-[var(--radius-btn-md)] border border-[var(--border)] bg-[var(--background)] p-2"
               >
                 <option value="text">Texto</option>
                 <option value="number">Número</option>

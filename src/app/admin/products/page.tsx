@@ -69,7 +69,7 @@ export default async function AdminProductsPage({
           {(products ?? []).map((product) => (
             <div
               key={product.id}
-              className="flex items-center justify-between rounded-xl border-2 border-[var(--border)] bg-[var(--card)] p-4 shadow-[3px_3px_0_0_var(--shadow)]"
+              className="flex items-center justify-between rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-soft)]"
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2">

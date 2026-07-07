@@ -118,14 +118,14 @@ export default function OrderEditForm({ order }: Props) {
   return (
     <Form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
       {error && (
-        <div className="rounded-lg border-2 border-[var(--error-border)] bg-[var(--error-bg)] px-4 py-3 text-sm font-semibold text-[var(--error-text)]">
+        <div className="rounded-[var(--radius-btn-md)] border border-[var(--error-border)] bg-[var(--error-bg)] px-4 py-3 text-sm font-medium text-[var(--error-text)]">
           {error}
         </div>
       )}
 
       {/* Status */}
-      <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-4">
-        <h2 className="font-bold text-base">Estado del pedido</h2>
+      <section className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)] p-5 space-y-4">
+        <h2 className="font-medium text-base">Estado del pedido</h2>
         <div className="flex flex-wrap gap-2">
           {ALL_STATUSES.map((s) => (
             <Button
@@ -134,7 +134,6 @@ export default function OrderEditForm({ order }: Props) {
               size="md"
               shadow={status !== s}
               onClick={() => setStatus(s)}
-              className={status === s ? "translate-x-[2px] translate-y-[2px]" : ""}
             >
               {STATUS_LABELS[s]}
             </Button>
@@ -143,8 +142,8 @@ export default function OrderEditForm({ order }: Props) {
       </section>
 
       {/* Notes */}
-      <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-3">
-        <h2 className="font-bold text-base">Notas internas</h2>
+      <section className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)] p-5 space-y-3">
+        <h2 className="font-medium text-base">Notas internas</h2>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -154,8 +153,8 @@ export default function OrderEditForm({ order }: Props) {
       </section>
 
       {/* Tracking code */}
-      <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-3">
-        <h2 className="font-bold text-base">Seguimiento de envío</h2>
+      <section className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)] p-5 space-y-3">
+        <h2 className="font-medium text-base">Seguimiento de envío</h2>
         <Input
           type="text"
           value={trackingCode}
@@ -166,8 +165,8 @@ export default function OrderEditForm({ order }: Props) {
       </section>
 
       {/* Shipping address */}
-      <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] p-5 space-y-4">
-        <h2 className="font-bold text-base">Dirección de entrega</h2>
+      <section className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)] p-5 space-y-4">
+        <h2 className="font-medium text-base">Dirección de entrega</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <LabeledField label="Destinatario" required>
             <Input
@@ -228,12 +227,12 @@ export default function OrderEditForm({ order }: Props) {
       </section>
 
       {/* Items */}
-      <section className="rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)] overflow-hidden">
-        <div className="p-5 border-b-2 border-[var(--border)]">
-          <h2 className="font-bold text-base">Ítems del pedido</h2>
+      <section className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)] overflow-hidden">
+        <div className="p-5 border-b border-[var(--border)]">
+          <h2 className="font-medium text-base">Ítems del pedido</h2>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-[var(--accent)] text-[var(--accent-foreground)] border-b-2 border-[var(--border)]">
+          <thead className="bg-[var(--accent)] text-[var(--accent-foreground)] border-b border-[var(--border)]">
             <tr>
               <th className="p-3 text-left font-bold">Producto</th>
               <th className="p-3 text-right font-bold">P. Unit.</th>
@@ -280,7 +279,7 @@ export default function OrderEditForm({ order }: Props) {
               </tr>
             ))}
           </tbody>
-          <tfoot className="border-t-2 border-[var(--border)]">
+          <tfoot className="border-t border-[var(--border)]">
             {parsedShippingCost > 0 && (
               <>
                 <tr>

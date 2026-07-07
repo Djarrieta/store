@@ -88,11 +88,11 @@ export default async function PreviewEditorPage({
       </header>
 
       {!product.customizable || !kind ? (
-        <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] p-4 text-sm">
+        <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-4 text-sm">
           Este producto no es personalizable. Actívalo desde la página de edición.
         </div>
       ) : variants.length === 0 ? (
-        <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] p-4 text-sm">
+        <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-4 text-sm">
           Aún no hay variaciones con plantilla. Crea una variación y configura su plantilla
           de impresión antes de previsualizar.
         </div>

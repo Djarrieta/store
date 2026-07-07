@@ -107,7 +107,7 @@ export default function PrintTemplateFields({ kind, defaultValue }: Props) {
         <p className="text-xs text-[var(--error-text)]">{uploadError}</p>
       )}
 
-      <fieldset className="space-y-2 rounded-lg border-2 border-dashed border-[var(--border)] p-3">
+      <fieldset className="space-y-2 rounded-[var(--radius-btn-md)] border border-dashed border-[var(--border)] p-3">
         <legend className="px-1 text-xs font-bold uppercase tracking-wide">
           Área segura (0..1, opcional)
         </legend>
@@ -227,7 +227,7 @@ function FileSlot({
           input.value = "";
         }}
       />
-      <div className="flex flex-wrap items-center gap-2 rounded-md border-2 border-[var(--border)] bg-[var(--card)] px-3 py-2">
+      <div className="flex flex-wrap items-center gap-2 rounded-[var(--radius-btn-md)] border border-[var(--border)] bg-[var(--card)] px-3 py-2">
         <Button
           type="button"
           variant="primary"

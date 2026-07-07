@@ -99,7 +99,7 @@ export default function ChatWidget({
   return (
     <div className="flex flex-col h-[70vh] max-w-2xl mx-auto">
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto space-y-3 p-4 rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)]">
+      <div className="flex-1 overflow-y-auto space-y-3 p-4 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)]">
         {messages.length === 0 && (
           <p className="text-center text-sm text-[var(--muted)] mt-8">
             Hola 👋 Pregúntame sobre productos, precios o realiza un pedido.
@@ -116,7 +116,7 @@ export default function ChatWidget({
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[80%] rounded-xl border-2 border-[var(--border)] px-4 py-2 text-sm shadow-[2px_2px_0_0_var(--shadow)] ${
+              className={`max-w-[80%] rounded-[var(--radius-card)] border border-[var(--border)] px-4 py-2 text-sm shadow-[var(--shadow-soft-sm)] ${
                 msg.role === "user"
                   ? "bg-[var(--accent)] text-[var(--accent-foreground)] font-medium"
                   : "bg-[var(--surface)]"
@@ -151,7 +151,7 @@ export default function ChatWidget({
         ))}
         {isPending && (
           <div className="flex justify-start">
-            <div className="rounded-xl border-2 border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm shadow-[2px_2px_0_0_var(--shadow)] text-[var(--muted)]">
+            <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm shadow-[var(--shadow-soft-sm)] text-[var(--muted)]">
               Escribiendo…
             </div>
           </div>

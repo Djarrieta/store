@@ -34,7 +34,7 @@ export default async function EditCustomizationKindPage({
       <h1 className="font-display text-3xl font-bold">Editar tipo de personalización</h1>
 
       {(audit.orphaned > 0 || audit.incomplete > 0) && (
-        <div className="rounded-xl border-2 border-[var(--border)] bg-yellow-100 p-4 text-sm text-yellow-900 shadow-[3px_3px_0_0_var(--shadow)]">
+        <div className="rounded-[var(--radius-card)] border border-[var(--border)] bg-yellow-100 p-4 text-sm text-yellow-900 shadow-[var(--shadow-soft)]">
           <p className="mb-2 font-bold uppercase">Aviso</p>
           <ul className="list-disc space-y-1 pl-5">
             {audit.orphaned > 0 && (

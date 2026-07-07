@@ -46,9 +46,9 @@ export default async function AdminCustomizationKindsPage() {
       isEmpty={rows.length === 0}
       emptyText="Aún no hay tipos de personalización."
     >
-      <div className="overflow-x-auto rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-[3px_3px_0_0_var(--shadow)]">
+      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-soft)]">
         <table className="w-full min-w-[640px] text-sm">
-          <thead className="border-b-2 border-[var(--border)] bg-[var(--accent)] text-[var(--accent-foreground)]">
+          <thead className="border-b border-[var(--border)] bg-[var(--accent)] text-[var(--accent-foreground)]">
             <tr>
               <th className="p-3 text-left font-bold">Nombre</th>
               <th className="p-3 text-left font-bold">Slug</th>
