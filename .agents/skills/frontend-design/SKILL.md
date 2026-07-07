@@ -6,17 +6,27 @@ description: Create bold, production-grade UI aligned with this project visual l
 When working on UI in this repository, follow these rules:
 
 - Build expressive, intentional interfaces. Avoid default boilerplate layouts.
-- Respect existing project visual language in src/app/globals.css and shared components.
+- Respect the CRISTA formal visual language (see below) defined in `src/app/globals.css`, `src/app/themes/default.css`, and shared components.
 - Prefer reusable components in src/app/components before adding one-off markup.
 - Keep pages responsive across mobile and desktop.
 - Use accessible semantics (headings, labels, button text, alt text).
 - Keep motion purposeful and lightweight.
 - Avoid introducing new design systems unless explicitly requested.
 
+## CRISTA visual language
+
+CRISTA (“Naturalmente tú”) is a formal, elegant, natural/botanical women's clothing brand. The UI is refined and understated — **not** heavy or brutalist:
+
+- **Borders**: hairline (`border`, `border-b`, `border-t`) using `--border`. Never thick (`border-2`+) borders except functional cases (e.g. spinner rings).
+- **Shadows**: soft, blurred — `shadow-[var(--shadow-soft-sm)]`, `shadow-[var(--shadow-soft)]`, `shadow-[var(--shadow-soft-lg)]`. Never hard offset shadows.
+- **Palette**: ivory/warm-neutral surfaces (`--bg`, `--card`, `--surface`) with a burgundy accent (`--accent`) and ivory accent text.
+- **Typography**: Playfair Display for headings (`font-display`, `font-medium tracking-tight`) and Montserrat for body (`font-sans`). Avoid heavy `font-bold` uppercase treatments.
+- **Buttons**: primary is a filled burgundy button with ivory text; secondary is a hairline outline. No press-in translate effects.
+
 ## Reusable Components — ALWAYS prefer these over raw HTML
 
 Never use raw HTML elements when a reusable component exists. The components below
-live in `src/app/components/` and enforce the NeoBrutalism visual language.
+live in `src/app/components/` and enforce the CRISTA visual language.
 
 ### `Button` (`Button.tsx`)
 - **Replaces**: `<button>`, `<a>` used as a button, inline `<Link>` styled as a button.
@@ -39,7 +49,7 @@ live in `src/app/components/` and enforce the NeoBrutalism visual language.
 
 ### `FormCard` + `FormActions` (`FormCard.tsx`)
 - **Replaces**: plain `<form>` with manual card styling, and `<div>` button rows at the bottom of forms.
-- `FormCard` wraps a `<form>` in the NeoBrutalism card style; pass `action` directly.
+- `FormCard` wraps a `<form>` in the CRISTA card style; pass `action` directly.
 - `FormActions` is the button row wrapper inside a form.
 
 ### `PageHeader` (`PageHeader.tsx`)

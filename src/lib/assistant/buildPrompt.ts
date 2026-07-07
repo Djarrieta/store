@@ -3,8 +3,8 @@ import { formatCurrency } from "@/lib/format";
 import { createServiceClient } from "@/lib/supabase/service";
 
 import { type ChatChannel, type ChatMessage, getHistory } from "./chatHistory";
-import { fetchStoreSnapshot } from "./storeSnapshot";
 import { ASSISTANT_PROMPT } from "./prompt";
+import { fetchStoreSnapshot } from "./storeSnapshot";
 
 const MAX_CART_ITEMS = 50;
 

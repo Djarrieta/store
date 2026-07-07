@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Store — Agent Guide
 
-**Stack**: Next.js 16 (App Router) · React 19 · TypeScript 5 · Supabase (Postgres + Auth + Storage + RLS) · RetroUI/NeoBrutalism + Tailwind CSS 4 · Wompi (payments) · DeepSeek (AI assistant)
+**Stack**: Next.js 16 (App Router) · React 19 · TypeScript 5 · Supabase (Postgres + Auth + Storage + RLS) · CRISTA formal theme (Playfair Display + Montserrat, hairline borders + soft shadows) + Tailwind CSS 4 · Wompi (payments) · DeepSeek (AI assistant)
 
 Full technical spec: [TECH_SPEC.md](./TECH_SPEC.md)
 
@@ -189,5 +189,5 @@ Invoke via `/frontend-design` and `/supabase-postgres-best-practices` in chat:
 
 | Skill | When to use |
 |-------|-------------|
-| `frontend-design` | All UI components, pages, layouts — enforces RetroUI/NeoBrutalism style |
+| `frontend-design` | All UI components, pages, layouts — enforces the CRISTA formal/elegant visual language |
 | `supabase-postgres-best-practices` | Writing/reviewing queries, schema design, RLS policies, performance |

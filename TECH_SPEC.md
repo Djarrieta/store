@@ -40,7 +40,7 @@
 | Framework         | **Next.js** (App Router)                         | 16.x         |
 | Language          | **TypeScript**                                   | 5.x          |
 | React             | **React**                                        | 19.x         |
-| Styling           | **RetroUI** (NeoBrutalism, shadcn-based) + Tailwind CSS 4 | per RetroUI  |
+| Styling           | **CRISTA formal theme** (Playfair Display + Montserrat) + Tailwind CSS 4 | custom       |
 | Backend / DB      | **Supabase** (Postgres + Auth + Storage + RLS)   | —            |
 | Supabase Client   | `@supabase/supabase-js` + `@supabase/ssr`        | 2.x / 0.10.x |
 | Payments          | **Wompi** (Widget Checkout, COP)                 | —            |
@@ -1287,28 +1287,30 @@ export default function EntityForm({ action, defaultValues }: FormProps) {
 | `SearchableSelect`  | Dropdown with search for selecting related entities                     |
 | `SelectionProvider` | Context for multi-select with bulk actions                              |
 | `UserMenu`          | Avatar + dropdown with logout                                           |
-| `NavLinks`          | Desktop + mobile navigation links                                       |
+| `SiteNav`           | Responsive nav — desktop inline links + mobile accordion                |
+| `Logo`              | Reusable brand logo (image or Playfair wordmark)                        |
+| `Hero`              | Admin-managed home hero (reads the `home_hero` content key)             |
 
 ---
 
 ## 17. Styling & Theming
 
-### RetroUI (NeoBrutalism)
+### CRISTA formal theme
 
-Uses [RetroUI](https://retroui.dev/docs) — a NeoBrutalism-styled component library built on shadcn conventions. Follow RetroUI's recommended installation and Tailwind version.
+A single, formal/elegant brand theme for **CRISTA — “Naturalmente tú”** (natural, botanical women's clothing). The visual language uses **hairline (1px) borders + soft blurred shadows**, an ivory/warm-neutral palette with a **burgundy accent**, and refined typography — replacing the previous heavy NeoBrutalism look (thick borders, hard offset shadows).
 
-Theme tokens and global styles are defined in `globals.css` per RetroUI's setup guide.
+Built on Tailwind CSS 4. Theme tokens live on `:root` in `src/app/themes/default.css` and are bound to Tailwind via `@theme inline` in `globals.css`. Key tokens: `--bg`, `--fg`, `--card`, `--surface`, `--muted`, `--accent`, `--accent-hover`, `--border`, and the soft-shadow set `--shadow-soft-sm` / `--shadow-soft` / `--shadow-soft-lg`.
 
 ### Fonts
 
 Two Google Fonts loaded via `next/font`:
 
-- **Outfit** — display/headings (`font-display`)
-- **Inter** — body text (`font-sans`)
+- **Playfair Display** — display/headings (`font-display`)
+- **Montserrat** — body text (`font-sans`)
 
-### Light + Dark Theme
+### Theme
 
-The app supports both light and dark modes using RetroUI's default theming. A theme toggle is available in the UI.
+A single light theme applied via `:root` (no theme toggle / no `data-theme`).
 
 ---
 
@@ -1458,7 +1460,7 @@ This allows users to share entities as JSON files that can be imported into othe
 - [ ] `src/app/<module>/new/page.tsx` — create page
 - [ ] `src/app/<module>/<Module>Card.tsx` — card component
 - [ ] `src/app/<module>/<Module>Form.tsx` — form component (with `maxLength` on text inputs)
-- [ ] Add nav link in `src/app/components/NavLinks.tsx`
+- [ ] Add nav link in `src/app/components/SiteNav.tsx`
 - [ ] Add nav buttons in `src/app/layout.tsx`
 - [ ] Use `<Image unoptimized />` instead of `<img>` for user-provided image URLs
 - [ ] (Optional) Storage bucket migration if module has images
