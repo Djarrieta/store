@@ -31,7 +31,7 @@ export default function Logo({
     </span>
   ) : (
     <Image
-      src="/logo.jpeg"
+      src="/logo-htal.png"
       alt="CRISTA — Naturalmente tú"
       width={Math.round(height * 1.6)}
       height={height}
